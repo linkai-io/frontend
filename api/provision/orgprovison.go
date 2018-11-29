@@ -20,13 +20,14 @@ const (
 	URLFmt            = "https://%s-auth.linkai.io/"
 	LogoutURLFmt      = "https://%s-console.linkai.io/logout"
 	LoginURLFmt       = "https://%s-console.linkai.io/dashboard/"
-	WelcomeTitleMsg   = `Welcome to the hakken web management system`
-	WelcomeSubjectMsg = `Please login to the hakken web management system at: %s 
-	Your username is: %s
-	Your temporary password is: {####}
-
-	Thank you!
-	The linkai.io team`
+	WelcomeTitleMsg   = `Welcome to linkai.io's hakken web management system`
+	WelcomeSubjectMsg = `Hello %s,<br>
+Your organization has been successfully created, please login to the hakken web management system at: %s<br>
+Your username is: {username}<br>
+Your temporary password is: {####}<br>
+<br><br>
+Thank you,<br>
+The linkai.io team`
 )
 
 type OrgProvisoner struct {
@@ -67,11 +68,10 @@ func (p *OrgProvisoner) createURLS() {
 }
 
 func (p *OrgProvisoner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization) error {
-
 	var err error
 	// check if exists
 	_, _, err = p.orgClient.Get(ctx, userContext, orgData.OrgName)
-	if err != nil && err != am.ErrOrganizationExists {
+	if err != nil && err == am.ErrOrganizationExists {
 		return errors.Wrap(err, "organization already exists")
 	} else if err != nil {
 		return err
@@ -123,9 +123,13 @@ func (p *OrgProvisoner) createUserPool(ctx context.Context, orgData *am.Organiza
 		AdminCreateUserConfig: &cip.AdminCreateUserConfigType{
 			AllowAdminCreateUserOnly:  aws.Bool(true),
 			UnusedAccountValidityDays: aws.Int64(5),
+			InviteMessageTemplate: &cip.MessageTemplateType{
+				EmailSubject: aws.String(WelcomeTitleMsg),
+				EmailMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.serviceURL)),
+			},
 		},
 		EmailVerificationSubject: aws.String(WelcomeTitleMsg),
-		EmailVerificationMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, p.serviceURL, orgData.OwnerEmail)),
+		EmailVerificationMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.serviceURL)),
 		PoolName:                 aws.String("org-linkai-" + orgData.OrgName),
 		UsernameAttributes:       []cip.UsernameAttributeType{"email"},
 		MfaConfiguration:         cip.UserPoolMfaTypeOff,
@@ -139,7 +143,11 @@ func (p *OrgProvisoner) createUserPool(ctx context.Context, orgData *am.Organiza
 			},
 		},
 		VerificationMessageTemplate: &cip.VerificationMessageTemplateType{
-			DefaultEmailOption: cip.DefaultEmailOptionType("CONFIRM_WITH_LINK"),
+			EmailSubject: aws.String(WelcomeTitleMsg),
+			//EmailSubjectByLink: aws.String(WelcomeTitleMsg),
+			EmailMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.serviceURL)),
+			//EmailMessageByLink: aws.String(fmt.Sprintf(WelcomeSubjectMsg, p.serviceURL)),
+			DefaultEmailOption: cip.DefaultEmailOptionTypeConfirmWithCode,
 		},
 		Schema: p.userPoolAttributeSchema(),
 	}
@@ -293,6 +301,7 @@ func (p *OrgProvisoner) createOwnerUser(ctx context.Context, orgData *am.Organiz
 	return err
 }
 
+// Delete the identity pool and user
 func (p *OrgProvisoner) Delete(ctx context.Context, orgData *am.Organization) error {
 	if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
 		return deleteErr
