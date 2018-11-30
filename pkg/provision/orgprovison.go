@@ -1,4 +1,4 @@
-package main
+package provision
 
 import (
 	"context"
@@ -67,15 +67,39 @@ func (p *OrgProvisoner) createURLS() {
 	}
 }
 
-func (p *OrgProvisoner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization) error {
+// orgExists checks our organization service to see if the organization already exists. This is bad if new organization,
+// good if support account
+func (p *OrgProvisoner) orgExists(ctx context.Context, userContext am.UserContext, orgData *am.Organization) (bool, error) {
 	var err error
+	var org *am.Organization
+
 	// check if exists
-	_, _, err = p.orgClient.Get(ctx, userContext, orgData.OrgName)
-	if err != nil && err == am.ErrOrganizationExists {
-		return errors.Wrap(err, "organization already exists")
-	} else if err != nil {
+	_, org, err = p.orgClient.Get(ctx, userContext, orgData.OrgName)
+	return (org != nil), err
+}
+
+// AddSupportOrganization to manage the hakken service (provision, troubleshoot etc)
+func (p *OrgProvisoner) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, password string) error {
+	var err error
+	exists, err := p.orgExists(ctx, userContext, orgData)
+	if exists == false || err != nil {
 		return err
 	}
+	return p.add(ctx, userContext, orgData, password)
+}
+
+// Add an organization to hakken provided the organization does not already exist.
+func (p *OrgProvisoner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization) error {
+	var err error
+	exists, err := p.orgExists(ctx, userContext, orgData)
+	if exists == true || err != nil {
+		return errors.Wrap(err, "org exists or error")
+	}
+	return p.add(ctx, userContext, orgData, "")
+}
+
+func (p *OrgProvisoner) add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, password string) error {
+	var err error
 
 	// create user pool
 	orgData.UserPoolID, err = p.createUserPool(ctx, orgData)
@@ -92,7 +116,7 @@ func (p *OrgProvisoner) Add(ctx context.Context, userContext am.UserContext, org
 		}
 		return err
 	}
-	log.Info().Str("orgname", orgData.OrgName).Str("user_app_client_id", orgData.UserPoolAppClientID).Msg("user pool appclient successfully created")
+	log.Info().Str("orgname", orgData.OrgName).Str("user_app_client_id", orgData.UserPoolAppClientID).Msg("user pool app client successfully created")
 
 	// create identity pool
 	orgData.IdentityPoolID, err = p.createIdentityPool(ctx, orgData)
