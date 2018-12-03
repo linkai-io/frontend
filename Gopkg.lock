@@ -48,7 +48,7 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:b57195b9cd803f398a75234baee10a2947b5b97acb6ebbb8251458f0d8a92658"
+  digest = "1:38e7932d3831e7efa46624dd04fdf633081e4886bd04b91fa347a9397ba4c858"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -89,8 +89,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "89734ade0df0a4a437cbf4aa9c14e17daf37c5ac"
-  version = "v1.15.86"
+  revision = "ceab7b7ac6f535d1397f124620720b5145f1ad59"
+  version = "v1.15.88"
 
 [[projects]]
   digest = "1:5b00bee0abaf79b60f878621fde6fcf166eebcbe2478780788d5d6308b2873ec"
@@ -166,7 +166,7 @@
   version = "v2.0.2"
 
 [[projects]]
-  digest = "1:8dfbec76b4834d96c37ba4c4969fc47c9a15e67c5a7eecfa031fbe67dab50429"
+  digest = "1:6a5edb6e9ad91f22d33e01739bbabea324fed674c40bc4f7d60adb48235e8b48"
   name = "github.com/jackc/pgx"
   packages = [
     ".",
@@ -177,8 +177,8 @@
     "pgtype",
   ]
   pruneopts = "UT"
-  revision = "89f1e6ac7276b61d885db5e5aed6fcbedd1c7e31"
-  version = "v3.2.0"
+  revision = "c59c9cac59ab95eceb0c12ff338923c62f411ea2"
+  version = "v3.3.0"
 
 [[projects]]
   digest = "1:e22af8c7518e1eab6f2eab2b7d7558927f816262586cd6ed9f349c97a6c285c4"
@@ -189,12 +189,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:af16d8863f7ed8bda78dfdb7e81a7fca82e323f7a9a272dda2c9e0f3568d1593"
+  digest = "1:66805ade9799dc27af9eda578c8f372f1353b1ee6df58af39dc2985db08fe6a7"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
     "amtest",
+    "clients/address",
     "clients/organization",
+    "clients/scangroup",
+    "clients/user",
+    "clients/webdata",
     "mock",
     "pkg/bq",
     "pkg/convert",
@@ -203,12 +207,15 @@
     "pkg/retrier",
     "pkg/secrets",
     "pkg/state",
+    "protocservices/address",
     "protocservices/organization",
     "protocservices/prototypes",
     "protocservices/scangroup",
+    "protocservices/user",
+    "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "17c5463f25313ed223608e2c62aee59f57cd3b0a"
+  revision = "2bff3e49b6af3601ab39d0187a28042432ce3ab9"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -275,7 +282,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c12edd415c90eb884aebe3de625e98a39fe1c9a6c8141d0b21261153de70b6f2"
+  digest = "1:818e5ec92ac1d615a333837441cfe79914c5702734b74334da5ae2b3768011fe"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -289,7 +296,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
+  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
 
 [[projects]]
   branch = "master"
@@ -338,7 +345,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bbcc65f29ca8bf23b133b6a66d557633955bc0ff493b356f21d2722365c4fcca"
+  digest = "1:774067fe70b1244645adfc65d6b11c734ae8f0dade6ab0ae47047eb89a14ae57"
   name = "google.golang.org/api"
   packages = [
     "bigquery/v2",
@@ -353,7 +360,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "0a71a4356c3f4bcbdd16294c78ca2a31fda36cca"
+  revision = "af4fc4062c262223ddc2d92f5f35a93690db383a"
 
 [[projects]]
   digest = "1:d2a8db567a76203e3b41c1f632d86485ffd57f8e650a0d1b19d240671c2fddd7"
@@ -376,14 +383,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4e066fd41c9da1067ba8d2f198cd2f9fef8a3c18a61e3cc9196881ba5a5ed6c1"
+  digest = "1:4136ec22e8bf3c8a03a97131d3a885e643f4c14288dfcdc32a6c08f556b7ed48"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/rpc/code",
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "31ac5d88444a9e7ad18077db9a165d793ad06a2e"
+  revision = "bd91e49a0898e27abb88c339b432fa53d7497ac0"
 
 [[projects]]
   digest = "1:c3ad9841823db6da420a5625b367913b4ff54bbe60e8e3c98bd20e243e62e2d2"
@@ -436,7 +443,11 @@
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",
+    "github.com/linkai-io/am/clients/address",
     "github.com/linkai-io/am/clients/organization",
+    "github.com/linkai-io/am/clients/scangroup",
+    "github.com/linkai-io/am/clients/user",
+    "github.com/linkai-io/am/clients/webdata",
     "github.com/linkai-io/am/mock",
     "github.com/linkai-io/am/pkg/secrets",
     "github.com/pkg/errors",

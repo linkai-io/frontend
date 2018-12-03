@@ -30,6 +30,12 @@ Thank you,<br>
 The linkai.io team`
 )
 
+type OrgGroup struct {
+	Name        string
+	Description string
+	Precedence  int
+}
+
 type OrgProvisoner struct {
 	orgClient  am.OrganizationService
 	env        string
@@ -69,30 +75,42 @@ func (p *OrgProvisoner) createURLS() {
 
 // orgExists checks our organization service to see if the organization already exists. This is bad if new organization,
 // good if support account
-func (p *OrgProvisoner) orgExists(ctx context.Context, userContext am.UserContext, orgData *am.Organization) (bool, error) {
+func (p *OrgProvisoner) orgExists(ctx context.Context, userContext am.UserContext, orgData *am.Organization) (*am.Organization, error) {
 	var err error
 	var org *am.Organization
 
 	// check if exists
 	_, org, err = p.orgClient.Get(ctx, userContext, orgData.OrgName)
-	return (org != nil), err
+	return org, err
 }
 
 // AddSupportOrganization to manage the hakken service (provision, troubleshoot etc)
 func (p *OrgProvisoner) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, password string) error {
 	var err error
-	exists, err := p.orgExists(ctx, userContext, orgData)
-	if exists == false || err != nil {
+	supportOrg, err := p.orgExists(ctx, userContext, orgData)
+	if supportOrg == nil {
+		return errors.New("support organization does not exist")
+	}
+
+	if err != nil {
 		return err
 	}
-	return p.add(ctx, userContext, orgData, password)
+
+	supportOrg.FirstName = orgData.FirstName
+	supportOrg.LastName = orgData.LastName
+	supportOrg.OwnerEmail = orgData.OwnerEmail
+
+	if err := p.add(ctx, userContext, supportOrg, password); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Add an organization to hakken provided the organization does not already exist.
 func (p *OrgProvisoner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization) error {
 	var err error
-	exists, err := p.orgExists(ctx, userContext, orgData)
-	if exists == true || err != nil {
+	org, err := p.orgExists(ctx, userContext, orgData)
+	if org != nil || err != nil {
 		return errors.Wrap(err, "org exists or error")
 	}
 	return p.add(ctx, userContext, orgData, "")
@@ -128,8 +146,18 @@ func (p *OrgProvisoner) add(ctx context.Context, userContext am.UserContext, org
 	}
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("user pool appclient successfully created")
 
+	if err = p.createPoolGroups(ctx, orgData); err != nil {
+		if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
+			log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete identity pool")
+		}
+		if deleteErr := p.deleteUserPool(ctx, orgData); deleteErr != nil {
+			log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete user pool")
+		}
+		return err
+	}
+
 	// create initial user
-	err = p.createOwnerUser(ctx, orgData)
+	err = p.createOwnerUser(ctx, orgData, password)
 	if err != nil {
 		if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
 			log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete identity pool")
@@ -239,6 +267,39 @@ func (p *OrgProvisoner) userPoolAttributeSchema() []cip.SchemaAttributeType {
 	return schema
 }
 
+func (p *OrgProvisoner) createPoolGroups(ctx context.Context, orgData *am.Organization) error {
+	i := 1 // start at 1 because system groups are 0
+	orgGroups := make([]*OrgGroup, 0)
+	if orgData.SubscriptionID == 9999 {
+		orgGroups = append(orgGroups, &OrgGroup{Name: "support", Description: "Support account for all organizations", Precedence: i})
+		i++
+	}
+	orgGroups = append(orgGroups, &OrgGroup{Name: "owner", Description: "Owner of this organization", Precedence: i})
+	i++
+	orgGroups = append(orgGroups, &OrgGroup{Name: "administrator", Description: "Administrator of this organization", Precedence: i})
+	i++
+	orgGroups = append(orgGroups, &OrgGroup{Name: "auditor", Description: "Auditor for reviewing/launching scans", Precedence: i})
+	i++
+	orgGroups = append(orgGroups, &OrgGroup{Name: "editor", Description: "Editor for reviewing results and tagging assets", Precedence: i})
+	i++
+	orgGroups = append(orgGroups, &OrgGroup{Name: "reviewer", Description: "Reviewer read only access", Precedence: i})
+	i++
+
+	for _, group := range orgGroups {
+		input := &cip.CreateGroupInput{
+			Description: aws.String(group.Description),
+			GroupName:   aws.String(group.Name),
+			Precedence:  aws.Int64(int64(group.Precedence)),
+		}
+		req := p.svc.CreateGroupRequest(input)
+		_, err := req.Send()
+		if err != nil {
+			return errors.Wrap(err, "failed to create organization user pool group")
+		}
+	}
+	return nil
+}
+
 func (p *OrgProvisoner) createAppClient(ctx context.Context, orgData *am.Organization) (string, string, error) {
 
 	appClient := &cip.CreateUserPoolClientInput{
@@ -288,7 +349,7 @@ func (p *OrgProvisoner) createIdentityPool(ctx context.Context, orgData *am.Orga
 	return *out.IdentityPoolId, nil
 }
 
-func (p *OrgProvisoner) createOwnerUser(ctx context.Context, orgData *am.Organization) error {
+func (p *OrgProvisoner) createOwnerUser(ctx context.Context, orgData *am.Organization, password string) error {
 	user := &cip.AdminCreateUserInput{
 		DesiredDeliveryMediums: []cip.DeliveryMediumType{"EMAIL"},
 		UserAttributes: []cip.AttributeType{
@@ -320,6 +381,12 @@ func (p *OrgProvisoner) createOwnerUser(ctx context.Context, orgData *am.Organiz
 		UserPoolId: aws.String(orgData.UserPoolID),
 		Username:   aws.String(orgData.OwnerEmail),
 	}
+
+	if password != "" {
+		user.TemporaryPassword = aws.String(password)
+		user.MessageAction = cip.MessageActionTypeSuppress
+	}
+
 	req := p.svc.AdminCreateUserRequest(user)
 	_, err := req.Send()
 	return err
