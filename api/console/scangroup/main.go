@@ -58,8 +58,6 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	case "DELETE/scangroup/id/":
 		return resp, nil
 	}
-	fmt.Println("Received: ", request.Body)
-	fmt.Printf("REQUEST: %#v\n", request.PathParameters)
 	return resp, nil
 }
 

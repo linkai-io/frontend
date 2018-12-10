@@ -41,6 +41,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	fmt.Printf("route: %v\n", route)
 	fmt.Println("Received: ", request.Body)
 	fmt.Printf("REQUEST: %#v\n", request.PathParameters)
+
 	switch route {
 	case "GET/web/responses/":
 		return resp, nil

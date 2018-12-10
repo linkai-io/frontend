@@ -14,7 +14,109 @@ import (
 )
 
 func main() {
-	csrp, err := cognitosrp.NewCognitoSRP("isaac.dawson@linkai.io", "H0h0h0h0.",
+	testAdminAuth()
+	//testForgotPassword()
+	//testConfirmForgotPassword()
+}
+
+func testForgotPassword() {
+	cfg, _ := external.LoadDefaultAWSConfig()
+	cfg.Region = endpoints.UsEast1RegionID
+	//cfg.Credentials = aws.AnonymousCredentials
+	svc := cip.New(cfg)
+	params := make(map[string]string, 0)
+	params["USERNAME"] = "isaac.dawson@linkai.io"
+	//params["PASSWORD"] = "somenewpassword." //"8tv;;qHzZX"
+	input := &cip.ForgotPasswordInput{
+		Username: aws.String("isaac.dawson@linkai.io"),
+		//AuthParameters: params,
+		ClientId: aws.String("6bjp2k79is6ra7504e3rik163j"),
+		//UserPoolId:     aws.String("us-east-1_BRlOXjA4M"),
+	}
+	req := svc.ForgotPasswordRequest(input)
+	out, err := req.Send()
+	if err != nil {
+		checkError(err)
+		return
+	}
+	log.Printf("out: %#v\n", out)
+}
+
+func testConfirmForgotPassword() {
+	cfg, _ := external.LoadDefaultAWSConfig()
+	cfg.Region = endpoints.UsEast1RegionID
+	//cfg.Credentials = aws.AnonymousCredentials
+	svc := cip.New(cfg)
+	params := make(map[string]string, 0)
+	params["USERNAME"] = "isaac.dawson@linkai.io"
+	//params["PASSWORD"] = "somenewpassword." //"8tv;;qHzZX"
+	input := &cip.ConfirmForgotPasswordInput{
+		Username:         aws.String("isaac.dawson@linkai.io"),
+		ConfirmationCode: aws.String("189692"),
+		Password:         aws.String("somenewpassword2."),
+		//AuthParameters: params,
+		ClientId: aws.String("6bjp2k79is6ra7504e3rik163j"),
+		//UserPoolId:     aws.String("us-east-1_BRlOXjA4M"),
+	}
+	req := svc.ConfirmForgotPasswordRequest(input)
+	out, err := req.Send()
+	if err != nil {
+		checkError(err)
+		return
+	}
+	log.Printf("out: %#v\n", out)
+}
+
+func testAdminAuth() {
+	cfg, _ := external.LoadDefaultAWSConfig()
+	cfg.Region = endpoints.UsEast1RegionID
+	//cfg.Credentials = aws.AnonymousCredentials
+	svc := cip.New(cfg)
+
+	params := make(map[string]string, 0)
+	params["USERNAME"] = "isaac.dawson@linkai.io"
+	params["PASSWORD"] = "somenewpassword2." //"8tv;;qHzZX"
+	input := &cip.AdminInitiateAuthInput{
+		AuthFlow:       cip.AuthFlowTypeAdminNoSrpAuth,
+		AuthParameters: params,
+		ClientId:       aws.String("6bjp2k79is6ra7504e3rik163j"),
+		UserPoolId:     aws.String("us-east-1_geOt7d44n"),
+	}
+	req := svc.AdminInitiateAuthRequest(input)
+	out, err := req.Send()
+	if err != nil {
+		checkError(err)
+		return
+	}
+	log.Printf("out: %#v\n", out)
+	switch out.ChallengeName {
+	case cip.ChallengeNameTypeNewPasswordRequired:
+		newPassParams := make(map[string]string, 0)
+		newPassParams["USERNAME"] = out.ChallengeParameters["USER_ID_FOR_SRP"]
+		newPassParams["NEW_PASSWORD"] = "somenewpassword."
+		newPass := &cip.AdminRespondToAuthChallengeInput{
+			ChallengeName:      out.ChallengeName,
+			ChallengeResponses: newPassParams,
+			Session:            out.Session,
+			ClientId:           input.ClientId,
+			UserPoolId:         input.UserPoolId,
+		}
+		req := svc.AdminRespondToAuthChallengeRequest(newPass)
+		out, err := req.Send()
+		if err != nil {
+			checkError(err)
+			return
+		}
+		log.Printf("out: %#v\n", out)
+		return
+	case cip.ChallengeNameTypePasswordVerifier:
+
+	}
+
+}
+
+func testCSRPAuth() {
+	csrp, err := cognitosrp.NewCognitoSRP("isaac.dawson@linkai.io", "xxx",
 		"us-east-1_gZiBStGnL",
 		"68c9ta93d2mt6qo5jsbnpgdnpr", aws.String("1kb8c1ngs0lecjnn8dcsanbqkoqgm4sebfrikqalh176flc8379r")) // )
 	if err != nil {
@@ -110,6 +212,7 @@ func checkError(err error) {
 
 		// Prints out full error message, including original error if there was one.
 		log.Println("Respond Error:", awsErr.Error())
+		log.Printf("%#v\n", awsErr)
 
 		// Get original error
 		if origErr := awsErr.OrigErr(); origErr != nil {

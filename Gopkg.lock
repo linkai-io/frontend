@@ -15,8 +15,8 @@
     "internal/version",
   ]
   pruneopts = "UT"
-  revision = "74b12019e2aa53ec27882158f59192d7cd6d1998"
-  version = "v0.33.1"
+  revision = "0ebda48a7f143b1cce9eb37a8c1106ac762a3430"
+  version = "v0.34.0"
 
 [[projects]]
   branch = "master"
@@ -35,20 +35,21 @@
   version = "1.0.2"
 
 [[projects]]
-  digest = "1:a4fae639114a906f205a4cb858c670ca28784426c0e809d664de2babb13cb28c"
+  digest = "1:dc55aa92d684cc0b326fee79cc885152d868f98b29ad0fd3470d383a509978d4"
   name = "github.com/aws/aws-lambda-go"
   packages = [
+    "cfn",
     "events",
     "lambda",
     "lambda/messages",
     "lambdacontext",
   ]
   pruneopts = "UT"
-  revision = "fb8f88d824489a878aee1e0badde7d8e129f8767"
-  version = "v1.7.0"
+  revision = "9e3676ee8ca83aee500682f382e10b9d03660093"
+  version = "v1.8.0"
 
 [[projects]]
-  digest = "1:38e7932d3831e7efa46624dd04fdf633081e4886bd04b91fa347a9397ba4c858"
+  digest = "1:a75c46530c142440f400d8e5a61a33a61161e1aa6c01a91cd23db4dac52877b9"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -60,6 +61,7 @@
     "aws/credentials",
     "aws/credentials/ec2rolecreds",
     "aws/credentials/endpointcreds",
+    "aws/credentials/processcreds",
     "aws/credentials/stscreds",
     "aws/csm",
     "aws/defaults",
@@ -89,11 +91,11 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "ceab7b7ac6f535d1397f124620720b5145f1ad59"
-  version = "v1.15.88"
+  revision = "130ebb7dc1d6b5a940198b47642fc8b20936a65d"
+  version = "v1.16.1"
 
 [[projects]]
-  digest = "1:5b00bee0abaf79b60f878621fde6fcf166eebcbe2478780788d5d6308b2873ec"
+  digest = "1:b79478c357e0d3c9d0c13cf0cccbac9f73c9e30ad0d51f99ab1355a4bffc1dd4"
   name = "github.com/aws/aws-sdk-go-v2"
   packages = [
     "aws",
@@ -121,8 +123,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "d52522b5f4b95591ff6528d7c54923951aadf099"
-  version = "v2.0.0-preview.5"
+  revision = "0143dbcf72cf30047f4830d714f7511e74d44034"
+  version = "v0.6.0"
 
 [[projects]]
   digest = "1:e9e0f08f481adc597a51c9cca9c0ff9afee47fa3136d80ea3b1a9dddff89c877"
@@ -189,7 +191,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:66805ade9799dc27af9eda578c8f372f1353b1ee6df58af39dc2985db08fe6a7"
+  digest = "1:208064b9387a860bcf3015c4eb682439d8d662b25172a64a8884a90aef65487a"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -215,7 +217,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "2bff3e49b6af3601ab39d0187a28042432ce3ab9"
+  revision = "cac3948b292143534eda259d2ed53d008de45d6c"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -300,7 +302,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:632f90938b07f6e07ec6d2118f8af83add0aba9ff07d96f879fb9785797104f5"
+  digest = "1:23443edff0740e348959763085df98400dcfd85528d7771bb0ce9f5f2754ff4a"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -310,15 +312,15 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "28207608b83849a028d4f12e46533a6b6894ecaf"
+  revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
 
 [[projects]]
   branch = "master"
-  digest = "1:8775d8a768d9e65e8b659172804aac5db1fc8d563ba766470a6c2698c57c61a7"
+  digest = "1:9399de11945e643d7131cf070736122b76800d92d57a80494bd9a4e73e6979f3"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31"
+  revision = "70b957f3b65e069b4930ea94e2721eefa0f8f695"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -345,7 +347,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:774067fe70b1244645adfc65d6b11c734ae8f0dade6ab0ae47047eb89a14ae57"
+  digest = "1:e4077e9559876612d82bb58caddc05ed44a73794066c801069fd75ca469d1e55"
   name = "google.golang.org/api"
   packages = [
     "bigquery/v2",
@@ -360,7 +362,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "af4fc4062c262223ddc2d92f5f35a93690db383a"
+  revision = "1a5ef82f9af45ef51c486291ef2b0a16d82fdb95"
 
 [[projects]]
   digest = "1:d2a8db567a76203e3b41c1f632d86485ffd57f8e650a0d1b19d240671c2fddd7"
@@ -393,24 +395,29 @@
   revision = "bd91e49a0898e27abb88c339b432fa53d7497ac0"
 
 [[projects]]
-  digest = "1:c3ad9841823db6da420a5625b367913b4ff54bbe60e8e3c98bd20e243e62e2d2"
+  digest = "1:9edd250a3c46675d0679d87540b30c9ed253b19bd1fd1af08f4f5fb3c79fc487"
   name = "google.golang.org/grpc"
   packages = [
     ".",
     "balancer",
     "balancer/base",
     "balancer/roundrobin",
+    "binarylog/grpc_binarylog_v1",
     "codes",
     "connectivity",
     "credentials",
+    "credentials/internal",
     "encoding",
     "encoding/proto",
     "grpclog",
     "internal",
     "internal/backoff",
+    "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
     "internal/grpcrand",
+    "internal/grpcsync",
+    "internal/syscall",
     "internal/transport",
     "keepalive",
     "metadata",
@@ -424,14 +431,15 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "2e463a05d100327ca47ac218281906921038fd95"
-  version = "v1.16.0"
+  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
+  version = "v1.17.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/AlexRudd/cognito-srp",
+    "github.com/aws/aws-lambda-go/cfn",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
     "github.com/aws/aws-sdk-go-v2/aws",
