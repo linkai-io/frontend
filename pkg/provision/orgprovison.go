@@ -93,6 +93,7 @@ func (p *OrgProvisioner) orgExists(ctx context.Context, userContext am.UserConte
 }
 
 // AddSupportOrganization to manage the hakken service (provision, troubleshoot etc)
+// TODO: Need to look up support userID by modifying UserService to allow looking up non-same-org users
 func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error) {
 	var err error
 	supportOrg, err := p.orgExists(ctx, userContext, orgData)
@@ -109,11 +110,18 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 	supportOrg.LastName = orgData.LastName
 	supportOrg.OwnerEmail = orgData.OwnerEmail
 
-	if err := p.add(ctx, userContext, supportOrg, roles, password); err != nil {
+	if err := p.add(ctx, supportOrg, roles, password); err != nil {
 		return "", "", err
 	}
 
-	_, err = p.orgClient.Update(ctx, userContext, supportOrg)
+	// change to support user context so we don't overwrite system as Update will
+	// use the OrgID from context to determine which org to update
+	supportUserContext := &am.UserContextData{
+		OrgID:  supportOrg.OrgID,
+		UserID: supportOrg.OrgID, // TODO: This assumes orgID == userID (which it almost always does) but should get from UserService
+	}
+
+	_, err = p.orgClient.Update(ctx, supportUserContext, supportOrg)
 	if err != nil {
 		if deleteErr := p.deleteIdentityPool(ctx, supportOrg); deleteErr != nil {
 			log.Error().Err(deleteErr).Str("orgname", supportOrg.OrgName).Str("identity_pool_id", supportOrg.IdentityPoolID).Msg("failed to delete identity pool")
@@ -134,7 +142,7 @@ func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, or
 	if org != nil || err != nil {
 		return errors.Wrap(err, "org exists or error")
 	}
-	return p.add(ctx, userContext, orgData, roles, "")
+	return p.add(ctx, orgData, roles, "")
 }
 
 // This method provisions everything an organization needs to get running:
@@ -144,7 +152,7 @@ func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, or
 // 4. Identity Pool (sets roles too)
 // 5. The owner user
 // 6. Assigns owner user to owner group
-func (p *OrgProvisioner) add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) error {
+func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, roles map[string]string, password string) error {
 	var err error
 
 	// create user pool

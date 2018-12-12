@@ -138,6 +138,25 @@
   version = "v0.5.1"
 
 [[projects]]
+  digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
+  name = "github.com/go-playground/locales"
+  packages = [
+    ".",
+    "currency",
+  ]
+  pruneopts = "UT"
+  revision = "f63010822830b6fe52288ee52d5a1151088ce039"
+  version = "v0.12.1"
+
+[[projects]]
+  digest = "1:e022cf244bcac1b6ef933f1a2e0adcf6a6dfd7b872d8d41e4d4179bb09a87cbc"
+  name = "github.com/go-playground/universal-translator"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b32fa301c9fe55953584134cb6853a13c87ec0a1"
+  version = "v0.16.0"
+
+[[projects]]
   digest = "1:c594a691090b434d55c67f6cc8e326ef5ba49452abc059821bd5d4fd4cdef08c"
   name = "github.com/gofrs/uuid"
   packages = ["."]
@@ -190,8 +209,16 @@
   revision = "0b12d6b5"
 
 [[projects]]
+  digest = "1:6782ffc812e8e700e6952ede1e60487ff1fd9da489eff762985be662a7cfc431"
+  name = "github.com/leodido/go-urn"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "70078a794e8ea4b497ba7c19a78cd60f90ccf0f4"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
-  digest = "1:208064b9387a860bcf3015c4eb682439d8d662b25172a64a8884a90aef65487a"
+  digest = "1:bccdee97a7e59307a6cb14859707cd5092fed8b83a7e51bbd18e2a7d2a341e6e"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -217,7 +244,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "cac3948b292143534eda259d2ed53d008de45d6c"
+  revision = "3f042a48c88eb6ea4a2c9c1271bc17168844d8e8"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -298,7 +325,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
+  revision = "610586996380ceef02dd726cc09df7e00a3f8e56"
 
 [[projects]]
   branch = "master"
@@ -316,11 +343,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9399de11945e643d7131cf070736122b76800d92d57a80494bd9a4e73e6979f3"
+  digest = "1:418531991b3ea024fd1947c8fdd18019b3ce285025955fddc6b8e4cc4f9213fc"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "70b957f3b65e069b4930ea94e2721eefa0f8f695"
+  revision = "7da8ea5c81829e397bdf930c5d8ba4b703616f33"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -347,7 +374,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e4077e9559876612d82bb58caddc05ed44a73794066c801069fd75ca469d1e55"
+  digest = "1:211e2a46298510d9f2659620ba7fa62fd492308e30d0662138261c4629aa9afe"
   name = "google.golang.org/api"
   packages = [
     "bigquery/v2",
@@ -362,7 +389,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "1a5ef82f9af45ef51c486291ef2b0a16d82fdb95"
+  revision = "40e757e92c52ce056bea83c8050054d41443ade8"
 
 [[projects]]
   digest = "1:d2a8db567a76203e3b41c1f632d86485ffd57f8e650a0d1b19d240671c2fddd7"
@@ -434,6 +461,14 @@
   revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
   version = "v1.17.0"
 
+[[projects]]
+  digest = "1:8abc978192c2fca4d6a74260c3a8f4aa34d25bd3c548c938745b91b8b20cda1d"
+  name = "gopkg.in/go-playground/validator.v9"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0277b12d53df79c9dbf7311cb07fa9c81ed621bb"
+  version = "v9.24.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -442,12 +477,14 @@
     "github.com/aws/aws-lambda-go/cfn",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
+    "github.com/aws/aws-lambda-go/lambdacontext",
     "github.com/aws/aws-sdk-go-v2/aws",
     "github.com/aws/aws-sdk-go-v2/aws/awserr",
     "github.com/aws/aws-sdk-go-v2/aws/endpoints",
     "github.com/aws/aws-sdk-go-v2/aws/external",
     "github.com/aws/aws-sdk-go-v2/service/cognitoidentity",
     "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider",
+    "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",
@@ -461,6 +498,7 @@
     "github.com/pkg/errors",
     "github.com/rs/zerolog",
     "github.com/rs/zerolog/log",
+    "gopkg.in/go-playground/validator.v9",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
