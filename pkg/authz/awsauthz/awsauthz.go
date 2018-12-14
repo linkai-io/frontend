@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	cip "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/rs/zerolog/log"

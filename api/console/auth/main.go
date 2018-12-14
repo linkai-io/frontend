@@ -8,7 +8,6 @@ import (
 
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
-	validator "gopkg.in/go-playground/validator.v9"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -20,7 +19,6 @@ import (
 )
 
 var (
-	validate     *validator.Validate
 	env          string
 	region       string
 	systemOrgID  int
@@ -99,7 +97,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	systemUserContext := getSystemContext(request.RequestContext.RequestID, request.RequestContext.Identity.SourceIP)
 	authenticator := awsauthz.New(env, region, orgClient, systemUserContext)
 	if err := authenticator.Init(nil); err != nil {
-		return returnError("internal authenticator error", 500), err
+		return returnError("internal authenticator error", 500), nil
 	}
 
 	switch route {
@@ -121,18 +119,18 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 func handleLogin(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	loginDetails := &authz.LoginDetails{}
 	if err := json.Unmarshal([]byte(request.Body), loginDetails); err != nil {
-		return returnError("unmarshal failed", 500), err
+		return returnError("unmarshal failed", 500), nil
 	}
 
 	results, err := authenticator.Login(ctx, loginDetails)
 	if err != nil {
-		return returnError("login failed", 403), err
+		return returnError("login failed", 403), nil
 	}
 
 	authResponse := &AuthResponse{Status: "ok", Results: results}
 	data, err := json.Marshal(authResponse)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), err
+		return returnError("marshal auth response failed", 500), nil
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -144,12 +142,12 @@ func handleLogin(ctx context.Context, authenticator authz.Authenticator, request
 func handleChangePwd(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	loginDetails := &authz.LoginDetails{}
 	if err := json.Unmarshal([]byte(request.Body), loginDetails); err != nil {
-		return returnError("unmarshal failed", 500), err
+		return returnError("unmarshal failed", 500), nil
 	}
 
 	results, err := authenticator.SetNewPassword(ctx, loginDetails)
 	if err != nil {
-		return returnError("login failed", 403), err
+		return returnError("login failed", 403), nil
 	}
 
 	authResponse := &AuthResponse{Status: "ok", Results: results}
@@ -161,24 +159,24 @@ func handleChangePwd(ctx context.Context, authenticator authz.Authenticator, req
 	return events.APIGatewayProxyResponse{
 		Body:       string(data),
 		StatusCode: 200,
-	}, err
+	}, nil
 }
 
 func handleForgot(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	resetDetails := &authz.ResetDetails{}
 	if err := json.Unmarshal([]byte(request.Body), resetDetails); err != nil {
-		return returnError("unmarshal failed", 500), err
+		return returnError("unmarshal failed", 500), nil
 	}
 
 	err := authenticator.Forgot(ctx, resetDetails)
 	if err != nil {
-		return returnError("forgot password sequence failed", 400), err
+		return returnError("forgot password sequence failed", 400), nil
 	}
 
 	authResponse := &AuthResponse{Status: "ok"}
 	data, err := json.Marshal(authResponse)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), err
+		return returnError("marshal auth response failed", 500), nil
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -190,23 +188,23 @@ func handleForgot(ctx context.Context, authenticator authz.Authenticator, reques
 func handleForgotConfirm(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	resetDetails := &authz.ResetDetails{}
 	if err := json.Unmarshal([]byte(request.Body), resetDetails); err != nil {
-		return returnError("unmarshal failed", 500), err
+		return returnError("unmarshal failed", 500), nil
 	}
 
 	if err := authenticator.Reset(ctx, resetDetails); err != nil {
-		return returnError("reset failed", 403), err
+		return returnError("reset failed", 403), nil
 	}
 
 	authResponse := &AuthResponse{Status: "ok"}
 	data, err := json.Marshal(authResponse)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), err
+		return returnError("marshal auth response failed", 500), nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       string(data),
 		StatusCode: 200,
-	}, err
+	}, nil
 }
 
 func main() {

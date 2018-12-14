@@ -3,22 +3,25 @@ package provision
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/awserr"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	identity "github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	cip "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/linkai-io/am/am"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
 const (
-	URLFmt            = "https://%sauth.linkai.io/"
-	ResetURLFmt       = "https://%sauth.linkai.io/reset"
+	URLFmt            = "https://%sconsole.linkai.io/"
+	ResetURLFmt       = "https://%sconsole.linkai.io/auth/reset"
 	LogoutURLFmt      = "https://%sconsole.linkai.io/logout"
 	LoginURLFmt       = "https://%sconsole.linkai.io/dashboard/"
 	WelcomeTitleMsg   = `Welcome to linkai.io's hakken web management system`
@@ -43,6 +46,7 @@ Thank you,<br>
 The linkai.io team`
 )
 
+// OrgProvisioner for provisioning support and customer organizations
 type OrgProvisioner struct {
 	orgClient  am.OrganizationService
 	env        string
@@ -110,29 +114,52 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 	supportOrg.LastName = orgData.LastName
 	supportOrg.OwnerEmail = orgData.OwnerEmail
 
+	// add cognito pools/clients
 	if err := p.add(ctx, supportOrg, roles, password); err != nil {
 		return "", "", err
 	}
 
-	// change to support user context so we don't overwrite system as Update will
+	// change to support user context so we don't overwrite system. Update will
 	// use the OrgID from context to determine which org to update
 	supportUserContext := &am.UserContextData{
 		OrgID:  supportOrg.OrgID,
 		UserID: supportOrg.OrgID, // TODO: This assumes orgID == userID (which it almost always does) but should get from UserService
 	}
 
-	_, err = p.orgClient.Update(ctx, supportUserContext, supportOrg)
-	if err != nil {
-		if deleteErr := p.deleteIdentityPool(ctx, supportOrg); deleteErr != nil {
-			log.Error().Err(deleteErr).Str("orgname", supportOrg.OrgName).Str("identity_pool_id", supportOrg.IdentityPoolID).Msg("failed to delete identity pool")
-		}
-		if deleteErr := p.deleteUserPool(ctx, supportOrg); deleteErr != nil {
-			log.Error().Err(deleteErr).Str("orgname", supportOrg.OrgName).Str("user_pool_id", supportOrg.UserPoolID).Msg("failed to delete user pool")
-		}
+	if err := p.getUserPoolJWK(ctx, supportOrg); err != nil {
+		p.cleanUp(ctx, supportOrg)
 		return "", "", err
 	}
+
+	// adds all user pool/identity pool related information to the support organization.
+	_, err = p.orgClient.Update(ctx, supportUserContext, supportOrg)
+	if err != nil {
+		p.cleanUp(ctx, supportOrg)
+		return "", "", err
+	}
+
 	log.Info().Str("user_pool_id", supportOrg.UserPoolID).Str("identity_pool_id", supportOrg.IdentityPoolID).Msg("returning success")
 	return supportOrg.UserPoolID, supportOrg.IdentityPoolID, nil
+}
+
+func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, supportOrg *am.Organization) error {
+	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", p.region, supportOrg.UserPoolID)
+	myClient := &http.Client{Timeout: 10 * time.Second}
+	r, err := myClient.Get(jwksURL)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	supportOrg.UserPoolJWK = string(data)
+	if supportOrg.UserPoolJWK == "" {
+		return errors.New("jwk for user pool was empty")
+	}
+	return nil
 }
 
 // Add an organization to hakken provided the organization does not already exist.
@@ -163,17 +190,13 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("user pool successfully created")
 
 	if err := p.createPoolGroups(ctx, orgData, roles); err != nil {
-		if deleteErr := p.deleteUserPool(ctx, orgData); err != nil {
-			log.Error().Err(deleteErr).Msg("failed to delete user pool")
-		}
+		p.cleanUp(ctx, orgData)
 		return err
 	}
 	// create app client
 	orgData.UserPoolAppClientID, err = p.createAppClient(ctx, orgData)
 	if err != nil {
-		if deleteErr := p.deleteUserPool(ctx, orgData); err != nil {
-			log.Error().Err(deleteErr).Msg("failed to delete user pool")
-		}
+		p.cleanUp(ctx, orgData)
 		return err
 	}
 	log.Info().Str("orgname", orgData.OrgName).Str("user_app_client_id", orgData.UserPoolAppClientID).Msg("user pool app client successfully created")
@@ -181,22 +204,16 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 	// create identity pool and set auth/unauth roles
 	orgData.IdentityPoolID, err = p.createIdentityPool(ctx, orgData, roles)
 	if err != nil {
-		if deleteErr := p.deleteUserPool(ctx, orgData); err != nil {
-			log.Error().Err(deleteErr).Msg("failed to delete user pool")
-		}
+		p.cleanUp(ctx, orgData)
 		return err
 	}
+
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Str("identity_pool_id", orgData.IdentityPoolID).Msg("identity pool successfully created")
 
 	// create initial user and assign user to owner group
 	err = p.createOwnerUser(ctx, orgData, password)
 	if err != nil {
-		if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
-			log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete identity pool")
-		}
-		if deleteErr := p.deleteUserPool(ctx, orgData); deleteErr != nil {
-			log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete user pool")
-		}
+		p.cleanUp(ctx, orgData)
 		return err
 	}
 
@@ -524,6 +541,16 @@ func (p *OrgProvisioner) DeleteSupportOrganization(ctx context.Context, userCont
 
 	err = p.Delete(ctx, org)
 	return org.UserPoolID, org.IdentityPoolID, err
+}
+
+// cleanUp similar to delete, but just print errors
+func (p *OrgProvisioner) cleanUp(ctx context.Context, orgData *am.Organization) {
+	if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
+		log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete identity pool")
+	}
+	if deleteErr := p.deleteUserPool(ctx, orgData); deleteErr != nil {
+		log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete user pool")
+	}
 }
 
 // Delete the identity pool and user
