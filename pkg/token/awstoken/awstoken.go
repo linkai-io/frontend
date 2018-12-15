@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -16,6 +17,7 @@ import (
 	identity "github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/frontend/pkg/token"
 )
 
 // JWK is json data struct for JSON Web Key
@@ -31,20 +33,6 @@ type JWKKey struct {
 	Kty string
 	N   string
 	Use string
-}
-
-type IDToken struct {
-	OrgName         string   `json:"custom:orgname"`
-	FirstName       string   `json:"given_name"`
-	LastName        string   `json:"family_name"`
-	EventID         string   `json:"event_id"`
-	Email           string   `json:"email"`
-	CognitoUserName string   `json:"cognito:username"`
-	TokenUse        string   `json:"token_use"`
-	AuthTime        float64  `json:"auth_time"`
-	Roles           []string `json:"cognito:roles"`
-	Groups          []string `json:"cognito:groups"`
-	jwt.StandardClaims
 }
 
 type AWSToken struct {
@@ -64,21 +52,32 @@ func New(env, region string) *AWSToken {
 	return t
 }
 
-func (t *AWSToken) ParseIDKey(userPoolID, jwkData, idKey string) (*IDToken, error) {
-	//https: //cognito-idp.{region}.amazonaws.com/{userPoolId}/.well-known/jwks.json
-	jwk, err := readJWK([]byte(jwkData))
+func (t *AWSToken) UnsafeExtractDetails(ctx context.Context, idKey string) (*token.IDToken, error) {
+	p := &jwt.Parser{}
+	tok := &token.IDToken{}
+	_, _, err := p.ParseUnverified(idKey, tok)
+	if err != nil {
+		return nil, err
+	}
+	return tok, nil
+}
+
+// ValidateToken verifies the signature from the user pool is valid (not expired, properly signed) then verifies individual
+// claims inside the parsed token.
+func (t *AWSToken) ValidateToken(ctx context.Context, org *am.Organization, idKey string) (*token.IDToken, error) {
+	jwk, err := readJWK([]byte(org.UserPoolJWK))
 	if err != nil {
 		return nil, err
 	}
 
-	tok := &IDToken{}
-	pubKey, err := jwt.ParseWithClaims(idKey, tok, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+	tok := &token.IDToken{}
+
+	_, err = jwt.ParseWithClaims(idKey, tok, func(jwToken *jwt.Token) (interface{}, error) {
+		if _, ok := jwToken.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", jwToken.Header["alg"])
 		}
 
-		if kid, ok := token.Header["kid"]; ok {
+		if kid, ok := jwToken.Header["kid"]; ok {
 			if kidStr, ok := kid.(string); ok {
 				key := jwk[kidStr]
 				// 6. Verify the signature of the decoded JWT token.
@@ -86,21 +85,31 @@ func (t *AWSToken) ParseIDKey(userPoolID, jwkData, idKey string) (*IDToken, erro
 				return rsaPublicKey, nil
 			}
 		}
-		log.Printf("%#v\n", token)
 		return nil, nil
 	})
 
 	if err != nil {
 		return tok, err
 	}
-	log.Printf("pubKey: %#v\n", pubKey)
-	log.Printf("tok: %#v\n", tok)
-	// TODO: Validate claims before returning
+
+	// careful here, ParseWithClaims ignores standard claims if they don't exist (which seems crazy)
+	// so validate they are actually set.
+	if tok.Audience == "" {
+		return nil, errors.New("aud missing")
+	} else if tok.ExpiresAt == 0 {
+		return nil, errors.New("exp empty or missing")
+	} else if tok.IssuedAt == 0 {
+		return nil, errors.New("iat empty or missing")
+	} else if tok.Id == "" {
+		return nil, errors.New("id empty or missing")
+	} else if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
+		return nil, errors.New("invalid token issuer detected")
+	}
 	return tok, nil
 }
 
 func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization, idKey, accessKey string) (string, error) {
-	tok, err := t.ParseIDKey(org.UserPoolID, org.UserPoolJWK, idKey)
+	tok, err := t.ValidateToken(ctx, org, idKey, accessKey)
 	if err != nil {
 		return "", err
 	}
@@ -149,7 +158,7 @@ func readJWK(jwkData []byte) (map[string]JWKKey, error) {
 func convertKey(rawE, rawN string) *rsa.PublicKey {
 	decodedE, err := base64.RawURLEncoding.DecodeString(rawE)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	if len(decodedE) < 4 {
 		ndata := make([]byte, 4)
@@ -162,11 +171,9 @@ func convertKey(rawE, rawN string) *rsa.PublicKey {
 	}
 	decodedN, err := base64.RawURLEncoding.DecodeString(rawN)
 	if err != nil {
-		panic(err)
+		return nil
 	}
+
 	pubKey.N.SetBytes(decodedN)
-	// fmt.Println(decodedN)
-	// fmt.Println(decodedE)
-	// fmt.Printf("%#v\n", *pubKey)
 	return pubKey
 }

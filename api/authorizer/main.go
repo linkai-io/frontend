@@ -12,6 +12,8 @@ import (
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/clients/user"
 	"github.com/linkai-io/am/pkg/secrets"
+	"github.com/linkai-io/frontend/pkg/token"
+	"github.com/linkai-io/frontend/pkg/token/awstoken"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,6 +27,7 @@ var (
 	orgClient       am.OrganizationService
 	userClient      am.UserService
 	policyContainer *PolicyContainer
+	tokener         token.Tokener
 )
 
 func init() {
@@ -66,6 +69,7 @@ func init() {
 		log.Fatal().Err(err).Msg("error initializing user client")
 	}
 
+	tokener = awstoken.New(env, region)
 }
 
 // Help function to generate an IAM policy
@@ -95,18 +99,33 @@ func generatePolicy(principalId, effect, resource string) events.APIGatewayCusto
 	return authResponse
 }
 
+func createSystemContext() am.UserContext {
+	return &am.UserContextData{
+		OrgID:  systemOrgID,
+		UserID: systemUserID,
+	}
+}
+
 func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
 	token := event.AuthorizationToken
-	switch strings.ToLower(token) {
-	case "allow":
-		return generatePolicy("user", "Allow", event.MethodArn), nil
-	case "deny":
-		return generatePolicy("user", "Deny", event.MethodArn), nil
-	case "unauthorized":
-		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Unauthorized") // Return a 401 Unauthorized response
-	default:
+	unsafeToken, err := tokener.UnsafeExtractDetails(ctx, idKey)
+	if unsafeToken.OrgName == "" || unsafeToken.Email == "" {
 		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Error: Invalid token")
 	}
+
+	_, org, err := orgClient.Get(ctx, createSystemContext(), unsafeToken.OrgName)
+	if err != nil {
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Internal Org Error")
+	}
+
+	idToken, err := tokener.ValidateToken(ctx, org, token)
+	if err != nil {
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Error: Invalid token")
+	}
+
+	_, user, err := userClient.Get()
+
+	return generatePolicy(org)
 }
 
 func main() {
