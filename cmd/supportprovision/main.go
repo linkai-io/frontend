@@ -86,7 +86,6 @@ func initUserClient(sec *secrets.SecretsCache) am.UserService {
 		log.Fatal().Err(err).Msg("error reading load balancer data")
 	}
 
-	log.Info().Int("org_id", systemOrgID).Int("user_id", systemUserID).Msg("provisioning with system ids")
 	userClient := user.New()
 	if err := userClient.Init([]byte(lb)); err != nil {
 		log.Fatal().Err(err).Msg("error initializing organization client")
@@ -151,7 +150,9 @@ func main() {
 	}
 
 	orgClient := initOrgClient(sec)
-	provisioner := provision.NewOrgProvisioner(env, region, orgClient)
+	userClient := initUserClient(sec)
+
+	provisioner := provision.NewOrgProvisioner(env, region, userClient, orgClient)
 
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()

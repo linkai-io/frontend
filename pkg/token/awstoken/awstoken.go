@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/big"
 	"strings"
 
@@ -18,6 +17,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/token"
+	"github.com/rs/zerolog/log"
 )
 
 // JWK is json data struct for JSON Web Key
@@ -94,14 +94,13 @@ func (t *AWSToken) ValidateToken(ctx context.Context, org *am.Organization, idKe
 
 	// careful here, ParseWithClaims ignores standard claims if they don't exist (which seems crazy)
 	// so validate they are actually set.
+	log.Info().Msgf("%#v\n", tok)
 	if tok.Audience == "" {
 		return nil, errors.New("aud missing")
 	} else if tok.ExpiresAt == 0 {
 		return nil, errors.New("exp empty or missing")
 	} else if tok.IssuedAt == 0 {
 		return nil, errors.New("iat empty or missing")
-	} else if tok.Id == "" {
-		return nil, errors.New("id empty or missing")
 	} else if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
 		return nil, errors.New("invalid token issuer detected")
 	}
@@ -109,7 +108,7 @@ func (t *AWSToken) ValidateToken(ctx context.Context, org *am.Organization, idKe
 }
 
 func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization, idKey, accessKey string) (string, error) {
-	tok, err := t.ValidateToken(ctx, org, idKey, accessKey)
+	tok, err := t.ValidateToken(ctx, org, idKey)
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +122,7 @@ func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization
 	req := t.fedSvc.GetIdRequest(idInput)
 	out, err := req.Send()
 	if err != nil {
-		log.Printf("error in getID request: %v\n", err)
+		log.Error().Err(err).Msg("error in Cognito GetID")
 		return "", err
 	}
 
@@ -134,10 +133,10 @@ func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization
 	credReq := t.fedSvc.GetCredentialsForIdentityRequest(credInput)
 	cred, err := credReq.Send()
 	if err != nil {
-		log.Printf("error in GetCreds request: %v\n", err)
+		log.Error().Err(err).Msg("error in Cognito GetCreds")
 		return "", err
 	}
-	log.Printf("cred.Credential: %#v\n", cred.Credentials)
+
 	return *cred.Credentials.SessionToken, nil
 }
 

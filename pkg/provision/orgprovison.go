@@ -49,6 +49,7 @@ The linkai.io team`
 // OrgProvisioner for provisioning support and customer organizations
 type OrgProvisioner struct {
 	orgClient  am.OrganizationService
+	userClient am.UserService
 	env        string
 	region     string
 	serviceURL string
@@ -59,8 +60,8 @@ type OrgProvisioner struct {
 	fedSvc     *identity.CognitoIdentity
 }
 
-func NewOrgProvisioner(env, region string, orgClient am.OrganizationService) *OrgProvisioner {
-	p := &OrgProvisioner{orgClient: orgClient}
+func NewOrgProvisioner(env, region string, userClient am.UserService, orgClient am.OrganizationService) *OrgProvisioner {
+	p := &OrgProvisioner{orgClient: orgClient, userClient: userClient}
 	p.env = env
 	p.region = region
 	cfg, _ := external.LoadDefaultAWSConfig()
@@ -100,6 +101,8 @@ func (p *OrgProvisioner) orgExists(ctx context.Context, userContext am.UserConte
 // TODO: Need to look up support userID by modifying UserService to allow looking up non-same-org users
 func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error) {
 	var err error
+	var userCID string
+
 	supportOrg, err := p.orgExists(ctx, userContext, orgData)
 	if supportOrg == nil {
 		log.Error().Err(err).Str("org_name", orgData.OrgName).Msg("failed to find support organization")
@@ -115,7 +118,7 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 	supportOrg.OwnerEmail = orgData.OwnerEmail
 
 	// add cognito pools/clients
-	if err := p.add(ctx, supportOrg, roles, password); err != nil {
+	if userCID, err = p.add(ctx, supportOrg, roles, password); err != nil {
 		return "", "", err
 	}
 
@@ -133,6 +136,20 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 
 	// adds all user pool/identity pool related information to the support organization.
 	_, err = p.orgClient.Update(ctx, supportUserContext, supportOrg)
+	if err != nil {
+		p.cleanUp(ctx, supportOrg)
+		return "", "", err
+	}
+
+	// Get the user and update userCID
+	_, user, err := p.userClient.Get(ctx, supportUserContext, supportOrg.OwnerEmail)
+	if err != nil {
+		p.cleanUp(ctx, supportOrg)
+		return "", "", err
+	}
+
+	user.UserCID = userCID
+	_, _, err = p.userClient.Update(ctx, supportUserContext, user, user.UserID)
 	if err != nil {
 		p.cleanUp(ctx, supportOrg)
 		return "", "", err
@@ -163,11 +180,11 @@ func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, supportOrg *am.Orga
 }
 
 // Add an organization to hakken provided the organization does not already exist.
-func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) error {
+func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error) {
 	var err error
 	org, err := p.orgExists(ctx, userContext, orgData)
 	if org != nil || err != nil {
-		return errors.Wrap(err, "org exists or error")
+		return "", errors.Wrap(err, "org exists or error")
 	}
 	return p.add(ctx, orgData, roles, "")
 }
@@ -179,25 +196,26 @@ func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, or
 // 4. Identity Pool (sets roles too)
 // 5. The owner user
 // 6. Assigns owner user to owner group
-func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, roles map[string]string, password string) error {
+func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, roles map[string]string, password string) (string, error) {
 	var err error
+	var userCID string
 
 	// create user pool
 	orgData.UserPoolID, err = p.createUserPool(ctx, orgData)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("user pool successfully created")
 
 	if err := p.createPoolGroups(ctx, orgData, roles); err != nil {
 		p.cleanUp(ctx, orgData)
-		return err
+		return "", err
 	}
 	// create app client
 	orgData.UserPoolAppClientID, err = p.createAppClient(ctx, orgData)
 	if err != nil {
 		p.cleanUp(ctx, orgData)
-		return err
+		return "", err
 	}
 	log.Info().Str("orgname", orgData.OrgName).Str("user_app_client_id", orgData.UserPoolAppClientID).Msg("user pool app client successfully created")
 
@@ -205,21 +223,21 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 	orgData.IdentityPoolID, err = p.createIdentityPool(ctx, orgData, roles)
 	if err != nil {
 		p.cleanUp(ctx, orgData)
-		return err
+		return "", err
 	}
 
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Str("identity_pool_id", orgData.IdentityPoolID).Msg("identity pool successfully created")
 
 	// create initial user and assign user to owner group
-	err = p.createOwnerUser(ctx, orgData, password)
+	userCID, err = p.createOwnerUser(ctx, orgData, password)
 	if err != nil {
 		p.cleanUp(ctx, orgData)
-		return err
+		return "", err
 	}
 
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Str("identity_pool_id", orgData.IdentityPoolID).Msg("owner user successfully created")
 
-	return err
+	return userCID, err
 }
 
 func (p *OrgProvisioner) createUserPool(ctx context.Context, orgData *am.Organization) (string, error) {
@@ -462,7 +480,7 @@ func (p *OrgProvisioner) createIdentityPool(ctx context.Context, orgData *am.Org
 	return *out.IdentityPoolId, nil
 }
 
-func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organization, password string) error {
+func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organization, password string) (string, error) {
 	user := &cip.AdminCreateUserInput{
 		DesiredDeliveryMediums: []cip.DeliveryMediumType{"EMAIL"},
 		UserAttributes: []cip.AttributeType{
@@ -507,9 +525,10 @@ func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organi
 	req := p.svc.AdminCreateUserRequest(user)
 	out, err := req.Send()
 	if err != nil {
-		return checkError("create_owner_user", err)
+		return "", checkError("create_owner_user", err)
 	}
 
+	log.Info().Str("username", *out.User.Username).Msg("adding user to owner group")
 	// add owner user to owner group
 	group := &cip.AdminAddUserToGroupInput{
 		GroupName:  aws.String("owner"),
@@ -520,9 +539,9 @@ func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organi
 	groupReq := p.svc.AdminAddUserToGroupRequest(group)
 	_, err = groupReq.Send()
 	if err != nil {
-		return checkError("add_owner_to_group", err)
+		return "", checkError("add_owner_to_group", err)
 	}
-	return err
+	return *out.User.Username, err
 }
 
 func (p *OrgProvisioner) DeleteSupportOrganization(ctx context.Context, userContext am.UserContext, orgName string) (string, string, error) {

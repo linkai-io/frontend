@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/linkai-io/am/clients/organization"
@@ -35,13 +34,23 @@ func init() {
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	route := request.RequestContext.HTTPMethod + request.Path
+
+	log.Info().Msgf("route: %s, authorizer data: %#v", route)
+	for k, v := range request.RequestContext.Authorizer {
+		switch typ := v.(type) {
+		case string:
+			log.Info().Str(k, typ).Msg("authorizer data")
+		case int:
+			log.Info().Int(k, typ).Msg("authorizer data")
+		case int64:
+			log.Info().Int64(k, typ).Msg("authorizer data")
+		}
+	}
+	log.Info().Msgf("body: %s", request.Body)
+
 	resp := events.APIGatewayProxyResponse{Body: request.Body + "DORK", StatusCode: 200}
-	route := request.RequestContext.HTTPMethod + request.RequestContext.ResourcePath
-
-	fmt.Printf("route: %v\n", route)
-	fmt.Println("Received: ", request.Body)
-	fmt.Printf("REQUEST: %#v\n", request.PathParameters)
-
 	switch route {
 	case "GET/org/name/":
 		return resp, nil

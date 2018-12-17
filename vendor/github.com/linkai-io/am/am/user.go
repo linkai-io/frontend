@@ -7,6 +7,7 @@ const (
 	RNUserSystem = "lrn:service:user:feature:system"
 	// RNUserManage organization specific management
 	RNUserManage   = "lrn:service:user:feature:manage"
+	RNUserSelf     = "lrn:service:user:feature:self"
 	UserServiceKey = "userservice"
 )
 
@@ -107,7 +108,9 @@ type UserFilter struct {
 // UserService for managing access to users
 type UserService interface {
 	Init(config []byte) error
-	Get(ctx context.Context, userContext UserContext, userID int) (oid int, user *User, err error)
+	Get(ctx context.Context, userContext UserContext, userEmail string) (oid int, user *User, err error)
+	GetWithOrgID(ctx context.Context, userContext UserContext, orgID int, userEmail string) (oid int, user *User, err error)
+	GetByID(ctx context.Context, userContext UserContext, userID int) (oid int, user *User, err error)
 	GetByCID(ctx context.Context, userContext UserContext, userCID string) (oid int, user *User, err error)
 	List(ctx context.Context, userContext UserContext, filter *UserFilter) (oid int, users []*User, err error)
 	Create(ctx context.Context, userContext UserContext, user *User) (oid int, uid int, ucid string, err error)

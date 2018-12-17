@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/rs/zerolog/log"
 )
 
 type PolicyDocument struct {
@@ -45,10 +46,11 @@ func New(env, region string) *PolicyContainer {
 	cfg, _ := external.LoadDefaultAWSConfig()
 	cfg.Region = region
 
-	return &PolicyContainer{env: env, region: region, iam: iam.New(cfg)}
+	return &PolicyContainer{env: env, region: region, iam: iam.New(cfg), policyMap: make(map[string]*events.APIGatewayCustomAuthorizerPolicy, 0)}
 }
 
 func (p *PolicyContainer) Init(roleArns []string) error {
+	log.Info().Strs("roles", roleArns).Msg("parsing roles")
 	for _, roleArn := range roleArns {
 		roles := strings.Split(roleArn, "/")
 		if len(roles) != 2 {
@@ -66,7 +68,6 @@ func (p *PolicyContainer) Init(roleArns []string) error {
 // GetRolePolicies takes a roleName and looks up all policies applied to it, converting it to an APIGatewayCustomAuthorizerPolicy
 // Note does this take into account ManagedRoles.
 func (p *PolicyContainer) GetRolePolicies(roleName string) (*events.APIGatewayCustomAuthorizerPolicy, error) {
-	var version string
 	stmts := make([]events.IAMPolicyStatement, 0)
 
 	i := &iam.ListRolePoliciesInput{
@@ -92,7 +93,7 @@ func (p *PolicyContainer) GetRolePolicies(roleName string) (*events.APIGatewayCu
 			return nil, err
 		}
 
-		version, policyStatements, err = p.transformPolicy(*out.PolicyDocument)
+		_, policyStatements, err = p.transformPolicy(*out.PolicyDocument)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +101,7 @@ func (p *PolicyContainer) GetRolePolicies(roleName string) (*events.APIGatewayCu
 	}
 
 	return &events.APIGatewayCustomAuthorizerPolicy{
-		Version:   version,
+		Version:   "2012-10-17",
 		Statement: stmts,
 	}, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -72,31 +73,13 @@ func init() {
 	tokener = awstoken.New(env, region)
 }
 
-// Help function to generate an IAM policy
-func generatePolicy(principalId, effect, resource string) events.APIGatewayCustomAuthorizerResponse {
-	authResponse := events.APIGatewayCustomAuthorizerResponse{PrincipalID: principalId}
-	log.Info().Str("principal", principalId).Str("effect", effect).Str("resource", resource).Msg("generating policy")
-
-	if effect != "" && resource != "" {
-		authResponse.PolicyDocument = events.APIGatewayCustomAuthorizerPolicy{
-			Version: "2012-10-17",
-			Statement: []events.IAMPolicyStatement{
-				{
-					Action:   []string{"execute-api:Invoke"},
-					Effect:   effect,
-					Resource: []string{resource},
-				},
-			},
-		}
+func extractRoleName(idToken *token.IDToken) (string, error) {
+	roleArn := idToken.Roles[0]
+	role := strings.Split(roleArn, "/")
+	if len(role) != 2 {
+		return "", errors.New("invalid role arn passed in claims")
 	}
-
-	// Optional output with custom properties of the String, Number or Boolean type.
-	authResponse.Context = map[string]interface{}{
-		"stringKey":  "stringval",
-		"numberKey":  123,
-		"booleanKey": true,
-	}
-	return authResponse
+	return role[1], nil
 }
 
 func createSystemContext() am.UserContext {
@@ -106,26 +89,70 @@ func createSystemContext() am.UserContext {
 	}
 }
 
+// Help function to generate an IAM policy
+func generatePolicy(org *am.Organization, user *am.User, idToken *token.IDToken, resource string) (events.APIGatewayCustomAuthorizerResponse, error) {
+	authResponse := events.APIGatewayCustomAuthorizerResponse{PrincipalID: strconv.Itoa(user.UserID)}
+	roleName, err := extractRoleName(idToken)
+	if err != nil {
+		return events.APIGatewayCustomAuthorizerResponse{}, err
+	}
+
+	policy, err := policyContainer.GetRolePolicies(roleName)
+	if err != nil {
+		log.Error().Err(err).Str("OrgName", org.OrgName).Str("UserEmail", user.UserEmail).Str("RoleName", roleName).Msg("failed to lookup policy for role by name")
+		return events.APIGatewayCustomAuthorizerResponse{}, err
+	}
+
+	if resource != "" {
+		authResponse.PolicyDocument = *policy
+	}
+
+	// Optional output with custom properties of the String, Number or Boolean type.
+	authResponse.Context = map[string]interface{}{
+		"FirstName": idToken.FirstName,
+		"LastName":  idToken.LastName,
+		"CognitoID": idToken.CognitoUserName,
+		"UserCID":   user.UserCID,
+		"UserID":    user.UserID,
+		"OrgID":     org.OrgID,
+		"OrgCID":    org.OrgCID,
+		"Group":     idToken.Groups[0], // for now, only one group
+	}
+	log.Info().Msgf("Returning response: %#v\n", authResponse)
+	return authResponse, nil
+}
+
 func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
 	token := event.AuthorizationToken
-	unsafeToken, err := tokener.UnsafeExtractDetails(ctx, idKey)
+	unsafeToken, err := tokener.UnsafeExtractDetails(ctx, token)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to extract token details")
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("error invalid token")
+	}
+
 	if unsafeToken.OrgName == "" || unsafeToken.Email == "" {
-		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Error: Invalid token")
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("error invalid token, missing org or email claims")
 	}
 
 	_, org, err := orgClient.Get(ctx, createSystemContext(), unsafeToken.OrgName)
 	if err != nil {
-		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Internal Org Error")
+		log.Error().Err(err).Msg("failed to lookup organization by name")
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("error with org service")
 	}
 
 	idToken, err := tokener.ValidateToken(ctx, org, token)
 	if err != nil {
-		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Error: Invalid token")
+		log.Error().Err(err).Str("OrgName", org.OrgName).Msg("failed to validate token for organization")
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("error: invalid token")
 	}
 
-	_, user, err := userClient.Get()
+	_, user, err := userClient.GetWithOrgID(ctx, createSystemContext(), org.OrgID, idToken.Email)
+	if err != nil {
+		log.Error().Err(err).Str("OrgName", org.OrgName).Str("UserEmail", idToken.Email).Msg("failed to lookup user by org")
+		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("error with user service")
+	}
 
-	return generatePolicy(org)
+	return generatePolicy(org, user, idToken, event.MethodArn)
 }
 
 func main() {
