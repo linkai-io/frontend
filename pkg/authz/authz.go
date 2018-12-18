@@ -25,6 +25,11 @@ type ResetDetails struct {
 	VerificationCode string `json:"verification_code,omitempty" validate:"omitempty,gte=3,lte=256"`
 }
 
+type TokenDetails struct {
+	IDToken      string `json:"id_token" validate:"required,gte=1000,lte=2048"`
+	RefreshToken string `json:"refresh_token" validate:"required,gte=1000,lte=2048"`
+}
+
 type UserDetails struct {
 	Details map[string]string `json:"details"`
 }
@@ -34,8 +39,7 @@ type Authenticator interface {
 	Init(config []byte) error
 	Login(ctx context.Context, details *LoginDetails) (map[string]string, error)
 	SetNewPassword(ctx context.Context, details *LoginDetails) (map[string]string, error)
-	//UpdatePassword(ctx context.Context, details *LoginDetails) (map[string]string, error)
+	Refresh(ctx context.Context, details *TokenDetails) (map[string]string, error)
 	Forgot(ctx context.Context, details *ResetDetails) error
 	Reset(ctx context.Context, details *ResetDetails) error
-	Logout(ctx context.Context, userDetails *UserDetails) error
 }

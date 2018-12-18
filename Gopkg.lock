@@ -27,6 +27,14 @@
   revision = "7ced9b7d9fe7de67bdf63e3e728b9732f5c11af1"
 
 [[projects]]
+  digest = "1:9447e63c3d421bca04c226442321db764b781fe45419d9f0d68c9ed5d6c5caf6"
+  name = "github.com/apex/gateway"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "21c9971861be4e8be9352e7a2540710b0c46610f"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:b28b250b648609be14e0fa4a220b9b991ccaf7b1226781fd9d6e4dd6f4e086fd"
   name = "github.com/avast/retry-go"
   packages = ["."]
@@ -147,6 +155,14 @@
   version = "v3.2.0"
 
 [[projects]]
+  digest = "1:b9914f85d95a0968bafd1be1908ba29e2eafafd88d6fd13696be42bf5368c380"
+  name = "github.com/go-chi/chi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b5294d10673813fac8558e7f47242bc9e61b4c25"
+  version = "v3.3.3"
+
+[[projects]]
   digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
   name = "github.com/go-playground/locales"
   packages = [
@@ -227,7 +243,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2e481b8e8c3a5830ac64d88cf71951c69efc74b4228c39b29f5ff9aa425e302a"
+  digest = "1:323e04952507792cc9888e72b82bc1296959bddf54f65ef19b6d37dfbb13af2b"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -253,7 +269,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "060fefb223889d463c28b773f41ea0fca8fbfe34"
+  revision = "71225a9d4825dd40e0796708d09778cf264526a0"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -334,7 +350,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "891ebc4b82d6e74f468c533b06f983c7be918a96"
+  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
 
 [[projects]]
   branch = "master"
@@ -356,7 +372,7 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "4d1cda033e0619309c606fc686de3adcf599539e"
+  revision = "dcdaa6325bcb8d3c07805583fe12153f08a41e2b"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -428,7 +444,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "bd91e49a0898e27abb88c339b432fa53d7497ac0"
+  revision = "67d6565462c5a0d99b88193d59fefa10ca7e3010"
 
 [[projects]]
   digest = "1:9edd250a3c46675d0679d87540b30c9ed253b19bd1fd1af08f4f5fb3c79fc487"
@@ -483,6 +499,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/AlexRudd/cognito-srp",
+    "github.com/apex/gateway",
     "github.com/aws/aws-lambda-go/cfn",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
@@ -495,6 +512,7 @@
     "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider",
     "github.com/aws/aws-sdk-go-v2/service/iam",
     "github.com/dgrijalva/jwt-go",
+    "github.com/go-chi/chi",
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",
     "github.com/linkai-io/am/clients/address",

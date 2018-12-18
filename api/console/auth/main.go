@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/linkai-io/frontend/pkg/authz"
@@ -87,13 +86,6 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	route := request.RequestContext.HTTPMethod + request.Path
 
-	fmt.Printf("route: %v\n", route)
-	fmt.Printf("request: %#v\n", request)
-	fmt.Printf("request context: %#v\n", request.RequestContext)
-	fmt.Printf("request context identity: %#v\n", request.RequestContext.Identity)
-	fmt.Println("Received: ", request.Body)
-	fmt.Printf("REQUEST: %#v\n", request.PathParameters)
-
 	systemUserContext := getSystemContext(request.RequestContext.RequestID, request.RequestContext.Identity.SourceIP)
 	authenticator := awsauthz.New(env, region, orgClient, systemUserContext)
 	if err := authenticator.Init(nil); err != nil {
@@ -101,19 +93,42 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	switch route {
+	case "POST/auth/refresh":
+		return handleRefresh(ctx, authenticator, request)
 	case "POST/auth/login":
 		return handleLogin(ctx, authenticator, request)
 	case "POST/auth/forgot":
 		return handleForgot(ctx, authenticator, request)
 	case "POST/auth/forgot_confirm":
 		return handleForgotConfirm(ctx, authenticator, request)
-	case "POST/auth/logout":
-		return returnError("not implemented", 500), nil
 	case "POST/auth/changepwd":
 		return handleChangePwd(ctx, authenticator, request)
 	}
 
 	return returnError("not implemented", 500), nil
+}
+
+func handleRefresh(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	tokenDetails := &authz.TokenDetails{}
+	if err := json.Unmarshal([]byte(request.Body), tokenDetails); err != nil {
+		return returnError("unmarshal failed", 500), nil
+	}
+
+	results, err := authenticator.Refresh(ctx, tokenDetails)
+	if err != nil {
+		return returnError("login failed", 403), nil
+	}
+
+	authResponse := &AuthResponse{Status: "ok", Results: results}
+	data, err := json.Marshal(authResponse)
+	if err != nil {
+		return returnError("marshal auth response failed", 500), nil
+	}
+
+	return events.APIGatewayProxyResponse{
+		Body:       string(data),
+		StatusCode: 200,
+	}, err
 }
 
 func handleLogin(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

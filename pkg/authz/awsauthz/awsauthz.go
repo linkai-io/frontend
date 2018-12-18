@@ -3,13 +3,17 @@ package awsauthz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	cip "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/authz"
+	"github.com/linkai-io/frontend/pkg/token"
+	"github.com/linkai-io/frontend/pkg/token/awstoken"
 	"github.com/rs/zerolog/log"
 	validator "gopkg.in/go-playground/validator.v9"
 )
@@ -21,6 +25,7 @@ type AWSAuthenticate struct {
 	systemUserContext am.UserContext
 	svc               *cip.CognitoIdentityProvider
 	validate          *validator.Validate
+	tokener           token.Tokener
 }
 
 func New(env, region string, orgClient am.OrganizationService, systemUserContext am.UserContext) *AWSAuthenticate {
@@ -30,6 +35,7 @@ func New(env, region string, orgClient am.OrganizationService, systemUserContext
 		orgClient:         orgClient,
 		systemUserContext: systemUserContext,
 		validate:          validator.New(),
+		tokener:           awstoken.New(env, region),
 	}
 }
 
@@ -74,6 +80,7 @@ func (a *AWSAuthenticate) Login(ctx context.Context, details *authz.LoginDetails
 	req := a.svc.AdminInitiateAuthRequest(input)
 	out, err := req.Send()
 	if err != nil {
+		log.Error().Err(err).Str("org_name", org.OrgName).Str("username", details.Username).Msg("authentication failure")
 		return response, err
 	}
 
@@ -85,13 +92,8 @@ func (a *AWSAuthenticate) Login(ctx context.Context, details *authz.LoginDetails
 	if out.AuthenticationResult == nil {
 		return response, errors.New("empty authentication result")
 	}
-	response["state"] = authz.AuthSuccess
-	response["AccessToken"] = *out.AuthenticationResult.AccessToken
-	response["IdToken"] = *out.AuthenticationResult.IdToken
-	response["RefreshToken"] = *out.AuthenticationResult.RefreshToken
-	response["Expires"] = strconv.FormatInt(*out.AuthenticationResult.ExpiresIn, 10)
-	response["TokenType"] = *out.AuthenticationResult.TokenType
-	return response, nil
+
+	return a.successMap(out.AuthenticationResult)
 }
 
 // SetNewPassword for when a user first logs in and needs to set their new password.
@@ -150,15 +152,53 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.Log
 		return response, errors.New("failed to set new password")
 	}
 
-	response["state"] = "AUTHENTICATED"
-	response["AccessToken"] = *challenge.AuthenticationResult.AccessToken
-	response["IdToken"] = *challenge.AuthenticationResult.IdToken
-	response["RefreshToken"] = *challenge.AuthenticationResult.RefreshToken
-	response["Expires"] = strconv.FormatInt(*challenge.AuthenticationResult.ExpiresIn, 10)
-	response["TokenType"] = *challenge.AuthenticationResult.TokenType
-	return response, nil
+	return a.successMap(out.AuthenticationResult)
 }
 
+// Refresh token flow when id token has expired and needs to be refreshed
+func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetails) (map[string]string, error) {
+	response := make(map[string]string, 0)
+
+	if err := a.validate.Struct(details); err != nil {
+		return response, err
+	}
+
+	// it's OK to call unsafe extract here because even if they 'refresh' a token they control (from their own userpool)
+	// the authorizer lambda checks the signature against a valid JWK which we have stored in our DB for the organization name
+	// also, the token will fail validation because it's expired so, *shrug*
+	idToken, err := a.tokener.UnsafeExtractDetails(ctx, details.IDToken)
+	if err != nil {
+		return response, err
+	}
+
+	userPool := strings.Replace(idToken.StandardClaims.Issuer, fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/", a.region), "", -1)
+
+	input := &cip.AdminInitiateAuthInput{
+		AuthFlow:       cip.AuthFlowTypeRefreshTokenAuth,
+		AuthParameters: map[string]string{"REFRESH_TOKEN": details.RefreshToken},
+		ClientId:       aws.String(idToken.StandardClaims.Audience),
+		UserPoolId:     aws.String(userPool),
+	}
+
+	req := a.svc.AdminInitiateAuthRequest(input)
+	out, err := req.Send()
+	if err != nil {
+		return response, err
+	}
+
+	if out.ChallengeName == cip.ChallengeNameTypeNewPasswordRequired {
+		response["state"] = authz.AuthNewPasswordRequired
+		return response, nil
+	}
+
+	if out.AuthenticationResult == nil {
+		return response, errors.New("empty authentication result")
+	}
+
+	return a.successMap(out.AuthenticationResult)
+}
+
+// Forgot password flow
 func (a *AWSAuthenticate) Forgot(ctx context.Context, details *authz.ResetDetails) error {
 	if err := a.validate.Struct(details); err != nil {
 		return err
@@ -179,6 +219,7 @@ func (a *AWSAuthenticate) Forgot(ctx context.Context, details *authz.ResetDetail
 	return err
 }
 
+// Reset password flow
 func (a *AWSAuthenticate) Reset(ctx context.Context, details *authz.ResetDetails) error {
 	if err := a.validate.Struct(details); err != nil {
 		return err
@@ -202,6 +243,14 @@ func (a *AWSAuthenticate) Reset(ctx context.Context, details *authz.ResetDetails
 	return err
 }
 
-func (a *AWSAuthenticate) Logout(ctx context.Context, details *authz.UserDetails) error {
-	return nil
+func (a *AWSAuthenticate) successMap(authResult *cip.AuthenticationResultType) (map[string]string, error) {
+	response := make(map[string]string, 5)
+	response["state"] = authz.AuthSuccess
+	//response["access_token"] = *out.AuthenticationResult.AccessToken
+	response["id_token"] = *authResult.IdToken
+	response["refresh_token"] = *authResult.RefreshToken
+	response["expires"] = strconv.FormatInt(*authResult.ExpiresIn, 10)
+	response["token_type"] = *authResult.TokenType
+
+	return response, nil
 }

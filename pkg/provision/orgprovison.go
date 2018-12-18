@@ -411,7 +411,7 @@ func (p *OrgProvisioner) createAppClient(ctx context.Context, orgData *am.Organi
 		ExplicitAuthFlows:          []cip.ExplicitAuthFlowsType{cip.ExplicitAuthFlowsTypeAdminNoSrpAuth},
 		ReadAttributes:             []string{"email", "family_name", "given_name", "custom:orgname"},
 		WriteAttributes:            []string{"email", "family_name", "given_name"},
-		RefreshTokenValidity:       aws.Int64(30),
+		RefreshTokenValidity:       aws.Int64(1),
 		SupportedIdentityProviders: []string{"COGNITO"},
 	}
 	req := p.svc.CreateUserPoolClientRequest(appClient)
