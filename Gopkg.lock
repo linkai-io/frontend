@@ -204,12 +204,15 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:e04cc716992a302cacf6d726409a05aa9546241998b24356d6dd0f01bc5a374e"
+  digest = "1:cd9864c6366515827a759931746738ede6079faa08df9c584596370d6add135c"
   name = "github.com/googleapis/gax-go"
-  packages = ["."]
+  packages = [
+    ".",
+    "v2",
+  ]
   pruneopts = "UT"
-  revision = "b001040cd31805261cbd978842099e326dfa857b"
-  version = "v2.0.2"
+  revision = "c8a15bac9b9fe955bd9f900272f9a306465d28cf"
+  version = "v2.0.3"
 
 [[projects]]
   digest = "1:6a5edb6e9ad91f22d33e01739bbabea324fed674c40bc4f7d60adb48235e8b48"
@@ -243,7 +246,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:323e04952507792cc9888e72b82bc1296959bddf54f65ef19b6d37dfbb13af2b"
+  digest = "1:3e51778fe0ca8a8af91227868d56d658ef2074a1b2d41c29365ef4c19ead9272"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -269,7 +272,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "71225a9d4825dd40e0796708d09778cf264526a0"
+  revision = "4f2fb917bedab8d0d8922b15f52fd7c1903517e7"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -372,7 +375,7 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "dcdaa6325bcb8d3c07805583fe12153f08a41e2b"
+  revision = "074acd46bca67915925527c07849494d115e7c43"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -414,7 +417,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "41dc4b66e69d5dbf20efe4ba67e19d214d147ae3"
+  revision = "583d854617af4d2080b5d2a24d72f7fc5a128ab2"
 
 [[projects]]
   digest = "1:d2a8db567a76203e3b41c1f632d86485ffd57f8e650a0d1b19d240671c2fddd7"
@@ -444,7 +447,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "67d6565462c5a0d99b88193d59fefa10ca7e3010"
+  revision = "5a97ab628bfb2f65f6befec18f4bc7bc7f382b77"
 
 [[projects]]
   digest = "1:9edd250a3c46675d0679d87540b30c9ed253b19bd1fd1af08f4f5fb3c79fc487"

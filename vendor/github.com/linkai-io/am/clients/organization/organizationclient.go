@@ -44,12 +44,12 @@ func (c *Client) get(ctx context.Context, userContext am.UserContext, in *servic
 	ctxDeadline, cancel := context.WithTimeout(ctx, c.defaultTimeout)
 	defer cancel()
 
-	err = retrier.RetryUnless(func() error {
+	err = retrier.RetryIfNot(func() error {
 		var retryErr error
 
 		resp, retryErr = c.client.Get(ctxDeadline, in)
 		return errors.Wrap(retryErr, "unable to get organizations from client")
-	}, am.ErrUserNotAuthorized)
+	}, "rpc error: code = Unavailable desc")
 
 	if err != nil {
 		return 0, nil, err
@@ -85,6 +85,15 @@ func (c *Client) GetByID(ctx context.Context, userContext am.UserContext, orgID 
 	return c.get(ctx, userContext, in)
 }
 
+func (c *Client) GetByAppClientID(ctx context.Context, userContext am.UserContext, orgAppClientID string) (oid int, org *am.Organization, err error) {
+	in := &service.OrgRequest{
+		By:             service.OrgRequest_ORGCLIENTAPPID,
+		UserContext:    convert.DomainToUserContext(userContext),
+		OrgClientAppID: orgAppClientID,
+	}
+	return c.get(ctx, userContext, in)
+}
+
 func (c *Client) List(ctx context.Context, userContext am.UserContext, filter *am.OrgFilter) ([]*am.Organization, error) {
 	var resp service.Organization_ListClient
 	var err error
@@ -97,11 +106,11 @@ func (c *Client) List(ctx context.Context, userContext am.UserContext, filter *a
 	ctxDeadline, cancel := context.WithTimeout(ctx, c.defaultTimeout)
 	defer cancel()
 
-	err = retrier.RetryUnless(func() error {
+	err = retrier.RetryIfNot(func() error {
 		var retryErr error
 		resp, retryErr = c.client.List(ctxDeadline, in)
 		return errors.Wrap(retryErr, "unable to list organizations from client")
-	}, am.ErrUserNotAuthorized)
+	}, "rpc error: code = Unavailable desc")
 
 	if err != nil {
 		return nil, err
@@ -133,12 +142,12 @@ func (c *Client) Create(ctx context.Context, userContext am.UserContext, org *am
 	ctxDeadline, cancel := context.WithTimeout(ctx, c.defaultTimeout)
 	defer cancel()
 
-	err = retrier.RetryUnless(func() error {
+	err = retrier.RetryIfNot(func() error {
 		var retryErr error
 
 		resp, retryErr = c.client.Create(ctxDeadline, in)
 		return errors.Wrap(retryErr, "unable to create organizations from client")
-	}, am.ErrUserNotAuthorized)
+	}, "rpc error: code = Unavailable desc")
 
 	if err != nil {
 		return 0, 0, "", "", err
@@ -157,12 +166,12 @@ func (c *Client) Update(ctx context.Context, userContext am.UserContext, org *am
 	ctxDeadline, cancel := context.WithTimeout(ctx, c.defaultTimeout)
 	defer cancel()
 
-	err = retrier.RetryUnless(func() error {
+	err = retrier.RetryIfNot(func() error {
 		var retryErr error
 
 		resp, retryErr = c.client.Update(ctxDeadline, in)
 		return errors.Wrap(retryErr, "unable to update organizations from client")
-	}, am.ErrUserNotAuthorized)
+	}, "rpc error: code = Unavailable desc")
 
 	if err != nil {
 		return 0, err
@@ -180,12 +189,12 @@ func (c *Client) Delete(ctx context.Context, userContext am.UserContext, orgID i
 	ctxDeadline, cancel := context.WithTimeout(ctx, c.defaultTimeout)
 	defer cancel()
 
-	err = retrier.RetryUnless(func() error {
+	err = retrier.RetryIfNot(func() error {
 		var retryErr error
 
 		resp, retryErr = c.client.Delete(ctxDeadline, in)
 		return errors.Wrap(retryErr, "unable to delete organizations from client")
-	}, am.ErrUserNotAuthorized)
+	}, "rpc error: code = Unavailable desc")
 
 	if err != nil {
 		return 0, err

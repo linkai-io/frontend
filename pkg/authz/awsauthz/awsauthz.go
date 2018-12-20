@@ -166,17 +166,17 @@ func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetai
 	// it's OK to call unsafe extract here because even if they 'refresh' a token they control (from their own userpool)
 	// the authorizer lambda checks the signature against a valid JWK which we have stored in our DB for the organization name
 	// also, the token will fail validation because it's expired so, *shrug*
-	idToken, err := a.tokener.UnsafeExtractDetails(ctx, details.IDToken)
+	accessToken, err := a.tokener.UnsafeExtractAccess(ctx, details.AccessToken)
 	if err != nil {
 		return response, err
 	}
 
-	userPool := strings.Replace(idToken.StandardClaims.Issuer, fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/", a.region), "", -1)
+	userPool := strings.Replace(accessToken.StandardClaims.Issuer, fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/", a.region), "", -1)
 
 	input := &cip.AdminInitiateAuthInput{
 		AuthFlow:       cip.AuthFlowTypeRefreshTokenAuth,
 		AuthParameters: map[string]string{"REFRESH_TOKEN": details.RefreshToken},
-		ClientId:       aws.String(idToken.StandardClaims.Audience),
+		ClientId:       aws.String(accessToken.ClientID),
 		UserPoolId:     aws.String(userPool),
 	}
 
@@ -246,7 +246,7 @@ func (a *AWSAuthenticate) Reset(ctx context.Context, details *authz.ResetDetails
 func (a *AWSAuthenticate) successMap(authResult *cip.AuthenticationResultType) (map[string]string, error) {
 	response := make(map[string]string, 5)
 	response["state"] = authz.AuthSuccess
-	//response["access_token"] = *out.AuthenticationResult.AccessToken
+	response["access_token"] = *authResult.AccessToken
 	response["id_token"] = *authResult.IdToken
 	response["refresh_token"] = *authResult.RefreshToken
 	response["expires"] = strconv.FormatInt(*authResult.ExpiresIn, 10)

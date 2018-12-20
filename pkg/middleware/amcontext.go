@@ -77,6 +77,12 @@ func UserCtx(next http.Handler) http.Handler {
 			return
 		}
 
+		userContext.UserCID = stringField("UserID", requestContext.Authorizer)
+		if userContext.UserCID == "" {
+			ReturnError(w, "invalid user cid", 401)
+			return
+		}
+
 		id = stringField("OrgID", requestContext.Authorizer)
 		if userContext.OrgID, err = strconv.Atoi(id); err != nil {
 			ReturnError(w, "invalid org id", 401)
@@ -88,6 +94,7 @@ func UserCtx(next http.Handler) http.Handler {
 			ReturnError(w, "invalid org cid", 401)
 			return
 		}
+
 		role := stringField("Group", requestContext.Authorizer)
 		if role == "" {
 			ReturnError(w, "invalid role", 401)

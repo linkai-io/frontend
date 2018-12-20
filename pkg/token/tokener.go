@@ -22,10 +22,26 @@ type IDToken struct {
 	jwt.StandardClaims
 }
 
+// AccessToken represents the parsed JWT token containing access token
+type AccessToken struct {
+	EventID         string   `json:"event_id"`
+	Scope           string   `json:"scope"`
+	ClientID        string   `json:"client_id"`
+	CognitoUserName string   `json:"username"`
+	TokenUse        string   `json:"token_use"`
+	AuthTime        float64  `json:"auth_time"`
+	Groups          []string `json:"cognito:groups"`
+	jwt.StandardClaims
+}
+
 // Tokener for extracting details from a cognito jwt token.
 type Tokener interface {
 	// UnsafeExtractDetails extracts claims but does not verify signature
-	UnsafeExtractDetails(ctx context.Context, idKey string) (*IDToken, error)
-	// ValidateToken actually verifies signature on the token as well as verifies claims are proper
-	ValidateToken(ctx context.Context, org *am.Organization, idKey string) (*IDToken, error)
+	UnsafeExtractID(ctx context.Context, idKey string) (*IDToken, error)
+	// UnsafeExtractAccess extracts claims from the accses token but does not verify signature
+	UnsafeExtractAccess(ctx context.Context, accessKey string) (*AccessToken, error)
+	// ValidateIDToken actually verifies signature on the token as well as verifies claims are proper
+	ValidateIDToken(ctx context.Context, org *am.Organization, idKey string) (*IDToken, error)
+	// ValidateAccessToken actually verifies signature on the token as well as verifies claims are proper
+	ValidateAccessToken(ctx context.Context, org *am.Organization, accessKey string) (*AccessToken, error)
 }

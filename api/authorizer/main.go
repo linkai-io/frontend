@@ -13,38 +13,42 @@ import (
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/clients/user"
 	"github.com/linkai-io/am/pkg/secrets"
+	"github.com/linkai-io/frontend/pkg/policy"
 	"github.com/linkai-io/frontend/pkg/token"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
 	"github.com/rs/zerolog/log"
 )
 
 var (
-	env      string
-	region   string
-	roleArns []string
+	env     string
+	region  string
+	roleMap map[string]string //roleName:roleArn
 
 	systemOrgID     int
 	systemUserID    int
 	orgClient       am.OrganizationService
 	userClient      am.UserService
-	policyContainer *PolicyContainer
+	policyContainer *policy.Container
 	tokener         token.Tokener
 )
 
 func init() {
+	var err error
+
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
-	roleArns = strings.Split(os.Getenv("APP_ROLES"), ",")
-	if len(roleArns) < 1 {
-		log.Fatal().Msg("error reading role arns from environment")
+
+	roleMap, err = orgRoles()
+	if err != nil {
+		log.Fatal().Err(err).Msg("error initializing roles")
 	}
 
-	policyContainer = New(env, region)
-	if err := policyContainer.Init(roleArns); err != nil {
+	policyContainer = policy.New(env, region)
+	if err := policyContainer.Init(roleMap); err != nil {
 		log.Fatal().Err(err).Msg("error initializing policies")
 	}
 
-	log.Info().Str("env", env).Str("region", region).Int("num_roles", len(roleArns)).Msg("lambda authorizer initializing")
+	log.Info().Str("env", env).Str("region", region).Int("num_roles", len(roleMap)).Msg("lambda authorizer initializing")
 
 	sec := secrets.NewSecretsCache(env, region)
 	lb, err := sec.LoadBalancerAddr()
@@ -73,13 +77,16 @@ func init() {
 	tokener = awstoken.New(env, region)
 }
 
-func extractRoleName(idToken *token.IDToken) (string, error) {
-	roleArn := idToken.Roles[0]
-	role := strings.Split(roleArn, "/")
-	if len(role) != 2 {
-		return "", errors.New("invalid role arn passed in claims")
+func orgRoles() (map[string]string, error) {
+	roleMap := make(map[string]string, 8)
+	for _, roleName := range []string{"internal_owner", "internal_admin", "internal_reviewer", "owner", "admin", "auditor", "editor", "reviewer"} {
+		roleMap[roleName] = os.Getenv(roleName)
+		if roleMap[roleName] == "" {
+			log.Error().Str("roleName", roleName).Msg("had empty value")
+			return nil, errors.New("invalid value passed into org role environment var")
+		}
 	}
-	return role[1], nil
+	return roleMap, nil
 }
 
 func createSystemContext() am.UserContext {
@@ -90,15 +97,16 @@ func createSystemContext() am.UserContext {
 }
 
 // Help function to generate an IAM policy
-func generatePolicy(org *am.Organization, user *am.User, idToken *token.IDToken, resource string) (events.APIGatewayCustomAuthorizerResponse, error) {
+func generatePolicy(org *am.Organization, user *am.User, accessToken *token.AccessToken, resource string) (events.APIGatewayCustomAuthorizerResponse, error) {
+	var roleName string
 	authResponse := events.APIGatewayCustomAuthorizerResponse{PrincipalID: strconv.Itoa(user.UserID)}
-	roleName, err := extractRoleName(idToken)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to extract role name from idToken")
-		return returnUnauthorized()
+	if org.SubscriptionID == am.SubscriptionSystem {
+		roleName = "internal_" + accessToken.Groups[0]
+	} else {
+		roleName = accessToken.Groups[0]
 	}
 
-	policy, err := policyContainer.GetRolePolicies(roleName)
+	policy, err := policyContainer.GetPolicy(roleName)
 	if err != nil {
 		log.Error().Err(err).Str("OrgName", org.OrgName).Str("UserEmail", user.UserEmail).Str("RoleName", roleName).Msg("failed to lookup policy for role by name")
 		return returnUnauthorized()
@@ -110,14 +118,15 @@ func generatePolicy(org *am.Organization, user *am.User, idToken *token.IDToken,
 
 	// Optional output with custom properties of the String, Number or Boolean type.
 	authResponse.Context = map[string]interface{}{
-		"FirstName": idToken.FirstName,
-		"LastName":  idToken.LastName,
-		"CognitoID": idToken.CognitoUserName,
+		"FirstName": user.FirstName,
+		"LastName":  user.LastName,
+		"CognitoID": accessToken.CognitoUserName,
+		"Email":     user.UserEmail,
 		"UserCID":   user.UserCID,
 		"UserID":    user.UserID,
 		"OrgID":     org.OrgID,
 		"OrgCID":    org.OrgCID,
-		"Group":     idToken.Groups[0], // for now, only one group
+		"Group":     accessToken.Groups[0], // for now, only one group
 	}
 	return authResponse, nil
 }
@@ -126,37 +135,51 @@ func returnUnauthorized() (events.APIGatewayCustomAuthorizerResponse, error) {
 	return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Unauthorized")
 }
 
+func splitToken(token string) string {
+	if strings.HasPrefix(token, "Bearer ") {
+		parts := strings.Split(token, "Bearer ")
+		return parts[1]
+	}
+	if strings.HasPrefix(token, "bearer ") {
+		parts := strings.Split(token, "bearer ")
+		return parts[1]
+	}
+	return ""
+}
+
 func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
-	token := event.AuthorizationToken
-	unsafeToken, err := tokener.UnsafeExtractDetails(ctx, token)
+	token := splitToken(event.AuthorizationToken)
+
+	if token == "" {
+		log.Error().Msg("Bearer header missing from token")
+		return returnUnauthorized()
+	}
+
+	unsafeToken, err := tokener.UnsafeExtractAccess(ctx, token)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract token details")
 		return returnUnauthorized()
 	}
 
-	if unsafeToken.OrgName == "" || unsafeToken.Email == "" {
-		return returnUnauthorized()
-	}
-
-	_, org, err := orgClient.Get(ctx, createSystemContext(), unsafeToken.OrgName)
+	_, org, err := orgClient.GetByAppClientID(ctx, createSystemContext(), unsafeToken.ClientID)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to lookup organization by name")
+		log.Error().Err(err).Msg("failed to lookup organization by client id")
 		return returnUnauthorized()
 	}
 
-	idToken, err := tokener.ValidateToken(ctx, org, token)
+	accessToken, err := tokener.ValidateAccessToken(ctx, org, token)
 	if err != nil {
 		log.Error().Err(err).Str("OrgName", org.OrgName).Msg("failed to validate token for organization")
 		return returnUnauthorized()
 	}
 
-	_, user, err := userClient.GetWithOrgID(ctx, createSystemContext(), org.OrgID, idToken.Email)
+	_, user, err := userClient.GetWithOrgID(ctx, createSystemContext(), org.OrgID, accessToken.CognitoUserName)
 	if err != nil {
-		log.Error().Err(err).Str("OrgName", org.OrgName).Str("UserEmail", idToken.Email).Msg("failed to lookup user by org")
+		log.Error().Err(err).Str("OrgName", org.OrgName).Str("CognitoUserName", accessToken.CognitoUserName).Msg("failed to lookup user by org")
 		return returnUnauthorized()
 	}
 
-	return generatePolicy(org, user, idToken, event.MethodArn)
+	return generatePolicy(org, user, accessToken, event.MethodArn)
 }
 
 func main() {

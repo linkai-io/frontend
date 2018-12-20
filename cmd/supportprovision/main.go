@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/linkai-io/am/am"
-	"github.com/linkai-io/am/clients/organization"
-	"github.com/linkai-io/am/clients/user"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/provision"
 	"github.com/rs/zerolog"
@@ -63,35 +61,6 @@ func delete(ctx context.Context, provisioner *provision.OrgProvisioner, orgData 
 	}
 	log.Info().Str("UserPoolId", userPoolID).Str("IdentityPoolId", identityPoolID).Msg("deleted support organization")
 	return nil
-}
-
-func initOrgClient(sec *secrets.SecretsCache) am.OrganizationService {
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
-	log.Info().Int("org_id", systemOrgID).Int("user_id", systemUserID).Msg("provisioning with system ids")
-	orgClient := organization.New()
-	if err := orgClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
-	log.Info().Str("load_balancer", lb).Msg("orgClient initialized with lb")
-	return orgClient
-}
-
-func initUserClient(sec *secrets.SecretsCache) am.UserService {
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
-	userClient := user.New()
-	if err := userClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
-	log.Info().Str("load_balancer", lb).Msg("orgClient initialized with lb")
-	return userClient
 }
 
 func main() {
@@ -149,8 +118,8 @@ func main() {
 		roles[role] = v
 	}
 
-	orgClient := initOrgClient(sec)
-	userClient := initUserClient(sec)
+	orgClient := initializers.OrgClient(sec)
+	userClient := initializers.UserClient(sec)
 
 	provisioner := provision.NewOrgProvisioner(env, region, userClient, orgClient)
 

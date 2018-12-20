@@ -74,13 +74,13 @@ func testAdminAuth() {
 	svc := cip.New(cfg)
 
 	params := make(map[string]string, 0)
-	params["USERNAME"] = "isaac.dawson@linkai.io"
-	params["PASSWORD"] = "somenewpassword2." //"8tv;;qHzZX"
+	params["USERNAME"] = "linkai-support@linkai.io"
+	params["PASSWORD"] = "somenewpassword." //"8tv;;qHzZX"
 	input := &cip.AdminInitiateAuthInput{
 		AuthFlow:       cip.AuthFlowTypeAdminNoSrpAuth,
 		AuthParameters: params,
-		ClientId:       aws.String("6bjp2k79is6ra7504e3rik163j"),
-		UserPoolId:     aws.String("us-east-1_geOt7d44n"),
+		ClientId:       aws.String("4d5gni154c6mao8a0ggs6lj5po"),
+		UserPoolId:     aws.String("us-east-1_Qc2SgeoY8"),
 	}
 	req := svc.AdminInitiateAuthRequest(input)
 	out, err := req.Send()

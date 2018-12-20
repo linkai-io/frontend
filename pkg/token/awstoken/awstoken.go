@@ -52,7 +52,7 @@ func New(env, region string) *AWSToken {
 	return t
 }
 
-func (t *AWSToken) UnsafeExtractDetails(ctx context.Context, idKey string) (*token.IDToken, error) {
+func (t *AWSToken) UnsafeExtractID(ctx context.Context, idKey string) (*token.IDToken, error) {
 	p := &jwt.Parser{}
 	tok := &token.IDToken{}
 	_, _, err := p.ParseUnverified(idKey, tok)
@@ -62,9 +62,83 @@ func (t *AWSToken) UnsafeExtractDetails(ctx context.Context, idKey string) (*tok
 	return tok, nil
 }
 
-// ValidateToken verifies the signature from the user pool is valid (not expired, properly signed) then verifies individual
+func (t *AWSToken) UnsafeExtractAccess(ctx context.Context, accessKey string) (*token.AccessToken, error) {
+	p := &jwt.Parser{}
+	tok := &token.AccessToken{}
+	_, _, err := p.ParseUnverified(accessKey, tok)
+	if err != nil {
+		return nil, err
+	}
+	return tok, nil
+}
+
+// ValidateAccessToken verifies the signature from the user pool is valid (not expired, properly signed) then verifies individual
 // claims inside the parsed token.
-func (t *AWSToken) ValidateToken(ctx context.Context, org *am.Organization, idKey string) (*token.IDToken, error) {
+func (t *AWSToken) ValidateAccessToken(ctx context.Context, org *am.Organization, accessKey string) (*token.AccessToken, error) {
+	jwk, err := readJWK([]byte(org.UserPoolJWK))
+	if err != nil {
+		return nil, err
+	}
+
+	tok := &token.AccessToken{}
+
+	_, err = jwt.ParseWithClaims(accessKey, tok, func(jwToken *jwt.Token) (interface{}, error) {
+		if _, ok := jwToken.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", jwToken.Header["alg"])
+		}
+
+		if kid, ok := jwToken.Header["kid"]; ok {
+			if kidStr, ok := kid.(string); ok {
+				key := jwk[kidStr]
+				// 6. Verify the signature of the decoded JWT token.
+				rsaPublicKey := convertKey(key.E, key.N)
+				return rsaPublicKey, nil
+			}
+		}
+		return nil, nil
+	})
+
+	if err != nil {
+		return tok, err
+	}
+
+	// careful here, ParseWithClaims ignores standard claims if they don't exist (which seems crazy)
+	// so validate they are actually set.
+	log.Info().Msgf("%#v\n", tok)
+	if tok.TokenUse != "access" {
+		return nil, errors.New("wrong key type")
+	}
+
+	if tok.ExpiresAt == 0 {
+		return nil, errors.New("exp empty or missing")
+	}
+
+	if tok.IssuedAt == 0 {
+		return nil, errors.New("iat empty or missing")
+	}
+
+	if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
+		return nil, errors.New("invalid token issuer detected")
+	}
+
+	if tok.CognitoUserName == "" {
+		return nil, errors.New("username not set")
+	}
+
+	if tok.Groups == nil || len(tok.Groups) == 0 {
+		return nil, errors.New("groups not set")
+	}
+
+	if tok.ClientID != org.UserPoolAppClientID {
+		return nil, errors.New("wrong client id set")
+	}
+
+	return tok, nil
+}
+
+// ValidateIDToken verifies the signature from the user pool is valid (not expired, properly signed) then verifies individual
+// claims inside the parsed token.
+func (t *AWSToken) ValidateIDToken(ctx context.Context, org *am.Organization, idKey string) (*token.IDToken, error) {
 	jwk, err := readJWK([]byte(org.UserPoolJWK))
 	if err != nil {
 		return nil, err
@@ -97,18 +171,27 @@ func (t *AWSToken) ValidateToken(ctx context.Context, org *am.Organization, idKe
 	log.Info().Msgf("%#v\n", tok)
 	if tok.Audience == "" {
 		return nil, errors.New("aud missing")
-	} else if tok.ExpiresAt == 0 {
+	}
+	if tok.TokenUse != "id" {
+		return nil, errors.New("wrong token type")
+	}
+
+	if tok.ExpiresAt == 0 {
 		return nil, errors.New("exp empty or missing")
-	} else if tok.IssuedAt == 0 {
+	}
+
+	if tok.IssuedAt == 0 {
 		return nil, errors.New("iat empty or missing")
-	} else if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
+	}
+
+	if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
 		return nil, errors.New("invalid token issuer detected")
 	}
 	return tok, nil
 }
 
 func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization, idKey, accessKey string) (string, error) {
-	tok, err := t.ValidateToken(ctx, org, idKey)
+	tok, err := t.ValidateIDToken(ctx, org, idKey)
 	if err != nil {
 		return "", err
 	}

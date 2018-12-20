@@ -251,7 +251,7 @@ func main() {
 		r.Patch("/id/{id}", Update)
 		r.Delete("/id/{id}", Delete)
 		r.Get("/cid/{cid}", GetByCID)
-		r.Get("/list", GetByName)
+		r.Get("/list", List)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)
