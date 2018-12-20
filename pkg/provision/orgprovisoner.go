@@ -94,6 +94,9 @@ func (p *OrgProvisioner) orgExists(ctx context.Context, userContext am.UserConte
 
 	// check if exists
 	_, org, err = p.orgClient.Get(ctx, userContext, orgData.OrgName)
+	if err != nil {
+		log.Error().Err(err).Msgf("%#v\n", err)
+	}
 	return org, err
 }
 
@@ -183,9 +186,15 @@ func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, supportOrg *am.Orga
 func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error) {
 	var err error
 	org, err := p.orgExists(ctx, userContext, orgData)
-	if org != nil || err != nil {
-		return "", errors.Wrap(err, "org exists or error")
+	if org != nil {
+		return "", errors.Wrap(err, "org exists")
 	}
+
+	// TODO: ugh i know this is terrible
+	if !strings.Contains(err.Error(), "no rows in result set") {
+		return "", err
+	}
+
 	return p.add(ctx, orgData, roles, "")
 }
 

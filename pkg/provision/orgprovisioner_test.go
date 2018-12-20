@@ -16,7 +16,9 @@ func TestOrgProvisionPoolExists(t *testing.T) {
 	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
 		return 0, nil, nil
 	}
-	provisioner := NewOrgProvisioner("dev", "us-east-1", orgClient)
+	userClient := &mock.UserService{}
+
+	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
 	poolName := aws.String("org-linkai-" + "support-linkai")
 	ret := provisioner.checkUserPoolExists(*poolName, "")
 	if ret == true {
@@ -30,7 +32,9 @@ func TestOrgProvision(t *testing.T) {
 		return 0, nil, nil
 	}
 
-	provisioner := NewOrgProvisioner("dev", "us-east-1", orgClient)
+	userClient := &mock.UserService{}
+
+	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
 
 	orgData := testOrgData()
 	ctx := context.Background()
@@ -43,7 +47,7 @@ func TestOrgProvision(t *testing.T) {
 	roles["editor"] = "arn:aws:iam::447064213022:role/hakken-dev-frontend-console-api-EditorOrgRole-VY3VD72JGNRS"
 	roles["reviewer"] = "arn:aws:iam::447064213022:role/hakken-dev-frontend-console-api-ReviewerOrgRole-3OJZH1QT07Y7"
 
-	if err := provisioner.Add(ctx, userContext, orgData, roles); err != nil {
+	if _, err := provisioner.Add(ctx, userContext, orgData, roles); err != nil {
 		t.Fatalf("Error provisioning: %v\n", err)
 	}
 }
@@ -54,7 +58,9 @@ func TestDeleteOrg(t *testing.T) {
 		return 0, nil, nil
 	}
 	orgData := testOrgData()
-	provisioner := NewOrgProvisioner("dev", "us-east-1", orgClient)
+	userClient := &mock.UserService{}
+
+	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
 	err := provisioner.Delete(context.Background(), orgData)
 	if err != nil {
 		t.Fatalf("failed to delete org: %v\n", err)

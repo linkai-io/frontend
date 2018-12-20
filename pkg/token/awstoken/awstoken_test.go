@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	jwt "github.com/dgrijalva/jwt-go"
+
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
 )
@@ -63,5 +65,23 @@ func TestBearer(t *testing.T) {
 	_, err := at.UnsafeExtractAccess(context.Background(), tokenParts[1])
 	if err != nil {
 		t.Fatalf("error extracting token: %v\n", err)
+	}
+}
+
+func TestExpired(t *testing.T) {
+	accessKey := "eyJraWQiOiJUczY3cE95Rk5tU2I3S3BkS1NIdXRjRDZ4XC81ZEFBYys2Wm1SR1l6YmVTcz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzYTA5OGM1MC02MTc4LTQ0OWEtYmMwYS00MDgxMjBkYWE2MTAiLCJjb2duaXRvOmdyb3VwcyI6WyJvd25lciJdLCJldmVudF9pZCI6IjlhNmVlYWNjLTAzZjItMTFlOS1iZTEwLWY3N2RhODYxYTNhZSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE1NDUyNjc2MTIsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX1FjMlNnZW9ZOCIsImV4cCI6MTU0NTI3MTIxMiwiaWF0IjoxNTQ1MjY3NjEyLCJqdGkiOiI0ZDM4ZjhjYy1hNjcxLTQ3NzYtODM5YS0xYmNhNDVjNGJmYjciLCJjbGllbnRfaWQiOiI0ZDVnbmkxNTRjNm1hbzhhMGdnczZsajVwbyIsInVzZXJuYW1lIjoiM2EwOThjNTAtNjE3OC00NDlhLWJjMGEtNDA4MTIwZGFhNjEwIn0.j8psr_dX-Mekyq2ASepoqTiZFa8Cx5WwoMLxWjTo80KsfPZQvMS7952VdK_PdoViBplhmjHo_GSiBzaYBIZs4Q3vKPUdNJLRacA-CNyWDBSFn020EJZtS3b1uUt9lcjBZywrajh3Z1BcPIq-eMyHges-hA1GxGASFwmcT3DdGxl8imjurnGrbh14KWzSqjsUigUCkOElljRGg3vIPpLDD9CSfooRhK_fVlz2xL1DcTH4BdPJr4-_EeWt7ujP0P7E6Onh63q7AOxKriirpf1tiHtpnGnJDg-G8jOEHeO0A1v6atmwOTUu_fTYxcI6QjYQMNtMP7ryIc6WpYlNdIFneg"
+	org := &am.Organization{
+		UserPoolID:          "us-east-1_Qc2SgeoY8",
+		UserPoolAppClientID: "4d5gni154c6mao8a0ggs6lj5po",
+		UserPoolJWK:         `{"keys":[{"alg":"RS256","e":"AQAB","kid":"/OOhopf74balxDox1K3jMrhf0jpOeMxXlWmWkmHYb6w=","kty":"RSA","n":"ntauX0g0OH2R-25-S5oPBMSpjx1uKcb06cRlKQC2C9-QP6tzKLDFPUf3zfGbIbDEOIaxJWj9B9JieLQnQVdsFkRdGz_E2HC9ZEOh-qNZOVB_lhTJHGeftDCw5q5EOCpe96d49Maj6A9Opb9N2DSEVGn-ycEJvMJ_Hs1V19bQ6IKa3bJ8MKidUWfrw2JlQKtrbH73-T98f7A6MfvfOIL6H1fWyeJJHOv6hctVQeqf7g1XJMaaH4DmhEUdP3ZwilXwkfuEzwczjkeKO3agRBuMGZE7XNknhJEXg1IMtnGxfSCDZtEm5dXkWcfCxsxBOv39sWCDSEpj3rnEwBQdheRZkw","use":"sig"},{"alg":"RS256","e":"AQAB","kid":"Ts67pOyFNmSb7KpdKSHutcD6x/5dAAc+6ZmRGYzbeSs=","kty":"RSA","n":"lCLS7BhoON5O4HaCb1Z0oFS0oAFohvVk15tPbJxoJICw0jGrSFlvFBmjzV_TVBFLN3tUmTWzTO7Sh2T-IVU0cu1EFGR4-HcYXcIiEJJ6zQ1oxq0kHfuDd17oQGFD9SnmTM5ic77lXtcbUJlljwfv9o2quSy9xVAINk9lCnSCbSlTtYjieL5JrKw74DmGMWKTO_3vxCUykq_b6RSoi1cJAAkYykq4fDW9EbO0CDIo9y76vhQdPq-Sw1Iqsnb4qc-uJxx9uVEnusGkrH91nL2_KfDTtKeYiVJgNCEc3nQ6MPxX2CS5LiIUH0PHCGPm3cd2veNOR4NKq-kJRalwnx0HvQ","use":"sig"}]}`,
+	}
+
+	at := awstoken.New("dev", "us-east-1")
+	_, err := at.ValidateAccessToken(context.Background(), org, accessKey)
+	if vErr, ok := err.(*jwt.ValidationError); ok {
+
+		if vErr.Errors == jwt.ValidationErrorExpired {
+			t.Logf("Expired!\n")
+		}
 	}
 }

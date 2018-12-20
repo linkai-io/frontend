@@ -246,7 +246,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3e51778fe0ca8a8af91227868d56d658ef2074a1b2d41c29365ef4c19ead9272"
+  digest = "1:0607344b38e284516479a03be76204a89489d11befeb2831c4a748fbd04494df"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -272,7 +272,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "4f2fb917bedab8d0d8922b15f52fd7c1903517e7"
+  revision = "f049239f094fc4d85a934058ef2a54121d938d80"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"

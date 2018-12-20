@@ -20,12 +20,12 @@ uploadprovision: buildprovision
 	aws s3 sync dist/console/ s3://linkai-infra/frontend/lambdas/console/
 
 deployprovision: buildprovision uploadprovision
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/provision_handler.zip --function-name dev-console-handler-provision
+	aws lambda update-function-code --force --s3-bucket linkai-infra --s3-key frontend/lambdas/console/provision_handler.zip --function-name dev-console-handler-provision
 
-provision:
+supportprovision:
 	docker build -t linkai_support_org_provision -f Dockerfile.support_org_provision .
 
-pushprovision: provision
+pushsupportprovision: provision
 	docker tag linkai_support_org_provision:latest 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest && docker push 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest
 
 upload:

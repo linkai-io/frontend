@@ -55,8 +55,8 @@ func init() {
 }
 
 func orgRoles() (map[string]string, error) {
-	roleMap := make(map[string]string, 5)
-	for _, roleName := range []string{"owner", "admin", "auditor", "editor", "reviewer"} {
+	roleMap := make(map[string]string, 7)
+	for _, roleName := range []string{"authenticated", "unauthenticated", "owner", "admin", "auditor", "editor", "reviewer"} {
 		roleMap[roleName] = os.Getenv(roleName)
 		if roleMap[roleName] == "" {
 			log.Error().Str("roleName", roleName).Msg("had empty value")
@@ -69,7 +69,7 @@ func orgRoles() (map[string]string, error) {
 func CreateOrg(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
-	org := &am.Organization{}
+	orgDetails := &provision.OrgDetails{}
 
 	userContext, ok := middleware.ExtractUserContext(req.Context())
 	if !ok {
@@ -84,13 +84,21 @@ func CreateOrg(w http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	if err := json.Unmarshal(data, org); err != nil {
+	if err := json.Unmarshal(data, orgDetails); err != nil {
 		log.Error().Err(err).Msg("marshal body error")
 		middleware.ReturnError(w, "error reading organization", 500)
 		return
 	}
 
+	org, err := orgDetails.ToOrganization()
+	if err != nil {
+		log.Error().Err(err).Msg("validation failed for provision data")
+		middleware.ReturnError(w, "error reading organization", 500)
+		return
+	}
+
 	if _, err := provisioner.Add(req.Context(), userContext, org, roles); err != nil {
+		log.Error().Err(err).Msg("provisioner error")
 		middleware.ReturnError(w, "error provisioning organization", 500)
 		return
 	}
