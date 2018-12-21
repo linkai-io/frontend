@@ -26,7 +26,7 @@ type ResetDetails struct {
 }
 
 type TokenDetails struct {
-	AccessToken  string `json:"id_token" validate:"required,gte=1000,lte=2048"`
+	AccessToken  string `json:"access_token" validate:"required,gte=1000,lte=2048"`
 	RefreshToken string `json:"refresh_token" validate:"required,gte=1000,lte=2048"`
 }
 

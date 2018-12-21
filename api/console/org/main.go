@@ -11,6 +11,7 @@ import (
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
+	"github.com/linkai-io/frontend/pkg/serializers"
 
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/pkg/secrets"
@@ -38,22 +39,6 @@ func init() {
 	}
 }
 
-func serializeOrgForUsers(org *am.Organization) ([]byte, error) {
-	type Alias am.Organization
-	return json.Marshal(&struct {
-		OrgID                   int    `json:"org_id,omitempty"`
-		UserPoolID              string `json:"user_pool_id,omitempty"`
-		UserPoolAppClientID     string `json:"user_pool_app_client_id,omitempty"`
-		UserPoolAppClientSecret string `json:"user_pool_app_client_secret,omitempty"`
-		IdentityPoolID          string `json:"identity_pool_id,omitempty"`
-		UserPoolJWK             string `json:"user_pool_jwk,omitempty"`
-		Deleted                 bool   `json:"deleted,omitempty"`
-		*Alias
-	}{
-		Alias: (*Alias)(org),
-	})
-}
-
 func GetByName(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
@@ -68,7 +53,8 @@ func GetByName(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
-	if data, err = serializeOrgForUsers(org); err != nil {
+
+	if data, err = serializers.OrgForUsers(org); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}

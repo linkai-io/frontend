@@ -19,23 +19,23 @@ import (
 )
 
 type AWSAuthenticate struct {
-	env               string
-	region            string
-	orgClient         am.OrganizationService
-	systemUserContext am.UserContext
-	svc               *cip.CognitoIdentityProvider
-	validate          *validator.Validate
-	tokener           token.Tokener
+	env         string
+	region      string
+	orgClient   am.OrganizationService
+	userContext am.UserContext
+	svc         *cip.CognitoIdentityProvider
+	validate    *validator.Validate
+	tokener     token.Tokener
 }
 
-func New(env, region string, orgClient am.OrganizationService, systemUserContext am.UserContext) *AWSAuthenticate {
+func New(env, region string, orgClient am.OrganizationService, userContext am.UserContext) *AWSAuthenticate {
 	return &AWSAuthenticate{
-		env:               env,
-		region:            region,
-		orgClient:         orgClient,
-		systemUserContext: systemUserContext,
-		validate:          validator.New(),
-		tokener:           awstoken.New(env, region),
+		env:         env,
+		region:      region,
+		orgClient:   orgClient,
+		userContext: userContext,
+		validate:    validator.New(),
+		tokener:     awstoken.New(env, region),
 	}
 }
 
@@ -51,7 +51,7 @@ func (a *AWSAuthenticate) Init(config []byte) error {
 }
 
 func (a *AWSAuthenticate) getOrgData(ctx context.Context, orgName string) (*am.Organization, error) {
-	_, org, err := a.orgClient.Get(ctx, a.systemUserContext, orgName)
+	_, org, err := a.orgClient.Get(ctx, a.userContext, orgName)
 	if err != nil {
 		return nil, err
 	}
@@ -124,11 +124,6 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.Log
 		return response, err
 	}
 
-	// odd they can just login normally.
-	if out.AuthenticationResult != nil {
-		response["state"] = authz.AuthInvalidRequest
-		return response, nil
-	}
 	newPassParams := make(map[string]string, 0)
 	newPassParams["USERNAME"] = out.ChallengeParameters["USER_ID_FOR_SRP"]
 	newPassParams["NEW_PASSWORD"] = details.NewPassword

@@ -14,13 +14,13 @@ buildorg:
 	GOOS=linux go build -o dist/console/main ./api/console/org/ && zip -j dist/console/org_handler.zip dist/console/main && rm dist/console/main
 
 buildprovision:
-	GOOS=linux go build -o dist/console/main ./api/console/provision/ && zip -j dist/console/provision_handler.zip dist/console/main && rm dist/console/main
+	GOOS=linux go build -o dist/console/admin/main ./api/console/admin/provision/ && zip -j dist/console/admin/provision_handler.zip dist/console/admin/main && rm dist/console/admin/main
 
 uploadprovision: buildprovision
-	aws s3 sync dist/console/ s3://linkai-infra/frontend/lambdas/console/
+	aws s3 sync dist/console/admin s3://linkai-infra/frontend/lambdas/console/admin/
 
 deployprovision: buildprovision uploadprovision
-	aws lambda update-function-code --force --s3-bucket linkai-infra --s3-key frontend/lambdas/console/provision_handler.zip --function-name dev-console-handler-provision
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/provision_handler.zip --function-name dev-console-handler-provision
 
 supportprovision:
 	docker build -t linkai_support_org_provision -f Dockerfile.support_org_provision .

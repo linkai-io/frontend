@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/clients/user"
@@ -109,7 +110,7 @@ func generatePolicy(org *am.Organization, user *am.User, accessToken *token.Acce
 	policy, err := policyContainer.GetPolicy(roleName)
 	if err != nil {
 		log.Error().Err(err).Str("OrgName", org.OrgName).Str("UserEmail", user.UserEmail).Str("RoleName", roleName).Msg("failed to lookup policy for role by name")
-		return returnUnauthorized()
+		return returnUnauthorized("policy failure")
 	}
 
 	if resource != "" {
@@ -131,8 +132,20 @@ func generatePolicy(org *am.Organization, user *am.User, accessToken *token.Acce
 	return authResponse, nil
 }
 
-func returnUnauthorized() (events.APIGatewayCustomAuthorizerResponse, error) {
-	return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Unauthorized")
+func returnUnauthorized(msg string) (events.APIGatewayCustomAuthorizerResponse, error) {
+	return events.APIGatewayCustomAuthorizerResponse{
+		PrincipalID: "error",
+		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
+			Version: "2012-10-17",
+			Statement: []events.IAMPolicyStatement{events.IAMPolicyStatement{
+				Effect:   "Deny",
+				Action:   []string{"*"},
+				Resource: []string{"*"},
+			},
+			},
+		},
+		Context: map[string]interface{}{"message": msg, "customErrorMessage": msg},
+	}, nil
 }
 
 func splitToken(token string) string {
@@ -152,31 +165,36 @@ func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerR
 
 	if token == "" {
 		log.Error().Msg("Bearer header missing from token")
-		return returnUnauthorized()
+		return returnUnauthorized("Bearer header missing from token")
 	}
 
 	unsafeToken, err := tokener.UnsafeExtractAccess(ctx, token)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract token details")
-		return returnUnauthorized()
+		return returnUnauthorized(err.Error())
 	}
 
 	_, org, err := orgClient.GetByAppClientID(ctx, createSystemContext(), unsafeToken.ClientID)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to lookup organization by client id")
-		return returnUnauthorized()
+		return returnUnauthorized("internal error")
 	}
 
 	accessToken, err := tokener.ValidateAccessToken(ctx, org, token)
 	if err != nil {
+		if vErr, ok := err.(*jwt.ValidationError); ok {
+			if vErr.Errors == jwt.ValidationErrorExpired {
+				return returnUnauthorized("token expired")
+			}
+		}
 		log.Error().Err(err).Str("OrgName", org.OrgName).Msg("failed to validate token for organization")
-		return returnUnauthorized()
+		return returnUnauthorized(err.Error())
 	}
 
 	_, user, err := userClient.GetWithOrgID(ctx, createSystemContext(), org.OrgID, accessToken.CognitoUserName)
 	if err != nil {
 		log.Error().Err(err).Str("OrgName", org.OrgName).Str("CognitoUserName", accessToken.CognitoUserName).Msg("failed to lookup user by org")
-		return returnUnauthorized()
+		return returnUnauthorized("internal organization error")
 	}
 
 	return generatePolicy(org, user, accessToken, event.MethodArn)
