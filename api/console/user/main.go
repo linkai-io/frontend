@@ -124,7 +124,7 @@ func UpdateUser(w http.ResponseWriter, req *http.Request) {
 		LastName:  user.LastName,
 		UserEmail: user.Email,
 	}
-
+	
 	_, _, err = userClient.Update(req.Context(), userContext, amUser, userContext.GetUserID())
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update user")

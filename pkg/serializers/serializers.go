@@ -6,6 +6,23 @@ import (
 	"github.com/linkai-io/am/am"
 )
 
+type ScanGroupForUser struct {
+	*am.ScanGroup
+}
+
+func (s *ScanGroupForUser) MarshalJSON() ([]byte, error) {
+	type Alias ScanGroupForUser
+	return json.Marshal(&struct {
+		OrgID              int    `json:"org_id,omitempty"`
+		CreatedByID        int    `json:"created_by_id,omitempty"`
+		ModifiedByID       int    `json:"modified_by_id,omitempty"`
+		OriginalInputS3URL string `json:"original_input_s3_url,omitempty"`
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	})
+}
+
 func UserForUsers(user *am.User) ([]byte, error) {
 	type Alias am.User
 	return json.Marshal(&struct {
@@ -21,6 +38,20 @@ func UserForUsers(user *am.User) ([]byte, error) {
 		Alias: (*Alias)(user),
 	})
 }
+
+func ScanGroupForUsers(group *am.ScanGroup) ([]byte, error) {
+	type Alias am.ScanGroup
+	return json.Marshal(&struct {
+		OrgID              int    `json:"org_id,omitempty"`
+		CreatedByID        int    `json:"created_by_id,omitempty"`
+		ModifiedByID       int    `json:"modified_by_id,omitempty"`
+		OriginalInputS3URL string `json:"original_input_s3_url,omitempty"`
+		*Alias
+	}{
+		Alias: (*Alias)(group),
+	})
+}
+
 func DeserializeUserForUsers(data []byte) (*am.User, error) {
 	user := &am.User{}
 	/*
