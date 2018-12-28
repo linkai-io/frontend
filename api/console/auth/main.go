@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/linkai-io/frontend/pkg/initializers"
+
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/linkai-io/am/am"
-	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -55,11 +56,7 @@ func init() {
 	}
 
 	log.Info().Int("org_id", systemOrgID).Int("user_id", systemUserID).Msg("auth handler configured with system ids")
-	orgClient = organization.New()
-	if err := orgClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
-
+	orgClient = initializers.OrgClient(lb)
 	log.Info().Str("load_balancer", lb).Msg("orgClient initialized with lb")
 }
 

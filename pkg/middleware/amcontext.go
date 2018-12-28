@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -23,24 +22,6 @@ func stringField(key string, properties map[string]interface{}) string {
 		return ""
 	}
 	return str
-}
-
-type ErrorResponse struct {
-	Status string `json:"status"`
-	Msg    string `json:"msg"`
-}
-
-func ReturnError(w http.ResponseWriter, msg string, code int) {
-	resp := &ErrorResponse{Status: "error", Msg: msg}
-	data, err := json.Marshal(resp)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to returnError due to marshal failure")
-		w.WriteHeader(500)
-		fmt.Fprint(w, "{\"status\":\"error\"}")
-		return
-	}
-	w.WriteHeader(code)
-	fmt.Fprint(w, string(data))
 }
 
 func ExtractUserContext(ctx context.Context) (am.UserContext, bool) {

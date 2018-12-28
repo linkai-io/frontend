@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/linkai-io/frontend/pkg/initializers"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/linkai-io/am/am"
-	"github.com/linkai-io/am/clients/organization"
-	"github.com/linkai-io/am/clients/user"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/policy"
 	"github.com/linkai-io/frontend/pkg/token"
@@ -65,16 +65,8 @@ func init() {
 		log.Fatal().Err(err).Msg("error reading system user id")
 	}
 
-	orgClient = organization.New()
-	if err := orgClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
-
-	userClient = user.New()
-	if err := userClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing user client")
-	}
-
+	orgClient = initializers.OrgClient(lb)
+	userClient = initializers.UserClient(lb)
 	tokener = awstoken.New(env, region)
 }
 

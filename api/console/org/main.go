@@ -8,12 +8,13 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/linkai-io/frontend/pkg/initializers"
+
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/serializers"
 
-	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -33,10 +34,7 @@ func init() {
 		log.Fatal().Err(err).Msg("error reading load balancer data")
 	}
 
-	orgClient = organization.New()
-	if err := orgClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
+	orgClient = initializers.OrgClient(lb)
 }
 
 func GetByName(w http.ResponseWriter, req *http.Request) {
@@ -84,7 +82,7 @@ func GetByID(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if data, err = serializeOrgForUsers(org); err != nil {
+	if data, err = serializers.OrgForUsers(org); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
@@ -109,7 +107,7 @@ func GetByCID(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if data, err = serializeOrgForUsers(org); err != nil {
+	if data, err = serializers.OrgForUsers(org); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}

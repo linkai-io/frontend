@@ -14,7 +14,6 @@ import (
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
-	"github.com/linkai-io/frontend/pkg/provision"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	validator "gopkg.in/go-playground/validator.v9"
@@ -41,47 +40,8 @@ func init() {
 		log.Fatal().Err(err).Msg("error reading load balancer data")
 	}
 
-	userClient = initializers.UserClient(sec)
-	orgClient = initializers.OrgClient(sec)
-}
-
-func CreateOrg(w http.ResponseWriter, req *http.Request) {
-	var err error
-	var data []byte
-	orgDetails := &provision.OrgDetails{}
-
-	userContext, ok := middleware.ExtractUserContext(req.Context())
-	if !ok {
-		middleware.ReturnError(w, "missing user context", 401)
-		return
-	}
-
-	if data, err = ioutil.ReadAll(req.Body); err != nil {
-		log.Error().Err(err).Msg("read body error")
-		middleware.ReturnError(w, "error reading organization", 500)
-		return
-	}
-	defer req.Body.Close()
-
-	if err := json.Unmarshal(data, orgDetails); err != nil {
-		log.Error().Err(err).Msg("marshal body error")
-		middleware.ReturnError(w, "error reading organization", 500)
-		return
-	}
-
-	org, err := orgDetails.ToOrganization()
-	if err != nil {
-		log.Error().Err(err).Msg("validation failed for provision data")
-		middleware.ReturnError(w, "error reading organization", 500)
-		return
-	}
-
-	resp := make(map[string]string, 0)
-	resp["status"] = "ok"
-
-	data, _ = json.Marshal(resp)
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(data))
+	userClient = initializers.UserClient(lb)
+	orgClient = initializers.OrgClient(lb)
 }
 
 func UpdateUser(w http.ResponseWriter, req *http.Request) {
@@ -124,7 +84,7 @@ func UpdateUser(w http.ResponseWriter, req *http.Request) {
 		LastName:  user.LastName,
 		UserEmail: user.Email,
 	}
-	
+
 	_, _, err = userClient.Update(req.Context(), userContext, amUser, userContext.GetUserID())
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update user")
@@ -180,7 +140,7 @@ func main() {
 	r.Use(middleware.UserCtx)
 
 	r.Route("/user", func(r chi.Router) {
-		r.Get("/", GetUser)
+		//r.Get("/", GetUser)
 		r.Patch("/details", UpdateUser)
 		r.Patch("/password", ChangePassword)
 

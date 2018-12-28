@@ -10,7 +10,6 @@ import (
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
@@ -43,13 +42,8 @@ func init() {
 		log.Fatal().Err(err).Msg("error reading load balancer data")
 	}
 
-	orgClient = organization.New()
-	if err := orgClient.Init([]byte(lb)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
-	}
-
-	orgClient := initializers.OrgClient(sec)
-	userClient := initializers.UserClient(sec)
+	orgClient := initializers.OrgClient(lb)
+	userClient := initializers.UserClient(lb)
 
 	provisioner = provision.NewOrgProvisioner(env, region, userClient, orgClient)
 }
