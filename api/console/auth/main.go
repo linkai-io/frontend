@@ -1,17 +1,21 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 
+	"github.com/apex/gateway"
+	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/initializers"
+	"github.com/linkai-io/frontend/pkg/middleware"
 
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/rs/zerolog"
@@ -27,12 +31,6 @@ var (
 	orgClient         am.OrganizationService
 	systemUserContext am.UserContext
 )
-
-type AuthResponse struct {
-	Results map[string]string `json:"results,omitempty"`
-	Status  string            `json:"status"`
-	Msg     string            `json:"msg,omitempty"`
-}
 
 func init() {
 	zerolog.TimeFieldFormat = ""
@@ -57,7 +55,6 @@ func init() {
 
 	log.Info().Int("org_id", systemOrgID).Int("user_id", systemUserID).Msg("auth handler configured with system ids")
 	orgClient = initializers.OrgClient(lb)
-	log.Info().Str("load_balancer", lb).Msg("orgClient initialized with lb")
 }
 
 func getSystemContext(requestID, ipAddress string) am.UserContext {
@@ -69,156 +66,242 @@ func getSystemContext(requestID, ipAddress string) am.UserContext {
 	}
 }
 
-func returnError(msg string, code int) events.APIGatewayProxyResponse {
-	resp := &AuthResponse{Status: "error", Msg: msg, Results: make(map[string]string, 0)}
-	data, err := json.Marshal(resp)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to returnError due to marshal failure")
-		return events.APIGatewayProxyResponse{Body: "{\"status\":\"error\"}", StatusCode: 500}
+func getAuthenticator(r *http.Request) (authz.Authenticator, error) {
+	requestContext, ok := gateway.RequestContext(r.Context())
+	if !ok {
+		return nil, errors.New("missing request context")
 	}
-	return events.APIGatewayProxyResponse{Body: string(data), StatusCode: code}
-}
 
-func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	route := request.RequestContext.HTTPMethod + request.Path
-
-	systemUserContext := getSystemContext(request.RequestContext.RequestID, request.RequestContext.Identity.SourceIP)
+	systemUserContext := getSystemContext(requestContext.RequestID, requestContext.Identity.SourceIP)
 	authenticator := awsauthz.New(env, region, orgClient, systemUserContext)
 	if err := authenticator.Init(nil); err != nil {
-		return returnError("internal authenticator error", 500), nil
+		return nil, errors.New("internal authenticator error")
 	}
 
-	switch route {
-	case "POST/auth/refresh":
-		return handleRefresh(ctx, authenticator, request)
-	case "POST/auth/login":
-		return handleLogin(ctx, authenticator, request)
-	case "POST/auth/forgot":
-		return handleForgot(ctx, authenticator, request)
-	case "POST/auth/forgot_confirm":
-		return handleForgotConfirm(ctx, authenticator, request)
-	case "POST/auth/changepwd":
-		return handleChangePwd(ctx, authenticator, request)
-	}
-
-	return returnError("not implemented", 500), nil
+	return authenticator, nil
 }
 
-func handleRefresh(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// Refresh user access tokens
+func Refresh(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	authenticator, err := getAuthenticator(req)
+	if err != nil {
+		log.Error().Err(err).Msg("authenticator init failure")
+		middleware.ReturnError(w, "internal authenticator failure", 500)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading refresh data", 500)
+		return
+	}
+	defer req.Body.Close()
+
 	tokenDetails := &authz.TokenDetails{}
-	if err := json.Unmarshal([]byte(request.Body), tokenDetails); err != nil {
-		return returnError("unmarshal failed", 500), nil
+	if err := json.Unmarshal(data, tokenDetails); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading refresh data", 500)
+		return
 	}
 
-	results, err := authenticator.Refresh(ctx, tokenDetails)
+	results, err := authenticator.Refresh(req.Context(), tokenDetails)
 	if err != nil {
-		return returnError("login failed", 403), nil
+		middleware.ReturnError(w, "refresh failed", 403)
+		return
 	}
 
-	authResponse := &AuthResponse{Status: "ok", Results: results}
-	data, err := json.Marshal(authResponse)
+	respData, err := json.Marshal(results)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), nil
+		middleware.ReturnError(w, "marshal auth response failed", 500)
+		return
 	}
 
-	return events.APIGatewayProxyResponse{
-		Body:       string(data),
-		StatusCode: 200,
-	}, err
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(respData))
 }
 
-func handleLogin(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// Login to the application, returning access/refresh tokens
+func Login(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	authenticator, err := getAuthenticator(req)
+	if err != nil {
+		log.Error().Err(err).Msg("authenticator init failure")
+		middleware.ReturnError(w, "internal authenticator failure", 500)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading login data", 500)
+		return
+	}
+	defer req.Body.Close()
+
 	loginDetails := &authz.LoginDetails{}
-	if err := json.Unmarshal([]byte(request.Body), loginDetails); err != nil {
-		return returnError("unmarshal failed", 500), nil
+	if err := json.Unmarshal(data, loginDetails); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading login data", 500)
+		return
 	}
 
-	results, err := authenticator.Login(ctx, loginDetails)
+	results, err := authenticator.Login(req.Context(), loginDetails)
 	if err != nil {
-		return returnError("login failed", 403), nil
+		log.Error().Err(err).Msg("login failed")
+		middleware.ReturnError(w, "login failed", 403)
+		return
 	}
 
-	authResponse := &AuthResponse{Status: "ok", Results: results}
-	data, err := json.Marshal(authResponse)
+	respData, err := json.Marshal(results)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), nil
+		middleware.ReturnError(w, "marshal auth response failed", 500)
+		return
 	}
 
-	return events.APIGatewayProxyResponse{
-		Body:       string(data),
-		StatusCode: 200,
-	}, err
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(respData))
 }
 
-func handleChangePwd(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// Forgot password flow sending email to user with verification code
+func Forgot(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	authenticator, err := getAuthenticator(req)
+	if err != nil {
+		log.Error().Err(err).Msg("authenticator init failure")
+		middleware.ReturnError(w, "internal authenticator failure", 500)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading refresh data", 500)
+		return
+	}
+	defer req.Body.Close()
+
+	forgotDetails := &authz.ResetDetails{}
+	if err := json.Unmarshal(data, forgotDetails); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading forgot password data", 500)
+		return
+	}
+
+	if err := authenticator.Forgot(req.Context(), forgotDetails); err != nil {
+		log.Error().Err(err).Msg("forgot password failed")
+		middleware.ReturnError(w, "forgot password failed", 403)
+		return
+	}
+
+	resp := make(map[string]string, 0)
+	resp["status"] = "ok"
+
+	respData, _ := json.Marshal(resp)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(respData))
+}
+
+// ForgotConfirm to allow user who successfully retrieved verification code to set a
+// new password
+func ForgotConfirm(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	authenticator, err := getAuthenticator(req)
+	if err != nil {
+		log.Error().Err(err).Msg("authenticator init failure")
+		middleware.ReturnError(w, "internal authenticator failure", 500)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading refresh data", 500)
+		return
+	}
+	defer req.Body.Close()
+
+	resetDetails := &authz.ResetDetails{}
+	if err := json.Unmarshal(data, resetDetails); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading forgot_confirm data", 500)
+		return
+	}
+
+	if err := authenticator.Reset(req.Context(), resetDetails); err != nil {
+		log.Error().Err(err).Msg("forgot password confirm failed")
+		middleware.ReturnError(w, "forgot password confirm failed", 403)
+		return
+	}
+
+	resp := make(map[string]string, 0)
+	resp["status"] = "ok"
+
+	respData, _ := json.Marshal(resp)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(respData))
+}
+
+// ChangePwd allows a user to change their password provided the current password works.
+func ChangePwd(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	authenticator, err := getAuthenticator(req)
+	if err != nil {
+		log.Error().Err(err).Msg("authenticator init failure")
+		middleware.ReturnError(w, "internal authenticator failure", 500)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading changepwd data", 500)
+		return
+	}
+	defer req.Body.Close()
+
 	loginDetails := &authz.LoginDetails{}
-	if err := json.Unmarshal([]byte(request.Body), loginDetails); err != nil {
-		return returnError("unmarshal failed", 500), nil
+	if err := json.Unmarshal(data, loginDetails); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading changepwd data", 500)
+		return
 	}
 
-	results, err := authenticator.SetNewPassword(ctx, loginDetails)
+	results, err := authenticator.SetNewPassword(req.Context(), loginDetails)
 	if err != nil {
-		return returnError("login failed", 403), nil
+		middleware.ReturnError(w, "set new password failed", 403)
+		return
 	}
 
-	authResponse := &AuthResponse{Status: "ok", Results: results}
-	data, err := json.Marshal(authResponse)
+	respData, err := json.Marshal(results)
 	if err != nil {
-		return returnError("marshal auth response failed", 500), err
+		middleware.ReturnError(w, "marshal auth response failed", 500)
+		return
 	}
 
-	return events.APIGatewayProxyResponse{
-		Body:       string(data),
-		StatusCode: 200,
-	}, nil
-}
-
-func handleForgot(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	resetDetails := &authz.ResetDetails{}
-	if err := json.Unmarshal([]byte(request.Body), resetDetails); err != nil {
-		return returnError("unmarshal failed", 500), nil
-	}
-
-	err := authenticator.Forgot(ctx, resetDetails)
-	if err != nil {
-		return returnError("forgot password sequence failed", 400), nil
-	}
-
-	authResponse := &AuthResponse{Status: "ok"}
-	data, err := json.Marshal(authResponse)
-	if err != nil {
-		return returnError("marshal auth response failed", 500), nil
-	}
-
-	return events.APIGatewayProxyResponse{
-		Body:       string(data),
-		StatusCode: 200,
-	}, err
-}
-
-func handleForgotConfirm(ctx context.Context, authenticator authz.Authenticator, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	resetDetails := &authz.ResetDetails{}
-	if err := json.Unmarshal([]byte(request.Body), resetDetails); err != nil {
-		return returnError("unmarshal failed", 500), nil
-	}
-
-	if err := authenticator.Reset(ctx, resetDetails); err != nil {
-		return returnError("reset failed", 403), nil
-	}
-
-	authResponse := &AuthResponse{Status: "ok"}
-	data, err := json.Marshal(authResponse)
-	if err != nil {
-		return returnError("marshal auth response failed", 500), nil
-	}
-
-	return events.APIGatewayProxyResponse{
-		Body:       string(data),
-		StatusCode: 200,
-	}, nil
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(respData))
 }
 
 func main() {
-	lambda.Start(Handler)
+	r := chi.NewRouter()
+
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/refresh", Refresh)
+		r.Post("/login", Login)
+		r.Post("/forgot", Forgot)
+		r.Post("/forgot_confirm", ForgotConfirm)
+		r.Post("/changepwd", ChangePwd)
+	})
+
+	err := gateway.ListenAndServe(":3000", r)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to serve")
+	}
 }
