@@ -10,7 +10,6 @@ import (
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/provision"
@@ -31,15 +30,10 @@ func init() {
 	log.Logger = log.With().Str("lambda", "Provisioner").Logger()
 	env := os.Getenv("APP_ENV")
 	region := os.Getenv("APP_REGION")
+	lb := os.Getenv("APP_LOADBALANCER")
 	roles, err = orgRoles()
 	if err != nil {
 		log.Fatal().Err(err).Msg("error initializing roles")
-	}
-
-	sec := secrets.NewSecretsCache(env, region)
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
 	}
 
 	orgClient := initializers.OrgClient(lb)
@@ -64,6 +58,8 @@ func CreateOrg(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 	orgDetails := &provision.OrgDetails{}
+
+	log.Info().Msg("create org called")
 
 	userContext, ok := middleware.ExtractUserContext(req.Context())
 	if !ok {
@@ -114,14 +110,13 @@ func CreateUser(w http.ResponseWriter, req *http.Request) {
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-
-	r.Route("/provision", func(r chi.Router) {
-		r.Post("/org/{name}", CreateOrg)
-		r.Patch("/org/{name}", UpdateOrg)
-		r.Post("/user/{name}", CreateUser)
-
+	r.Route("/admin", func(admin chi.Router) {
+		admin.Route("/provision", func(prov chi.Router) {
+			prov.Post("/org/{name}", CreateOrg)
+			prov.Patch("/org/{name}", UpdateOrg)
+			prov.Post("/user/{name}", CreateUser)
+		})
 	})
-
 	err := gateway.ListenAndServe(":3000", r)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve")

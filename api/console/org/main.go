@@ -15,7 +15,6 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/serializers"
 
-	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -28,12 +27,7 @@ func init() {
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "Org").Logger()
 
-	sec := secrets.NewSecretsCache(os.Getenv("APP_ENV"), os.Getenv("APP_REGION"))
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
+	lb := os.Getenv("APP_LOADBALANCER")
 	orgClient = initializers.OrgClient(lb)
 }
 

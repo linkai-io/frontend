@@ -33,7 +33,7 @@ func UserCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		log.Info().Msg("retriving user context")
+		log.Info().Msg("retrieving user context")
 		requestDump, err := httputil.DumpRequest(r, true)
 		if err != nil {
 			fmt.Println(err)
@@ -86,7 +86,7 @@ func UserCtx(next http.Handler) http.Handler {
 		userContext.TraceID = requestContext.RequestID
 		userContext.IPAddress = requestContext.Identity.SourceIP
 		ctx := context.WithValue(r.Context(), userCtxKey, userContext)
-		log.Info().Msg("user context created")
+		log.Info().Msg("user context created, calling next")
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

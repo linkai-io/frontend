@@ -19,8 +19,6 @@ buildprovision:
 uploadprovision: buildprovision
 	aws s3 sync dist/console/admin s3://linkai-infra/frontend/lambdas/console/admin/
 
-deployprovision: buildprovision uploadprovision
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/provision_handler.zip --function-name dev-console-handler-provision
 
 supportprovision:
 	docker build -t linkai_support_org_provision -f Dockerfile.support_org_provision .
@@ -42,3 +40,6 @@ deployauthorizer: buildauthorizer uploadauthorizer
 
 deployauth: buildauth upload
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/auth_handler.zip --function-name dev-console-handler-auth
+
+deployprovision: buildprovision uploadprovision
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/admin/provision_handler.zip --function-name dev-console-handler-provision

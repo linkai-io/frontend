@@ -21,9 +21,9 @@ import (
 
 const (
 	URLFmt            = "https://%sconsole.linkai.io/"
-	ResetURLFmt       = "https://%sconsole.linkai.io/auth/reset"
+	ResetURLFmt       = "https://dev.console.linkai.io/login/confirm.html"
 	LogoutURLFmt      = "https://%sconsole.linkai.io/logout"
-	LoginURLFmt       = "https://%sconsole.linkai.io/dashboard/"
+	LoginURLFmt       = "https://%sconsole.linkai.io/login/"
 	WelcomeTitleMsg   = `Welcome to linkai.io's hakken web management system`
 	WelcomeSubjectMsg = `Hello %s,<br>
 Your organization has been successfully created, please login to the hakken web management system at: %s<br>
@@ -78,7 +78,7 @@ func (p *OrgProvisioner) createURLS() {
 	var env string
 
 	if p.env != "prod" {
-		env = p.env + "-"
+		env = p.env + "."
 	}
 	p.serviceURL = fmt.Sprintf(URLFmt, env)
 	p.loginURL = fmt.Sprintf(LoginURLFmt, env)
@@ -132,11 +132,6 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 		UserID: supportOrg.OrgID, // TODO: This assumes orgID == userID (which it almost always does) but should get from UserService
 	}
 
-	if err := p.getUserPoolJWK(ctx, supportOrg); err != nil {
-		p.cleanUp(ctx, supportOrg)
-		return "", "", err
-	}
-
 	// adds all user pool/identity pool related information to the support organization.
 	_, err = p.orgClient.Update(ctx, supportUserContext, supportOrg)
 	if err != nil {
@@ -162,24 +157,23 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 	return supportOrg.UserPoolID, supportOrg.IdentityPoolID, nil
 }
 
-func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, supportOrg *am.Organization) error {
-	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", p.region, supportOrg.UserPoolID)
+func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, orgData *am.Organization) (string, error) {
+	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", p.region, orgData.UserPoolID)
 	myClient := &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(jwksURL)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer r.Body.Close()
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	supportOrg.UserPoolJWK = string(data)
-	if supportOrg.UserPoolJWK == "" {
-		return errors.New("jwk for user pool was empty")
+	if string(data) == "" {
+		return "", errors.New("jwk for user pool was empty")
 	}
-	return nil
+	return string(data), nil
 }
 
 // Add an organization to hakken provided the organization does not already exist.
@@ -191,11 +185,21 @@ func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, or
 	}
 
 	// TODO: ugh i know this is terrible
-	if !strings.Contains(err.Error(), "no rows in result set") {
+	if !strings.Contains(err.Error(), "no results") {
 		return "", err
 	}
+	userCID, err := p.add(ctx, orgData, roles, "")
+	if err != nil {
+		return "", errors.Wrap(err, "failed to create organization")
+	}
+	log.Info().Msgf("creating org %#v", orgData)
 
-	return p.add(ctx, orgData, roles, "")
+	_, _, _, _, err = p.orgClient.Create(ctx, userContext, orgData, userCID)
+	if err != nil {
+		p.cleanUp(ctx, orgData)
+		return "", err
+	}
+	return userCID, nil
 }
 
 // This method provisions everything an organization needs to get running:
@@ -216,6 +220,13 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 	}
 	log.Info().Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("user pool successfully created")
 
+	userPoolJWK, err := p.getUserPoolJWK(ctx, orgData)
+	if err != nil {
+		p.cleanUp(ctx, orgData)
+		return "", err
+	}
+	orgData.UserPoolJWK = userPoolJWK
+
 	if err := p.createPoolGroups(ctx, orgData, roles); err != nil {
 		p.cleanUp(ctx, orgData)
 		return "", err
@@ -226,6 +237,8 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 		p.cleanUp(ctx, orgData)
 		return "", err
 	}
+	orgData.UserPoolAppClientSecret = "empty" // not currently used, but can't be empty
+
 	log.Info().Str("orgname", orgData.OrgName).Str("user_app_client_id", orgData.UserPoolAppClientID).Msg("user pool app client successfully created")
 
 	// create identity pool and set auth/unauth roles
@@ -262,11 +275,11 @@ func (p *OrgProvisioner) createUserPool(ctx context.Context, orgData *am.Organiz
 			UnusedAccountValidityDays: aws.Int64(5),
 			InviteMessageTemplate: &cip.MessageTemplateType{
 				EmailSubject: aws.String(WelcomeTitleMsg),
-				EmailMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.serviceURL, orgData.OrgName)),
+				EmailMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.loginURL, orgData.OrgName)),
 			},
 		},
 		EmailVerificationSubject: aws.String(WelcomeTitleMsg),
-		EmailVerificationMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.serviceURL, orgData.OrgName)),
+		EmailVerificationMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.loginURL, orgData.OrgName)),
 		PoolName:                 poolName,
 		UsernameAttributes:       []cip.UsernameAttributeType{"email"},
 		MfaConfiguration:         cip.UserPoolMfaTypeOff,

@@ -38,6 +38,7 @@ func init() {
 
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
+	lb := os.Getenv("APP_LOADBALANCER")
 
 	roleMap, err = orgRoles()
 	if err != nil {
@@ -52,10 +53,6 @@ func init() {
 	log.Info().Str("env", env).Str("region", region).Int("num_roles", len(roleMap)).Msg("lambda authorizer initializing")
 
 	sec := secrets.NewSecretsCache(env, region)
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
 
 	if systemOrgID, err = sec.SystemOrgID(); err != nil {
 		log.Fatal().Err(err).Msg("error reading system org id")

@@ -23,7 +23,7 @@ func OrgClient(loadBalancerAddr string) am.OrganizationService {
 func UserClient(loadBalancerAddr string) am.UserService {
 	userClient := user.New()
 	if err := userClient.Init([]byte(loadBalancerAddr)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
+		log.Fatal().Err(err).Msg("error initializing user client")
 	}
 	log.Info().Str("load_balancer", loadBalancerAddr).Msg("userClient initialized with lb")
 	return userClient
@@ -33,7 +33,7 @@ func UserClient(loadBalancerAddr string) am.UserService {
 func ScanGroupClient(loadBalancerAddr string) am.ScanGroupService {
 	scanGroupClient := scangroup.New()
 	if err := scanGroupClient.Init([]byte(loadBalancerAddr)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
+		log.Fatal().Err(err).Msg("error initializing scangroup client")
 	}
 	log.Info().Str("load_balancer", loadBalancerAddr).Msg("scanGroupClient initialized with lb")
 	return scanGroupClient
@@ -43,7 +43,7 @@ func ScanGroupClient(loadBalancerAddr string) am.ScanGroupService {
 func AddressClient(loadBalancerAddr string) am.AddressService {
 	addrClient := address.New()
 	if err := addrClient.Init([]byte(loadBalancerAddr)); err != nil {
-		log.Fatal().Err(err).Msg("error initializing organization client")
+		log.Fatal().Err(err).Msg("error initializing address client")
 	}
 	log.Info().Str("load_balancer", loadBalancerAddr).Msg("addrClient initialized with lb")
 	return addrClient
