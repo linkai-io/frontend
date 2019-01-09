@@ -19,12 +19,11 @@ buildprovision:
 uploadprovision: buildprovision
 	aws s3 sync dist/console/admin s3://linkai-infra/frontend/lambdas/console/admin/
 
-
 supportprovision:
-	docker build -t linkai_support_org_provision -f Dockerfile.support_org_provision .
+	docker build -t support_org_provision -f Dockerfile.support_org_provision .
 
-pushsupportprovision: provision
-	docker tag linkai_support_org_provision:latest 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest && docker push 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest
+pushsupportprovision: supportprovision
+	docker tag support_org_provision:latest 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest && docker push 447064213022.dkr.ecr.us-east-1.amazonaws.com/support_org_provision:latest
 
 upload:
 	aws s3 sync dist/console/ s3://linkai-infra/frontend/lambdas/console/

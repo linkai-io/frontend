@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
@@ -17,9 +18,11 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 )
 
 var orgClient am.OrganizationService
+var userClient am.UserService
 var provisioner *provision.OrgProvisioner
 var roles map[string]string
 
@@ -30,14 +33,16 @@ func init() {
 	log.Logger = log.With().Str("lambda", "Provisioner").Logger()
 	env := os.Getenv("APP_ENV")
 	region := os.Getenv("APP_REGION")
-	lb := os.Getenv("APP_LOADBALANCER")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
+
 	roles, err = orgRoles()
 	if err != nil {
 		log.Fatal().Err(err).Msg("error initializing roles")
 	}
 
-	orgClient := initializers.OrgClient(lb)
-	userClient := initializers.UserClient(lb)
+	orgClient = initializers.OrgClient()
+	userClient = initializers.UserClient()
 
 	provisioner = provision.NewOrgProvisioner(env, region, userClient, orgClient)
 }
@@ -101,6 +106,50 @@ func CreateOrg(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(data))
 }
 
+func DeleteOrg(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	log.Info().Msg("delete org called")
+
+	userContext, ok := middleware.ExtractUserContext(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	name := chi.URLParam(req, "name")
+	if name == "" || name == "linkai-support" || name == "linkai-system" {
+		middleware.ReturnError(w, "invalid name supplied", 401)
+		return
+	}
+
+	oid, org, err := orgClient.Get(req.Context(), userContext, name)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get org by name")
+		middleware.ReturnError(w, "internal org lookup failure", 500)
+		return
+	}
+
+	if _, err := orgClient.Delete(req.Context(), userContext, oid); err != nil {
+		log.Error().Err(err).Msg("failed to delete organization")
+		middleware.ReturnError(w, "failed to delete organization, inspect the logs", 500)
+		return
+	}
+
+	if err := provisioner.Delete(req.Context(), org); err != nil {
+		middleware.ReturnError(w, "failed to delete organization user and identity pools", 500)
+		return
+	}
+
+	resp := make(map[string]string, 0)
+	resp["status"] = "ok"
+
+	data, _ = json.Marshal(resp)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
 func UpdateOrg(w http.ResponseWriter, req *http.Request) {
 
 }
@@ -113,6 +162,7 @@ func main() {
 	r.Route("/admin", func(admin chi.Router) {
 		admin.Route("/provision", func(prov chi.Router) {
 			prov.Post("/org/{name}", CreateOrg)
+			prov.Delete("/org/{name}", DeleteOrg)
 			prov.Patch("/org/{name}", UpdateOrg)
 			prov.Post("/user/{name}", CreateUser)
 		})

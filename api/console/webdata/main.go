@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/linkai-io/am/clients/webdata"
-	"github.com/linkai-io/am/pkg/secrets"
+	"github.com/linkai-io/am/pkg/lb/consul"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -21,15 +22,10 @@ var webClient am.WebDataService
 func init() {
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "Address").Logger()
-
-	sec := secrets.NewSecretsCache(os.Getenv("APP_ENV"), os.Getenv("APP_REGION"))
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 	webClient = webdata.New()
-	if err := webClient.Init([]byte(lb)); err != nil {
+	if err := webClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing webdata client")
 	}
 }

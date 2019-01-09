@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
@@ -17,6 +18,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -33,18 +35,18 @@ var (
 )
 
 func init() {
+	var err error
+
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "AuthAPI").Logger()
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
+
 	log.Info().Str("env", env).Str("region", region).Msg("authapi initializing")
 
 	sec := secrets.NewSecretsCache(env, region)
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
 	if systemOrgID, err = sec.SystemOrgID(); err != nil {
 		log.Fatal().Err(err).Msg("error reading system org id")
 	}
@@ -54,7 +56,7 @@ func init() {
 	}
 
 	log.Info().Int("org_id", systemOrgID).Int("user_id", systemUserID).Msg("auth handler configured with system ids")
-	orgClient = initializers.OrgClient(lb)
+	orgClient = initializers.OrgClient()
 }
 
 func getSystemContext(requestID, ipAddress string) am.UserContext {
@@ -152,6 +154,10 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	results, err := authenticator.Login(req.Context(), loginDetails)
 	if err != nil {
 		log.Error().Err(err).Msg("login failed")
+		if req.Context().Err() != nil {
+			middleware.ReturnError(w, "internal server error", 500)
+			return
+		}
 		middleware.ReturnError(w, "login failed", 403)
 		return
 	}
@@ -191,7 +197,7 @@ func Forgot(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "error reading forgot password data", 500)
 		return
 	}
-
+	log.Info().Msg("calling authenticator.Forgot")
 	if err := authenticator.Forgot(req.Context(), forgotDetails); err != nil {
 		log.Error().Err(err).Msg("forgot password failed")
 		middleware.ReturnError(w, "forgot password failed", 403)
@@ -293,6 +299,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Route("/auth", func(r chi.Router) {
+		r.Get("/health", middleware.Health)
 		r.Post("/refresh", Refresh)
 		r.Post("/login", Login)
 		r.Post("/forgot", Forgot)

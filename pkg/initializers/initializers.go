@@ -1,6 +1,8 @@
 package initializers
 
 import (
+	"time"
+
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/clients/address"
 	"github.com/linkai-io/am/clients/organization"
@@ -10,41 +12,41 @@ import (
 )
 
 // OrgClient return a connection to the organization service
-func OrgClient(loadBalancerAddr string) am.OrganizationService {
+func OrgClient() am.OrganizationService {
 	orgClient := organization.New()
-	if err := orgClient.Init([]byte(loadBalancerAddr)); err != nil {
+	orgClient.SetTimeout(time.Second * 15)
+	if err := orgClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing organization client")
 	}
-	log.Info().Str("load_balancer", loadBalancerAddr).Msg("orgClient initialized with lb")
 	return orgClient
 }
 
 // UserClient return a connection to the user service
-func UserClient(loadBalancerAddr string) am.UserService {
+func UserClient() am.UserService {
 	userClient := user.New()
-	if err := userClient.Init([]byte(loadBalancerAddr)); err != nil {
+	userClient.SetTimeout(time.Second * 15)
+	if err := userClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing user client")
 	}
-	log.Info().Str("load_balancer", loadBalancerAddr).Msg("userClient initialized with lb")
 	return userClient
 }
 
 // ScanGroupClient return a connection to the scan group service
-func ScanGroupClient(loadBalancerAddr string) am.ScanGroupService {
+func ScanGroupClient() am.ScanGroupService {
 	scanGroupClient := scangroup.New()
-	if err := scanGroupClient.Init([]byte(loadBalancerAddr)); err != nil {
+	scanGroupClient.SetTimeout(time.Second * 15)
+	if err := scanGroupClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing scangroup client")
 	}
-	log.Info().Str("load_balancer", loadBalancerAddr).Msg("scanGroupClient initialized with lb")
 	return scanGroupClient
 }
 
 // AddressClient return a connection to the scan group service
-func AddressClient(loadBalancerAddr string) am.AddressService {
+func AddressClient() am.AddressService {
 	addrClient := address.New()
-	if err := addrClient.Init([]byte(loadBalancerAddr)); err != nil {
+	addrClient.SetTimeout(time.Second * 15)
+	if err := addrClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing address client")
 	}
-	log.Info().Str("load_balancer", loadBalancerAddr).Msg("addrClient initialized with lb")
 	return addrClient
 }

@@ -147,7 +147,7 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.Log
 		return response, errors.New("failed to set new password")
 	}
 
-	return a.successMap(out.AuthenticationResult)
+	return a.successMap(challenge.AuthenticationResult)
 }
 
 // Refresh token flow when id token has expired and needs to be refreshed
@@ -198,7 +198,7 @@ func (a *AWSAuthenticate) Forgot(ctx context.Context, details *authz.ResetDetail
 	if err := a.validate.Struct(details); err != nil {
 		return err
 	}
-
+	log.Info().Msg("calling getOrgData in forgot")
 	org, err := a.getOrgData(ctx, details.OrgName)
 	if err != nil {
 		return err

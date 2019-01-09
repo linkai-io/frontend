@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/bsm/grpclb"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/convert"
 	"github.com/linkai-io/am/pkg/retrier"
@@ -13,10 +12,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
 )
 
 type Client struct {
 	client         service.ScanGroupClient
+	conn           *grpc.ClientConn
 	defaultTimeout time.Duration
 }
 
@@ -24,16 +25,17 @@ func New() *Client {
 	return &Client{defaultTimeout: (time.Second * 10)}
 }
 
-func (c *Client) Init(config []byte) error {
-	balancer := grpc.RoundRobin(grpclb.NewResolver(&grpclb.Options{
-		Address: string(config),
-	}))
+func (c *Client) SetTimeout(timeout time.Duration) {
+	c.defaultTimeout = timeout
+}
 
-	conn, err := grpc.Dial(am.ScanGroupServiceKey, grpc.WithInsecure(), grpc.WithBalancer(balancer))
+func (c *Client) Init(config []byte) error {
+	conn, err := grpc.DialContext(context.Background(), "srv://consul/"+am.ScanGroupServiceKey, grpc.WithInsecure(), grpc.WithBalancerName(roundrobin.Name))
 	if err != nil {
 		return err
 	}
 
+	c.conn = conn
 	c.client = service.NewScanGroupClient(conn)
 	return nil
 }

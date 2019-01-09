@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/initializers"
@@ -19,6 +19,7 @@ import (
 	validator "gopkg.in/go-playground/validator.v9"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 )
 
 var userClient am.UserService
@@ -27,21 +28,15 @@ var env string
 var region string
 
 func init() {
-	var err error
-
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "User").Logger()
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
-	sec := secrets.NewSecretsCache(env, region)
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
-
-	userClient = initializers.UserClient(lb)
-	orgClient = initializers.OrgClient(lb)
+	userClient = initializers.UserClient()
+	orgClient = initializers.OrgClient()
 }
 
 func UpdateUser(w http.ResponseWriter, req *http.Request) {

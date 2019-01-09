@@ -12,12 +12,12 @@ import (
 
 	"github.com/linkai-io/am/pkg/convert"
 	"github.com/linkai-io/am/pkg/inputlist"
+	"github.com/linkai-io/am/pkg/lb/consul"
 
 	"github.com/linkai-io/frontend/pkg/initializers"
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -32,14 +32,11 @@ func init() {
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "Address").Logger()
 
-	sec := secrets.NewSecretsCache(os.Getenv("APP_ENV"), os.Getenv("APP_REGION"))
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error reading load balancer data")
-	}
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
-	scanGroupClient = initializers.ScanGroupClient(lb)
-	addrClient = initializers.AddressClient(lb)
+	scanGroupClient = initializers.ScanGroupClient()
+	addrClient = initializers.AddressClient()
 }
 
 type addressResponse struct {
@@ -50,7 +47,6 @@ type addressResponse struct {
 
 func GetAddresses(w http.ResponseWriter, req *http.Request) {
 	var err error
-	var data []byte
 
 	userContext, ok := middleware.ExtractUserContext(req.Context())
 	if !ok {
@@ -77,6 +73,7 @@ func GetAddresses(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "failed to get addresses: "+err.Error(), 500)
 		return
 	}
+	log.Info().Msgf("%d %v", oid, addrs)
 
 }
 

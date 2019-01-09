@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 	"github.com/linkai-io/am/pkg/secrets"
+	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/provision"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -27,6 +29,8 @@ func init() {
 	log.Logger = log.With().Str("lambda", "Provisioner").Logger()
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 }
 
 func create(ctx context.Context, provisioner *provision.OrgProvisioner, orgData *am.Organization, roles map[string]string, password string) error {
@@ -118,8 +122,8 @@ func main() {
 		roles[role] = v
 	}
 
-	orgClient := initializers.OrgClient(sec)
-	userClient := initializers.UserClient(sec)
+	orgClient := initializers.OrgClient()
+	userClient := initializers.UserClient()
 
 	provisioner := provision.NewOrgProvisioner(env, region, userClient, orgClient)
 

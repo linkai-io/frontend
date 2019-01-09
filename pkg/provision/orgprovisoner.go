@@ -21,7 +21,7 @@ import (
 
 const (
 	URLFmt            = "https://%sconsole.linkai.io/"
-	ResetURLFmt       = "https://dev.console.linkai.io/login/confirm.html"
+	ResetURLFmt       = "https://%sconsole.linkai.io/login/confirm.html"
 	LogoutURLFmt      = "https://%sconsole.linkai.io/logout"
 	LoginURLFmt       = "https://%sconsole.linkai.io/login/"
 	WelcomeTitleMsg   = `Welcome to linkai.io's hakken web management system`

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/linkai-io/frontend/pkg/initializers"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/policy"
 	"github.com/linkai-io/frontend/pkg/token"
@@ -38,7 +40,8 @@ func init() {
 
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
-	lb := os.Getenv("APP_LOADBALANCER")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
 	roleMap, err = orgRoles()
 	if err != nil {
@@ -62,8 +65,8 @@ func init() {
 		log.Fatal().Err(err).Msg("error reading system user id")
 	}
 
-	orgClient = initializers.OrgClient(lb)
-	userClient = initializers.UserClient(lb)
+	orgClient = initializers.OrgClient()
+	userClient = initializers.UserClient()
 	tokener = awstoken.New(env, region)
 }
 

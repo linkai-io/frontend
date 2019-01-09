@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/bsm/grpclb"
 	"github.com/linkai-io/am/pkg/convert"
 	"github.com/linkai-io/am/pkg/retrier"
 	"github.com/pkg/errors"
@@ -13,10 +12,12 @@ import (
 	"github.com/linkai-io/am/am"
 	service "github.com/linkai-io/am/protocservices/organization"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
 )
 
 type Client struct {
 	client         service.OrganizationClient
+	conn           *grpc.ClientConn
 	defaultTimeout time.Duration
 }
 
@@ -24,16 +25,17 @@ func New() *Client {
 	return &Client{defaultTimeout: (time.Second * 10)}
 }
 
-func (c *Client) Init(config []byte) error {
-	balancer := grpc.RoundRobin(grpclb.NewResolver(&grpclb.Options{
-		Address: string(config),
-	}))
+func (c *Client) SetTimeout(timeout time.Duration) {
+	c.defaultTimeout = timeout
+}
 
-	conn, err := grpc.Dial(am.OrganizationServiceKey, grpc.WithInsecure(), grpc.WithBalancer(balancer))
+func (c *Client) Init(config []byte) error {
+	conn, err := grpc.DialContext(context.Background(), "srv://consul/"+am.OrganizationServiceKey, grpc.WithInsecure(), grpc.WithBalancerName(roundrobin.Name))
 	if err != nil {
 		return err
 	}
 
+	c.conn = conn
 	c.client = service.NewOrganizationClient(conn)
 	return nil
 }

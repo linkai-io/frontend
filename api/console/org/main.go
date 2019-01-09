@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/linkai-io/frontend/pkg/initializers"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 )
 
 var orgClient am.OrganizationService
@@ -26,9 +28,10 @@ var orgClient am.OrganizationService
 func init() {
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "Org").Logger()
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
-	lb := os.Getenv("APP_LOADBALANCER")
-	orgClient = initializers.OrgClient(lb)
+	orgClient = initializers.OrgClient()
 }
 
 func GetByName(w http.ResponseWriter, req *http.Request) {

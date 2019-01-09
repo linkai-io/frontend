@@ -8,18 +8,19 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/linkai-io/frontend/pkg/serializers"
 
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/lb/consul"
 )
 
 var scanGroupClient am.ScanGroupService
@@ -31,14 +32,10 @@ func init() {
 	log.Logger = log.With().Str("lambda", "ScanGroup").Logger()
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
+	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
-	sec := secrets.NewSecretsCache(env, region)
-	lb, err := sec.LoadBalancerAddr()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed getting load balancer")
-	}
-
-	scanGroupClient = initializers.ScanGroupClient(lb)
+	scanGroupClient = initializers.ScanGroupClient()
 }
 
 func GetScanGroups(w http.ResponseWriter, req *http.Request) {
