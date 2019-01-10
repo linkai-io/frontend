@@ -19,6 +19,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/policy"
 	"github.com/linkai-io/frontend/pkg/token"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -37,6 +38,9 @@ var (
 
 func init() {
 	var err error
+
+	zerolog.TimeFieldFormat = ""
+	log.Logger = log.With().Str("lambda", "LambdaAuthorizer").Logger()
 
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")

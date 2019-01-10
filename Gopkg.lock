@@ -57,7 +57,7 @@
   version = "v1.8.1"
 
 [[projects]]
-  digest = "1:d270846409b7ffe7a77d07c6369793c4703be5facff5aad55dbcaa8bcefd2095"
+  digest = "1:55e2a143ffd9302a2f3e61a12770582e6f9785364814e381266a7743730ee78e"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -99,8 +99,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "62936e15518acb527a1a9cb4a39d96d94d0fd9a2"
-  version = "v1.16.15"
+  revision = "1f8a24693bc965514ee0d7aadbabe0ceed184a88"
+  version = "v1.16.16"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -409,11 +409,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f106a08663d0031b576f61ab81ffd80124da17096eab36aceb25b1b0d847da9a"
+  digest = "1:91137b48dc3eb34409f731b49f63a5ebf73218168a065e1a93af24eb5b2f99e8"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "7fbe1cd0fcc20051e1fcb87fbabec4a1bacaaeba"
+  revision = "48ac38b7c8cbedd50b1613c0fccacfc7d88dfcdf"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -488,7 +488,7 @@
   revision = "ae2f86662275e140f395167f1dab7081a5bd5fa8"
 
 [[projects]]
-  digest = "1:9edd250a3c46675d0679d87540b30c9ed253b19bd1fd1af08f4f5fb3c79fc487"
+  digest = "1:8f56475624fb72854d06ca16c2f7032e3cea14a63074e9c199ba8d46431c1127"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -503,6 +503,7 @@
     "encoding",
     "encoding/proto",
     "grpclog",
+    "health/grpc_health_v1",
     "internal",
     "internal/backoff",
     "internal/binarylog",
@@ -554,6 +555,7 @@
     "github.com/aws/aws-sdk-go-v2/service/iam",
     "github.com/dgrijalva/jwt-go",
     "github.com/go-chi/chi",
+    "github.com/hashicorp/consul/api",
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",
     "github.com/linkai-io/am/clients/address",
@@ -569,6 +571,8 @@
     "github.com/pkg/errors",
     "github.com/rs/zerolog",
     "github.com/rs/zerolog/log",
+    "google.golang.org/grpc",
+    "google.golang.org/grpc/health/grpc_health_v1",
     "gopkg.in/go-playground/validator.v9",
   ]
   solver-name = "gps-cdcl"

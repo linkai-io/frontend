@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/linkai-io/frontend/pkg/cookie"
+
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/initializers"
@@ -30,6 +32,10 @@ var (
 	systemOrgID  int
 	systemUserID int
 
+	secureCookie *cookie.SecureCookie
+	hashKey      string // for cookie signing/encrypting
+	blockKey     string // for cookie signing/encrypting
+
 	orgClient         am.OrganizationService
 	systemUserContext am.UserContext
 )
@@ -39,9 +45,17 @@ func init() {
 
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("lambda", "AuthAPI").Logger()
+	hashKey = os.Getenv("APP_HASHKEY")
+	blockKey = os.Getenv("APP_BLOCKKEY")
+	if hashKey == "" || blockKey == "" {
+		log.Fatal().Err(err).Msg("error reading hash or block keys")
+	}
+	secureCookie = cookie.New([]byte(hashKey), []byte(blockKey))
+
 	env = os.Getenv("APP_ENV")
 	region = os.Getenv("APP_REGION")
 	consulAddr := os.Getenv("CONSUL_HTTP_ADDR")
+
 	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
 	log.Info().Str("env", env).Str("region", region).Msg("authapi initializing")
@@ -121,6 +135,10 @@ func Refresh(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if err := secureCookie.SetAuthCookie(w, results["access_token"]); err != nil {
+		middleware.ReturnError(w, "internal cookie failure", 500)
+		return
+	}
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(respData))
 }
@@ -168,6 +186,10 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if err := secureCookie.SetAuthCookie(w, results["access_token"]); err != nil {
+		middleware.ReturnError(w, "internal cookie failure", 500)
+		return
+	}
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(respData))
 }
@@ -279,18 +301,15 @@ func ChangePwd(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	results, err := authenticator.SetNewPassword(req.Context(), loginDetails)
-	if err != nil {
+	if _, err := authenticator.SetNewPassword(req.Context(), loginDetails); err != nil {
 		middleware.ReturnError(w, "set new password failed", 403)
 		return
 	}
 
-	respData, err := json.Marshal(results)
-	if err != nil {
-		middleware.ReturnError(w, "marshal auth response failed", 500)
-		return
-	}
+	resp := make(map[string]string, 0)
+	resp["status"] = "ok"
 
+	respData, _ := json.Marshal(resp)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(respData))
 }
