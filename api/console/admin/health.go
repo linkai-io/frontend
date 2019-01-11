@@ -1,4 +1,4 @@
-package main
+package admin
 
 import (
 	"encoding/json"
@@ -15,28 +15,40 @@ type HealthData struct {
 	Services map[string]*health.ServiceHealth `json:"service_health"`
 }
 
-func CheckHealth(w http.ResponseWriter, req *http.Request) {
+type HealthHandlers struct {
+	ContextExtractor middleware.UserContextExtractor
+	healthChecker    *health.HealthChecker
+}
+
+func NewHealthHandlers() *HealthHandlers {
+	return &HealthHandlers{
+		ContextExtractor: middleware.ExtractUserContext,
+		healthChecker:    health.New(),
+	}
+}
+
+func (h *HealthHandlers) CheckHealth(w http.ResponseWriter, req *http.Request) {
 	var data []byte
 
 	log.Info().Msg("check health called")
 
-	_, ok := middleware.ExtractUserContext(req.Context())
+	_, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
 
-	h := health.New()
-	if err := h.Init(); err != nil {
+	if err := h.healthChecker.Init(); err != nil {
 		middleware.ReturnError(w, err.Error(), 401)
 		return
 	}
-	services, err := h.QueryServices(req.Context())
+
+	services, err := h.healthChecker.QueryServices(req.Context())
 	if err != nil {
 		middleware.ReturnError(w, err.Error(), 401)
 		return
 	}
-	h.CheckGRPCServices(req.Context(), services)
+	h.healthChecker.CheckGRPCServices(req.Context(), services)
 
 	resp := &HealthData{Status: "ok", Services: services}
 	data, _ = json.Marshal(resp)

@@ -46,8 +46,15 @@ Thank you,<br>
 The linkai.io team`
 )
 
-// OrgProvisioner for provisioning support and customer organizations
-type OrgProvisioner struct {
+type OrgProvisioner interface {
+	AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error)
+	Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error)
+	DeleteSupportOrganization(ctx context.Context, userContext am.UserContext, orgName string) (string, string, error)
+	Delete(ctx context.Context, orgData *am.Organization) error
+}
+
+// OrgProvision for provisioning support and customer organizations
+type OrgProvision struct {
 	orgClient  am.OrganizationService
 	userClient am.UserService
 	env        string
@@ -60,8 +67,8 @@ type OrgProvisioner struct {
 	fedSvc     *identity.CognitoIdentity
 }
 
-func NewOrgProvisioner(env, region string, userClient am.UserService, orgClient am.OrganizationService) *OrgProvisioner {
-	p := &OrgProvisioner{orgClient: orgClient, userClient: userClient}
+func NewOrgProvision(env, region string, userClient am.UserService, orgClient am.OrganizationService) *OrgProvision {
+	p := &OrgProvision{orgClient: orgClient, userClient: userClient}
 	p.env = env
 	p.region = region
 	cfg, _ := external.LoadDefaultAWSConfig()
@@ -74,7 +81,7 @@ func NewOrgProvisioner(env, region string, userClient am.UserService, orgClient 
 	return p
 }
 
-func (p *OrgProvisioner) createURLS() {
+func (p *OrgProvision) createURLS() {
 	var env string
 
 	if p.env != "prod" {
@@ -88,7 +95,7 @@ func (p *OrgProvisioner) createURLS() {
 
 // orgExists checks our organization service to see if the organization already exists. This is bad if new organization,
 // good if support account
-func (p *OrgProvisioner) orgExists(ctx context.Context, userContext am.UserContext, orgData *am.Organization) (*am.Organization, error) {
+func (p *OrgProvision) orgExists(ctx context.Context, userContext am.UserContext, orgData *am.Organization) (*am.Organization, error) {
 	var err error
 	var org *am.Organization
 
@@ -102,7 +109,7 @@ func (p *OrgProvisioner) orgExists(ctx context.Context, userContext am.UserConte
 
 // AddSupportOrganization to manage the hakken service (provision, troubleshoot etc)
 // TODO: Need to look up support userID by modifying UserService to allow looking up non-same-org users
-func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error) {
+func (p *OrgProvision) AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error) {
 	var err error
 	var userCID string
 
@@ -157,7 +164,7 @@ func (p *OrgProvisioner) AddSupportOrganization(ctx context.Context, userContext
 	return supportOrg.UserPoolID, supportOrg.IdentityPoolID, nil
 }
 
-func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, orgData *am.Organization) (string, error) {
+func (p *OrgProvision) getUserPoolJWK(ctx context.Context, orgData *am.Organization) (string, error) {
 	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", p.region, orgData.UserPoolID)
 	myClient := &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(jwksURL)
@@ -177,7 +184,7 @@ func (p *OrgProvisioner) getUserPoolJWK(ctx context.Context, orgData *am.Organiz
 }
 
 // Add an organization to hakken provided the organization does not already exist.
-func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error) {
+func (p *OrgProvision) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error) {
 	var err error
 	org, err := p.orgExists(ctx, userContext, orgData)
 	if org != nil {
@@ -209,7 +216,7 @@ func (p *OrgProvisioner) Add(ctx context.Context, userContext am.UserContext, or
 // 4. Identity Pool (sets roles too)
 // 5. The owner user
 // 6. Assigns owner user to owner group
-func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, roles map[string]string, password string) (string, error) {
+func (p *OrgProvision) add(ctx context.Context, orgData *am.Organization, roles map[string]string, password string) (string, error) {
 	var err error
 	var userCID string
 
@@ -262,7 +269,7 @@ func (p *OrgProvisioner) add(ctx context.Context, orgData *am.Organization, role
 	return userCID, err
 }
 
-func (p *OrgProvisioner) createUserPool(ctx context.Context, orgData *am.Organization) (string, error) {
+func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organization) (string, error) {
 	poolName := aws.String("org-linkai-" + orgData.OrgName)
 
 	if exists := p.checkUserPoolExists(*poolName, ""); exists {
@@ -309,7 +316,7 @@ func (p *OrgProvisioner) createUserPool(ctx context.Context, orgData *am.Organiz
 	return *out.UserPool.Id, nil
 }
 
-func (p *OrgProvisioner) checkUserPoolExists(name, token string) bool {
+func (p *OrgProvision) checkUserPoolExists(name, token string) bool {
 
 	input := &cip.ListUserPoolsInput{
 		MaxResults: aws.Int64(50),
@@ -342,7 +349,7 @@ func (p *OrgProvisioner) checkUserPoolExists(name, token string) bool {
 	return false
 }
 
-func (p *OrgProvisioner) userPoolAttributeSchema() []cip.SchemaAttributeType {
+func (p *OrgProvision) userPoolAttributeSchema() []cip.SchemaAttributeType {
 	var strType cip.AttributeDataType
 	var numType cip.AttributeDataType
 
@@ -396,7 +403,7 @@ func (p *OrgProvisioner) userPoolAttributeSchema() []cip.SchemaAttributeType {
 	return schema
 }
 
-func (p *OrgProvisioner) createPoolGroups(ctx context.Context, orgData *am.Organization, roles map[string]string) error {
+func (p *OrgProvision) createPoolGroups(ctx context.Context, orgData *am.Organization, roles map[string]string) error {
 
 	for k, v := range roles {
 		// don't add the identity pool roles to a group
@@ -421,7 +428,7 @@ func (p *OrgProvisioner) createPoolGroups(ctx context.Context, orgData *am.Organ
 	return nil
 }
 
-func (p *OrgProvisioner) createAppClient(ctx context.Context, orgData *am.Organization) (string, error) {
+func (p *OrgProvision) createAppClient(ctx context.Context, orgData *am.Organization) (string, error) {
 
 	appClient := &cip.CreateUserPoolClientInput{
 		UserPoolId:                 aws.String(orgData.UserPoolID),
@@ -445,7 +452,7 @@ func (p *OrgProvisioner) createAppClient(ctx context.Context, orgData *am.Organi
 	return *out.UserPoolClient.ClientId, nil
 }
 
-func (p *OrgProvisioner) createIdentityPool(ctx context.Context, orgData *am.Organization, roles map[string]string) (string, error) {
+func (p *OrgProvision) createIdentityPool(ctx context.Context, orgData *am.Organization, roles map[string]string) (string, error) {
 	providerName := fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", p.region, orgData.UserPoolID)
 
 	providers := make([]identity.Provider, 0)
@@ -502,7 +509,7 @@ func (p *OrgProvisioner) createIdentityPool(ctx context.Context, orgData *am.Org
 	return *out.IdentityPoolId, nil
 }
 
-func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organization, password string) (string, error) {
+func (p *OrgProvision) createOwnerUser(ctx context.Context, orgData *am.Organization, password string) (string, error) {
 	user := &cip.AdminCreateUserInput{
 		DesiredDeliveryMediums: []cip.DeliveryMediumType{"EMAIL"},
 		UserAttributes: []cip.AttributeType{
@@ -566,7 +573,7 @@ func (p *OrgProvisioner) createOwnerUser(ctx context.Context, orgData *am.Organi
 	return *out.User.Username, err
 }
 
-func (p *OrgProvisioner) DeleteSupportOrganization(ctx context.Context, userContext am.UserContext, orgName string) (string, string, error) {
+func (p *OrgProvision) DeleteSupportOrganization(ctx context.Context, userContext am.UserContext, orgName string) (string, string, error) {
 	_, org, err := p.orgClient.Get(ctx, userContext, orgName)
 	if err != nil {
 		return "unknownuserpool:1", "unknownidentitypool:1", err
@@ -585,7 +592,7 @@ func (p *OrgProvisioner) DeleteSupportOrganization(ctx context.Context, userCont
 }
 
 // cleanUp similar to delete, but just print errors
-func (p *OrgProvisioner) cleanUp(ctx context.Context, orgData *am.Organization) {
+func (p *OrgProvision) cleanUp(ctx context.Context, orgData *am.Organization) {
 	if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
 		log.Error().Err(deleteErr).Str("orgname", orgData.OrgName).Str("user_pool_id", orgData.UserPoolID).Msg("failed to delete identity pool")
 	}
@@ -595,7 +602,7 @@ func (p *OrgProvisioner) cleanUp(ctx context.Context, orgData *am.Organization) 
 }
 
 // Delete the identity pool and user
-func (p *OrgProvisioner) Delete(ctx context.Context, orgData *am.Organization) error {
+func (p *OrgProvision) Delete(ctx context.Context, orgData *am.Organization) error {
 
 	if deleteErr := p.deleteIdentityPool(ctx, orgData); deleteErr != nil {
 		return deleteErr
@@ -607,7 +614,7 @@ func (p *OrgProvisioner) Delete(ctx context.Context, orgData *am.Organization) e
 	return nil
 }
 
-func (p *OrgProvisioner) deleteUserPool(ctx context.Context, orgData *am.Organization) error {
+func (p *OrgProvision) deleteUserPool(ctx context.Context, orgData *am.Organization) error {
 	input := &cip.DeleteUserPoolInput{
 		UserPoolId: aws.String(orgData.UserPoolID),
 	}
@@ -620,7 +627,7 @@ func (p *OrgProvisioner) deleteUserPool(ctx context.Context, orgData *am.Organiz
 	return nil
 }
 
-func (p *OrgProvisioner) deleteIdentityPool(ctx context.Context, orgData *am.Organization) error {
+func (p *OrgProvision) deleteIdentityPool(ctx context.Context, orgData *am.Organization) error {
 	input := &identity.DeleteIdentityPoolInput{
 		IdentityPoolId: aws.String(orgData.IdentityPoolID),
 	}
@@ -632,7 +639,7 @@ func (p *OrgProvisioner) deleteIdentityPool(ctx context.Context, orgData *am.Org
 	return nil
 }
 
-func (p *OrgProvisioner) List() (map[string]*am.Organization, error) {
+func (p *OrgProvision) List() (map[string]*am.Organization, error) {
 	return nil, nil
 }
 

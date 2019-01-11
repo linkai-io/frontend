@@ -1,4 +1,4 @@
-package main
+package admin
 
 import (
 	"encoding/json"
@@ -7,19 +7,36 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/provision"
 	"github.com/rs/zerolog/log"
 )
 
-func CreateOrg(w http.ResponseWriter, req *http.Request) {
+type ProvisionHandlers struct {
+	orgClient        am.OrganizationService
+	provisioner      provision.OrgProvisioner
+	ContextExtractor middleware.UserContextExtractor
+	roles            map[string]string
+}
+
+func NewProvisionHandlers(orgClient am.OrganizationService, provisioner provision.OrgProvisioner, roles map[string]string) *ProvisionHandlers {
+	return &ProvisionHandlers{
+		roles:            roles,
+		orgClient:        orgClient,
+		provisioner:      provisioner,
+		ContextExtractor: middleware.ExtractUserContext,
+	}
+}
+
+func (h *ProvisionHandlers) CreateOrg(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 	orgDetails := &provision.OrgDetails{}
 
 	log.Info().Msg("create org called")
 
-	userContext, ok := middleware.ExtractUserContext(req.Context())
+	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
 		return
@@ -45,7 +62,7 @@ func CreateOrg(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if _, err := provisioner.Add(req.Context(), userContext, org, roles); err != nil {
+	if _, err := h.provisioner.Add(req.Context(), userContext, org, h.roles); err != nil {
 		log.Error().Err(err).Msg("provisioner error")
 		middleware.ReturnError(w, "error provisioning organization", 500)
 		return
@@ -59,13 +76,13 @@ func CreateOrg(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(data))
 }
 
-func DeleteOrg(w http.ResponseWriter, req *http.Request) {
+func (h *ProvisionHandlers) DeleteOrg(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 
 	log.Info().Msg("delete org called")
 
-	userContext, ok := middleware.ExtractUserContext(req.Context())
+	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
 		return
@@ -77,20 +94,20 @@ func DeleteOrg(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	oid, org, err := orgClient.Get(req.Context(), userContext, name)
+	oid, org, err := h.orgClient.Get(req.Context(), userContext, name)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get org by name")
 		middleware.ReturnError(w, "internal org lookup failure", 500)
 		return
 	}
 
-	if _, err := orgClient.Delete(req.Context(), userContext, oid); err != nil {
+	if _, err := h.orgClient.Delete(req.Context(), userContext, oid); err != nil {
 		log.Error().Err(err).Msg("failed to delete organization")
 		middleware.ReturnError(w, "failed to delete organization, inspect the logs", 500)
 		return
 	}
 
-	if err := provisioner.Delete(req.Context(), org); err != nil {
+	if err := h.provisioner.Delete(req.Context(), org); err != nil {
 		middleware.ReturnError(w, "failed to delete organization user and identity pools", 500)
 		return
 	}
@@ -103,8 +120,8 @@ func DeleteOrg(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(data))
 }
 
-func UpdateOrg(w http.ResponseWriter, req *http.Request) {
+func (h *ProvisionHandlers) UpdateOrg(w http.ResponseWriter, req *http.Request) {
 
 }
-func CreateUser(w http.ResponseWriter, req *http.Request) {
+func (h *ProvisionHandlers) CreateUser(w http.ResponseWriter, req *http.Request) {
 }

@@ -33,7 +33,7 @@ func init() {
 	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 }
 
-func create(ctx context.Context, provisioner *provision.OrgProvisioner, orgData *am.Organization, roles map[string]string, password string) error {
+func create(ctx context.Context, provisioner provision.OrgProvisioner, orgData *am.Organization, roles map[string]string, password string) error {
 	log.Info().Msg("create called")
 
 	if password == "" {
@@ -52,7 +52,7 @@ func create(ctx context.Context, provisioner *provision.OrgProvisioner, orgData 
 	return err
 }
 
-func delete(ctx context.Context, provisioner *provision.OrgProvisioner, orgData *am.Organization, roles map[string]string, password string) error {
+func delete(ctx context.Context, provisioner provision.OrgProvisioner, orgData *am.Organization, roles map[string]string, password string) error {
 	userContext := &am.UserContextData{
 		OrgID:  systemOrgID,
 		UserID: systemUserID,
@@ -125,7 +125,7 @@ func main() {
 	orgClient := initializers.OrgClient()
 	userClient := initializers.UserClient()
 
-	provisioner := provision.NewOrgProvisioner(env, region, userClient, orgClient)
+	provisioner := provision.NewOrgProvision(env, region, userClient, orgClient)
 
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()

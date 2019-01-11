@@ -2,6 +2,7 @@ package provision
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -11,6 +12,9 @@ import (
 )
 
 func TestOrgProvisionPoolExists(t *testing.T) {
+	if os.Getenv("INFRA_TESTS") == "" {
+		t.Skip("skipping infrastructure tests")
+	}
 	//userContext := amtest.CreateUserContext(1, 1)
 	orgClient := &mock.OrganizationService{}
 	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
@@ -18,7 +22,7 @@ func TestOrgProvisionPoolExists(t *testing.T) {
 	}
 	userClient := &mock.UserService{}
 
-	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
+	provisioner := NewOrgProvision("dev", "us-east-1", userClient, orgClient)
 	poolName := aws.String("org-linkai-" + "support-linkai")
 	ret := provisioner.checkUserPoolExists(*poolName, "")
 	if ret == true {
@@ -26,6 +30,9 @@ func TestOrgProvisionPoolExists(t *testing.T) {
 	}
 }
 func TestOrgProvision(t *testing.T) {
+	if os.Getenv("INFRA_TESTS") == "" {
+		t.Skip("skipping infrastructure tests")
+	}
 	userContext := amtest.CreateUserContext(1, 1)
 	orgClient := &mock.OrganizationService{}
 	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
@@ -34,7 +41,7 @@ func TestOrgProvision(t *testing.T) {
 
 	userClient := &mock.UserService{}
 
-	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
+	provisioner := NewOrgProvision("dev", "us-east-1", userClient, orgClient)
 
 	orgData := testOrgData()
 	ctx := context.Background()
@@ -53,6 +60,9 @@ func TestOrgProvision(t *testing.T) {
 }
 
 func TestDeleteOrg(t *testing.T) {
+	if os.Getenv("INFRA_TESTS") == "" {
+		t.Skip("skipping infrastructure tests")
+	}
 	orgClient := &mock.OrganizationService{}
 	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
 		return 0, nil, nil
@@ -60,7 +70,7 @@ func TestDeleteOrg(t *testing.T) {
 	orgData := testOrgData()
 	userClient := &mock.UserService{}
 
-	provisioner := NewOrgProvisioner("dev", "us-east-1", userClient, orgClient)
+	provisioner := NewOrgProvision("dev", "us-east-1", userClient, orgClient)
 	err := provisioner.Delete(context.Background(), orgData)
 	if err != nil {
 		t.Fatalf("failed to delete org: %v\n", err)

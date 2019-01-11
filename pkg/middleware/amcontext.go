@@ -12,6 +12,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// UserContextExtractor create the extractor as a type so it's easier to mock/test
+type UserContextExtractor func(ctx context.Context) (am.UserContext, bool)
+
 type key int
 
 const userCtxKey = iota
