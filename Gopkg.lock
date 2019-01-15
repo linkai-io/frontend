@@ -19,14 +19,6 @@
   version = "v0.34.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f51d43b7eebee8c5bae2605d504cf2f0675f18e0177f7bced7eb28a22fe12979"
-  name = "github.com/AlexRudd/cognito-srp"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "7ced9b7d9fe7de67bdf63e3e728b9732f5c11af1"
-
-[[projects]]
   digest = "1:9447e63c3d421bca04c226442321db764b781fe45419d9f0d68c9ed5d6c5caf6"
   name = "github.com/apex/gateway"
   packages = ["."]
@@ -57,7 +49,7 @@
   version = "v1.8.1"
 
 [[projects]]
-  digest = "1:55e2a143ffd9302a2f3e61a12770582e6f9785364814e381266a7743730ee78e"
+  digest = "1:0cf9f336e3c61d71fc3e25ab407e3536a3bd12ee36f2f319b5d7b5620afcc5ef"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -99,8 +91,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "1f8a24693bc965514ee0d7aadbabe0ceed184a88"
-  version = "v1.16.16"
+  revision = "6d55516ad2946220d9e26804f224c1c215f293ea"
+  version = "v1.16.17"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -144,12 +136,12 @@
   version = "v3.2.0"
 
 [[projects]]
-  digest = "1:6b90c84e1800bd2d695b41ebc73a292641c481d1a61a7ec226db3c692885c26c"
+  digest = "1:b8d8afedc1ea9028d6b8a037a61acaf5bac8ffb1ceb4b285a0af6654bfc62f16"
   name = "github.com/go-chi/chi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "08d9051ef6546d57c5dca8eae13e6df362e2d568"
-  version = "v3.3.4"
+  revision = "e95203758b2a6ec24a8e97124d5719ffe5ec1374"
+  version = "v4.0.0"
 
 [[projects]]
   digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
@@ -171,12 +163,12 @@
   version = "v0.16.0"
 
 [[projects]]
-  digest = "1:c594a691090b434d55c67f6cc8e326ef5ba49452abc059821bd5d4fd4cdef08c"
+  digest = "1:bed9d72d596f94e65fff37f4d6c01398074a6bb1c3f3ceff963516bd01db6ff5"
   name = "github.com/gofrs/uuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "7077aa61129615a0d7f45c49101cd011ab221c27"
-  version = "v3.1.2"
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
 
 [[projects]]
   digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
@@ -202,6 +194,14 @@
   pruneopts = "UT"
   revision = "c8a15bac9b9fe955bd9f900272f9a306465d28cf"
   version = "v2.0.3"
+
+[[projects]]
+  digest = "1:e72d1ebb8d395cf9f346fd9cbc652e5ae222dd85e0ac842dc57f175abed6d195"
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:bfc483a051d3c7185ebeaa41b5bb67a4f76e742217bcaeab5661cc4b1320f392"
@@ -294,7 +294,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "0f101ba92bfd5fff91b158b8ea65ebd65ce4f519"
+  revision = "5cb6d83cb2885a5fe47db7773b1cde6c267e0b1b"
 
 [[projects]]
   digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
@@ -377,7 +377,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5c5bfdd46bd5b13439240c6d39086a8b1b77684c4cbbd5524b2b561ae14239c4"
+  digest = "1:25c965216c188afcd5f430f65acc28d4f193c5a88e7c6c54ae876b1898f86368"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -391,11 +391,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "1e06a53dbb7e2ed46e91183f219db23c6943c532"
+  revision = "915654e7eabcea33ae277abbecf52f0d8b7a9fdc"
 
 [[projects]]
   branch = "master"
-  digest = "1:23443edff0740e348959763085df98400dcfd85528d7771bb0ce9f5f2754ff4a"
+  digest = "1:9dc1722414ac75f164c0dde25439fc9bf8ba3bdf22fbcdd93f4ecab392df1cd3"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -405,7 +405,7 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
+  revision = "fd3eaa146cbb5c89ce187c275fb79bd3a36a5ffc"
 
 [[projects]]
   branch = "master"
@@ -485,7 +485,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "ae2f86662275e140f395167f1dab7081a5bd5fa8"
+  revision = "6909d8a4a91b6d3fd1c4580b6e35816be4706fef"
 
 [[projects]]
   digest = "1:8f56475624fb72854d06ca16c2f7032e3cea14a63074e9c199ba8d46431c1127"
@@ -540,7 +540,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/AlexRudd/cognito-srp",
     "github.com/apex/gateway",
     "github.com/aws/aws-lambda-go/cfn",
     "github.com/aws/aws-lambda-go/events",
@@ -548,13 +547,13 @@
     "github.com/aws/aws-lambda-go/lambdacontext",
     "github.com/aws/aws-sdk-go-v2/aws",
     "github.com/aws/aws-sdk-go-v2/aws/awserr",
-    "github.com/aws/aws-sdk-go-v2/aws/endpoints",
     "github.com/aws/aws-sdk-go-v2/aws/external",
     "github.com/aws/aws-sdk-go-v2/service/cognitoidentity",
     "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider",
     "github.com/aws/aws-sdk-go-v2/service/iam",
     "github.com/dgrijalva/jwt-go",
     "github.com/go-chi/chi",
+    "github.com/gorilla/securecookie",
     "github.com/hashicorp/consul/api",
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",

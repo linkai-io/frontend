@@ -253,8 +253,9 @@ func makeAddrs(in map[string]struct{}, orgID, userID, groupID int) map[string]*a
 }
 
 type countResponse struct {
-	Status string `json:"status"`
-	Count  int    `json:"count"`
+	Status  string `json:"status"`
+	GroupID int    `json:"group_id"`
+	Count   int    `json:"count"`
 }
 
 func (h *AddressHandlers) GetGroupCount(w http.ResponseWriter, req *http.Request) {
@@ -280,7 +281,7 @@ func (h *AddressHandlers) GetGroupCount(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	data, err = json.Marshal(&countResponse{Status: "OK", Count: count})
+	data, err = json.Marshal(&countResponse{Status: "OK", GroupID: id, Count: count})
 	if err != nil {
 		middleware.ReturnError(w, "internal marshal error", 500)
 		return

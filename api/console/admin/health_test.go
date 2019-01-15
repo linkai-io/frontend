@@ -22,7 +22,7 @@ func TestHealth(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	rr, _ := fetest.RouterTestRequest(t, ts, "GET", "/address/group/1", nil)
+	rr, _ := fetest.RouterTestRequest(t, ts, "GET", "/admin/health", nil)
 
 	// Check the status code is what we expect.
 	if status := rr.StatusCode; status != http.StatusOK {
