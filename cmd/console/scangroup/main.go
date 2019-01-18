@@ -40,11 +40,11 @@ func main() {
 
 	r.Route("/scangroup", func(r chi.Router) {
 		r.Get("/groups", scanGroupHandlers.GetScanGroups)
-		r.Get("/id/{id}", scanGroupHandlers.GetScanGroupByID)
+		r.Get("/name/{name}", scanGroupHandlers.GetScanGroupByID)
 		r.Post("/name/{name}", scanGroupHandlers.CreateScanGroup)
-		r.Patch("/id/{id}", scanGroupHandlers.UpdateScanGroup)
-		r.Delete("/id/{id}", scanGroupHandlers.DeleteScanGroup)
-		r.Patch("/id/{id}/status", scanGroupHandlers.UpdateScanGroupStatus)
+		r.Patch("/name/{name}", scanGroupHandlers.UpdateScanGroup)
+		r.Delete("/name/{name}", scanGroupHandlers.DeleteScanGroup)
+		r.Patch("/name/{name}/status", scanGroupHandlers.UpdateScanGroupStatus)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)

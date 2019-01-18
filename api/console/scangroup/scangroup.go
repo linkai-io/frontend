@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/linkai-io/frontend/pkg/serializers"
 	validator "gopkg.in/go-playground/validator.v9"
@@ -187,6 +188,8 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	}
 	defer req.Body.Close()
 
+	log.Info().Msgf("blarg: %s", string(body))
+
 	groupDetails := &NewScanGroup{}
 	if err := json.Unmarshal(body, groupDetails); err != nil {
 		middleware.ReturnError(w, "error reading scangroup", 400)
@@ -199,12 +202,16 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 
+	now := time.Now().UnixNano()
 	group := &am.ScanGroup{}
+	group.GroupName = groupDetails.GroupName
 	group.OrgID = userContext.GetOrgID()
 	group.CreatedBy = userContext.GetUserCID() // replaced with user email
 	group.CreatedByID = userContext.GetUserID()
+	group.CreationTime = now
 	group.ModifiedBy = userContext.GetUserCID() // replaced with user email
 	group.ModifiedByID = userContext.GetUserID()
+	group.ModifiedTime = now
 	group.OriginalInputS3URL = "s3://empty"
 	group.Paused = true
 	group.ModuleConfigurations = &am.ModuleConfiguration{

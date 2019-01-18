@@ -88,7 +88,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue"}, true
 }
 
 func testUserClient() am.UserService {
@@ -174,14 +174,21 @@ func testScanGroupClient() am.ScanGroupService {
 		return userContext.GetOrgID(), nil, errors.New("no scan group found")
 	}
 
-	scanGroupClient.GroupsFn = func(ctx context.Context, userContext am.UserContext) (oid int, groups []*am.ScanGroup, err error) {
-		return userContext.GetOrgID(), groups, nil
+	scanGroupClient.GroupsFn = func(ctx context.Context, userContext am.UserContext) (int, []*am.ScanGroup, error) {
+		groupLock.RLock()
+		defer groupLock.RUnlock()
+		allGroups := make([]*am.ScanGroup, 0)
+		for _, g := range groups {
+			allGroups = append(allGroups, g)
+		}
+		return userContext.GetOrgID(), allGroups, nil
 	}
 
 	scanGroupClient.CreateFn = func(ctx context.Context, userContext am.UserContext, newGroup *am.ScanGroup) (int, int, error) {
 		groupLock.Lock()
 		defer groupLock.Unlock()
 		for _, g := range groups {
+			log.Info().Str("group", g.GroupName).Str("new", newGroup.GroupName)
 			if g.GroupName == newGroup.GroupName {
 				return userContext.GetOrgID(), 0, errors.New("group name exists")
 			}
@@ -189,6 +196,7 @@ func testScanGroupClient() am.ScanGroupService {
 		gid := atomic.AddInt32(&newID, 1)
 		newGroup.GroupID = int(gid)
 		groups[int(gid)] = newGroup
+		log.Info().Int("len", len(groups)).Msg("created new group")
 		return userContext.GetOrgID(), int(gid), nil
 	}
 	return scanGroupClient
