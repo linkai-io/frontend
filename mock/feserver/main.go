@@ -158,7 +158,7 @@ func testScanGroupClient() am.ScanGroupService {
 		if sg, ok := groups[groupID]; ok {
 			return userContext.GetOrgID(), sg, nil
 		}
-		return userContext.GetOrgID(), nil, errors.New("no scan group found")
+		return userContext.GetOrgID(), nil, am.ErrScanGroupNotExists
 	}
 
 	scanGroupClient.GetByNameFn = func(ctx context.Context, userContext am.UserContext, groupName string) (int, *am.ScanGroup, error) {
@@ -167,11 +167,11 @@ func testScanGroupClient() am.ScanGroupService {
 
 		for _, g := range groups {
 			if g.GroupName == groupName {
-				return userContext.GetOrgID(), g, errors.New("group name exists")
+				return userContext.GetOrgID(), g, nil
 			}
 		}
 
-		return userContext.GetOrgID(), nil, errors.New("no scan group found")
+		return userContext.GetOrgID(), nil, am.ErrScanGroupNotExists
 	}
 
 	scanGroupClient.GroupsFn = func(ctx context.Context, userContext am.UserContext) (int, []*am.ScanGroup, error) {
@@ -179,6 +179,9 @@ func testScanGroupClient() am.ScanGroupService {
 		defer groupLock.RUnlock()
 		allGroups := make([]*am.ScanGroup, 0)
 		for _, g := range groups {
+			if g.Deleted {
+				continue
+			}
 			allGroups = append(allGroups, g)
 		}
 		return userContext.GetOrgID(), allGroups, nil
@@ -199,44 +202,118 @@ func testScanGroupClient() am.ScanGroupService {
 		log.Info().Int("len", len(groups)).Msg("created new group")
 		return userContext.GetOrgID(), int(gid), nil
 	}
+
+	scanGroupClient.UpdateFn = func(ctx context.Context, userContext am.UserContext, updatedGroup *am.ScanGroup) (int, int, error) {
+		groupLock.Lock()
+		defer groupLock.Unlock()
+		for _, g := range groups {
+			log.Info().Str("group", g.GroupName).Str("new", updatedGroup.GroupName)
+			if g.GroupID == updatedGroup.GroupID {
+				g = updatedGroup
+				return userContext.GetOrgID(), g.GroupID, nil
+			}
+		}
+		return userContext.GetOrgID(), 0, am.ErrScanGroupNotExists
+	}
+
+	scanGroupClient.PauseFn = func(ctx context.Context, userContext am.UserContext, groupID int) (int, int, error) {
+		groupLock.Lock()
+		defer groupLock.Unlock()
+		for _, g := range groups {
+			log.Info().Int("group_id", g.GroupID).Int("requested_gid", groupID)
+			if g.GroupID == groupID {
+				g.Paused = true
+				return userContext.GetOrgID(), g.GroupID, nil
+			}
+		}
+		return userContext.GetOrgID(), 0, am.ErrScanGroupNotExists
+	}
+
+	scanGroupClient.ResumeFn = func(ctx context.Context, userContext am.UserContext, groupID int) (int, int, error) {
+		groupLock.Lock()
+		defer groupLock.Unlock()
+		for _, g := range groups {
+			log.Info().Int("group_id", g.GroupID).Int("requested_gid", groupID)
+			if g.GroupID == groupID {
+				g.Paused = false
+				return userContext.GetOrgID(), g.GroupID, nil
+			}
+		}
+		return userContext.GetOrgID(), 0, am.ErrScanGroupNotExists
+	}
+
+	scanGroupClient.DeleteFn = func(ctx context.Context, userContext am.UserContext, groupID int) (int, int, error) {
+		groupLock.Lock()
+		defer groupLock.Unlock()
+		for _, g := range groups {
+			log.Info().Int("group_id", g.GroupID).Int("requested_gid", groupID)
+			if g.GroupID == groupID {
+				g.Deleted = true
+				g.GroupName = fmt.Sprintf("%s%d", g.GroupName, time.Now().UnixNano())
+				return userContext.GetOrgID(), g.GroupID, nil
+			}
+		}
+		return userContext.GetOrgID(), 0, am.ErrScanGroupNotExists
+	}
 	return scanGroupClient
 }
 
 func testAddrClient() am.AddressService {
 	addrClient := &mock.AddressService{}
+	allAddresses := make(map[int64]*am.ScanGroupAddress)
+	addrLock := &sync.RWMutex{}
+	var addrID int64
+	atomic.AddInt64(&addrID, 1)
+
 	addrClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupAddress, error) {
-		addresses := make([]*am.ScanGroupAddress, 1)
-		addresses[0] = &am.ScanGroupAddress{
-			AddressID:           1,
-			OrgID:               userContext.GetOrgID(),
-			GroupID:             filter.GroupID,
-			HostAddress:         "example.com",
-			IPAddress:           "1.1.1.1",
-			DiscoveryTime:       time.Now().UnixNano(),
-			DiscoveredBy:        "",
-			LastScannedTime:     time.Now().UnixNano(),
-			LastSeenTime:        time.Now().UnixNano(),
-			ConfidenceScore:     100.0,
-			UserConfidenceScore: 0.0,
-			IsSOA:               false,
-			IsWildcardZone:      false,
-			IsHostedService:     false,
-			Ignored:             false,
-			FoundFrom:           "",
-			NSRecord:            0,
-			AddressHash:         "somehash",
+		addrLock.RLock()
+		defer addrLock.RUnlock()
+		addresses := make([]*am.ScanGroupAddress, 0)
+		for _, addr := range allAddresses {
+			log.Info().Msgf("%#v", addr)
+			if filter.GroupID == addr.GroupID {
+				addresses = append(addresses, addr)
+			}
 		}
 		return userContext.GetOrgID(), addresses, nil
 	}
+
 	addrClient.CountFn = func(ctx context.Context, userContext am.UserContext, groupID int) (oid int, count int, err error) {
-		return userContext.GetOrgID(), 1, nil
+		addrLock.RLock()
+		defer addrLock.RUnlock()
+		addrs := make([]*am.ScanGroupAddress, 0)
+		for _, addr := range allAddresses {
+			log.Info().Msgf("%#v", addr)
+			if addr.GroupID == groupID {
+				addrs = append(addrs, addr)
+			}
+		}
+		return userContext.GetOrgID(), len(addrs), nil
 	}
 
 	addrClient.UpdateFn = func(ctx context.Context, userContext am.UserContext, addresses map[string]*am.ScanGroupAddress) (oid int, count int, err error) {
+		addrLock.Lock()
+		defer addrLock.Unlock()
+		for _, addr := range addresses {
+			log.Info().Msgf("adding %#v", addr)
+			if addr.AddressID == 0 {
+				newID := atomic.AddInt64(&addrID, 1)
+				addr.AddressID = newID
+				allAddresses[newID] = addr
+			} else {
+				allAddresses[addr.AddressID] = addr
+			}
+		}
+		log.Info().Msg("updated addresses")
 		return userContext.GetOrgID(), len(addresses), nil
 	}
 
 	addrClient.DeleteFn = func(ctx context.Context, userContext am.UserContext, groupID int, addressIDs []int64) (oid int, err error) {
+		addrLock.Lock()
+		defer addrLock.Unlock()
+		for _, id := range addressIDs {
+			delete(allAddresses, id)
+		}
 		return userContext.GetOrgID(), nil
 	}
 	return addrClient

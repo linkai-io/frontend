@@ -25,7 +25,7 @@ func ValidateSubDomain(fl validator.FieldLevel) bool {
 	return !strings.ContainsAny(str, " ~`!@#$%^&*()=+[]{};\"'|<>,.?\r\n\x00\x01\x02\x03\x03\x04\x05\x06\x07\x08\t")
 }
 
-type NewScanGroup struct {
+type ScanGroupDetails struct {
 	GroupName          string   `json:"group_name" validate:"required,gte=1,lte=128,excludesall=/"`
 	CustomSubNames     []string `json:"custom_sub_names" validate:"omitempty,max=100,dive,gte=1,lte=128,subdomain"`
 	CustomPorts        []int32  `json:"custom_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
@@ -190,7 +190,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 
 	log.Info().Msgf("blarg: %s", string(body))
 
-	groupDetails := &NewScanGroup{}
+	groupDetails := &ScanGroupDetails{}
 	if err := json.Unmarshal(body, groupDetails); err != nil {
 		middleware.ReturnError(w, "error reading scangroup", 400)
 		return
@@ -283,16 +283,11 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	param := chi.URLParam(req, "id")
-	groupID, err := strconv.Atoi(param)
-	if err != nil {
-		middleware.ReturnError(w, "invalid parameter", 403)
-		return
-	}
+	param := chi.URLParam(req, "name")
 
-	oid, original, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	oid, original, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
-		middleware.ReturnError(w, "error getting original group", 500)
+		middleware.ReturnError(w, "group not found", 500)
 		return
 	}
 
@@ -304,26 +299,56 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
-		middleware.ReturnError(w, "error reading scangroup from body", 400)
+		middleware.ReturnError(w, "error reading group details", 400)
 		return
 	}
 	defer req.Body.Close()
 
-	group := &am.ScanGroup{}
-	if err := json.Unmarshal(body, group); err != nil {
-		middleware.ReturnError(w, "error reading scangroup", 400)
+	updatedGroup := &ScanGroupDetails{}
+	if err := json.Unmarshal(body, updatedGroup); err != nil {
+		log.Error().Err(err).Msg("failed to unmarshal")
+		middleware.ReturnError(w, "error reading group", 400)
 		return
 	}
 
-	if strings.Contains(group.GroupName, "/") {
+	if err := h.validate.Struct(updatedGroup); err != nil {
+		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("invalid data passed")
+		middleware.ReturnError(w, err.Error(), 401) // TODO: don't expose internal errors
+		return
+	}
+
+	if strings.Contains(updatedGroup.GroupName, "/") {
 		middleware.ReturnError(w, "'/' is not allowed in the group name", 401)
 		return
 	}
 
-	original.GroupName = group.GroupName
+	original.GroupName = updatedGroup.GroupName
 	original.ModifiedBy = userContext.GetUserCID() // replaced with user email
 	original.ModifiedByID = userContext.GetUserID()
-	original.ModuleConfigurations = group.ModuleConfigurations
+	original.ModuleConfigurations = &am.ModuleConfiguration{
+		NSModule: &am.NSModuleConfig{
+			RequestsPerSecond: updatedGroup.ConcurrentRequests,
+		},
+		BruteModule: &am.BruteModuleConfig{
+			CustomSubNames:    updatedGroup.CustomSubNames,
+			RequestsPerSecond: updatedGroup.ConcurrentRequests,
+			MaxDepth:          2,
+		},
+		PortModule: &am.PortModuleConfig{
+			RequestsPerSecond: updatedGroup.ConcurrentRequests,
+			CustomPorts:       updatedGroup.CustomPorts,
+		},
+		WebModule: &am.WebModuleConfig{
+			TakeScreenShots:       true,
+			RequestsPerSecond:     updatedGroup.ConcurrentRequests,
+			MaxLinks:              10,
+			ExtractJS:             true,
+			FingerprintFrameworks: true,
+		},
+		KeywordModule: &am.KeywordModuleConfig{
+			Keywords: []string{""},
+		},
+	}
 
 	_, _, err = h.scanGroupClient.Update(req.Context(), userContext, original)
 	if err != nil {
@@ -343,16 +368,11 @@ func (h *ScanGroupHandlers) DeleteScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	param := chi.URLParam(req, "id")
-	groupID, err := strconv.Atoi(param)
-	if err != nil {
-		middleware.ReturnError(w, "invalid parameter", 403)
-		return
-	}
+	param := chi.URLParam(req, "name")
 
-	oid, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	oid, group, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
-		middleware.ReturnError(w, "error getting group", 500)
+		middleware.ReturnError(w, "failure retrieving group", 500)
 		return
 	}
 
@@ -387,10 +407,10 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 	}
 
 	param := chi.URLParam(req, "name")
-
+	log.Info().Str("group_name", param).Msg("looking up group")
 	oid, group, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
-		middleware.ReturnError(w, "failure retrieving group", 500)
+		middleware.ReturnError(w, "group not found", 500)
 		return
 	}
 
@@ -402,7 +422,7 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
-		middleware.ReturnError(w, "error reading scangroup from body", 400)
+		middleware.ReturnError(w, "error reading group details", 400)
 		return
 	}
 	defer req.Body.Close()
@@ -418,7 +438,7 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 	} else if status.Status == "resume" {
 		_, _, err = h.scanGroupClient.Resume(req.Context(), userContext, group.GroupID)
 	} else {
-		middleware.ReturnError(w, "unknown status supplied must be pause or resume", 400)
+		middleware.ReturnError(w, "unknown status supplied, must be pause or resume", 400)
 		return
 	}
 

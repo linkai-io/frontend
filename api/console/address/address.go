@@ -162,6 +162,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 }
 
 type PutResponse struct {
+	Msg          string                  `json:"msg"`
 	Status       string                  `json:"status"`
 	ParserErrors []*inputlist.ParseError `json:"errors,omitempty"`
 	Count        int                     `json:"count,omitempty"`
@@ -184,9 +185,13 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
 	}
+	log.Info().Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("processing list")
+	defer req.Body.Close()
 
 	addrs, parserErrors := inputlist.ParseList(req.Body, 100000)
+	log.Info().Int("addr_len", len(addrs)).Msg("parsed list")
 	if len(parserErrors) != 0 {
+		log.Error().Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error processing input")
 		putResponse.ParserErrors = parserErrors
 		putResponse.Status = "NG"
 		data, err = json.Marshal(putResponse)
@@ -200,6 +205,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 
 	sgAddrs := makeAddrs(addrs, userContext.GetOrgID(), userContext.GetUserID(), groupID)
+	log.Info().Int("sgaddr_len", len(sgAddrs)).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("created sg addrs")
 
 	oid, count, err := h.addrClient.Update(req.Context(), userContext, sgAddrs)
 	if err != nil {
@@ -207,6 +213,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 		middleware.ReturnError(w, "failed to add addresses to scangroup", 500)
 		return
 	}
+	log.Info().Int("count", count).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("got count from update")
 
 	if oid != userContext.GetOrgID() {
 		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
@@ -216,6 +223,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 
 	putResponse.Count = count
 	putResponse.Status = "OK"
+	putResponse.Msg = "Upload Successful"
 
 	data, err = json.Marshal(putResponse)
 	if err != nil {
@@ -224,7 +232,8 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 
 	w.WriteHeader(200)
-	fmt.Fprint(w, string(data))
+	log.Info().Msgf("RESPONSE: %s", string(data))
+	fmt.Fprintf(w, string(data))
 }
 
 func makeAddrs(in map[string]struct{}, orgID, userID, groupID int) map[string]*am.ScanGroupAddress {
