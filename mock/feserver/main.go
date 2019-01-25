@@ -269,10 +269,16 @@ func testAddrClient() am.AddressService {
 		addrLock.RLock()
 		defer addrLock.RUnlock()
 		addresses := make([]*am.ScanGroupAddress, 0)
+		i := 0
 		for _, addr := range allAddresses {
 			log.Info().Msgf("%#v", addr)
 			if filter.GroupID == addr.GroupID {
-				addresses = append(addresses, addr)
+				if addr.AddressID >= filter.Start && filter.Limit <= i {
+					addresses = append(addresses, addr)
+					i++
+				} else if filter.Limit > i {
+					break
+				}
 			}
 		}
 		return userContext.GetOrgID(), addresses, nil
