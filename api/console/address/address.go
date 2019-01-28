@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -23,6 +24,7 @@ type AddressResponse struct {
 	Addrs     []*am.ScanGroupAddress `json:"addresses"`
 	Status    string                 `json:"status"`
 	LastIndex int64                  `json:"last_index"`
+	Total     int                    `json:"total"`
 }
 
 type AddressHandlers struct {
@@ -79,10 +81,19 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 			return
 		}
 	}
+
+	oid, total, err := h.addrClient.Count(req.Context(), userContext, groupID)
+	if err != nil {
+		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("failed to get address count")
+		middleware.ReturnError(w, "failed to get address count: "+err.Error(), 500)
+		return
+	}
+
 	response := &AddressResponse{
 		Status:    "ok",
 		LastIndex: lastAddr,
 		Addrs:     addrs,
+		Total:     total,
 	}
 
 	data, err := json.Marshal(response)
@@ -298,6 +309,197 @@ func (h *AddressHandlers) GetGroupCount(w http.ResponseWriter, req *http.Request
 
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
+}
+
+type deleteAddressRequest struct {
+	AddressIDs []int64 `json:"address_ids"`
+}
+
+func (h *AddressHandlers) DeleteAddresses(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var body []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	body, err = ioutil.ReadAll(req.Body)
+	if err != nil {
+		middleware.ReturnError(w, "error reading address details", 400)
+		return
+	}
+	defer req.Body.Close()
+
+	addresses := &deleteAddressRequest{}
+	if err := json.Unmarshal(body, addresses); err != nil {
+		middleware.ReturnError(w, "error reading addresses", 400)
+		return
+	}
+
+	oid, err := h.addrClient.Delete(req.Context(), userContext, id, addresses.AddressIDs)
+	if oid != userContext.GetOrgID() {
+		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	if err != nil {
+		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	middleware.ReturnSuccess(w, "addresses deleted", 200)
+}
+
+type ignoreAddressRequest struct {
+	IgnoreValue bool    `json:"ignore_value"`
+	AddressIDs  []int64 `json:"address_ids"`
+}
+
+func (h *AddressHandlers) IgnoreAddresses(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var body []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	body, err = ioutil.ReadAll(req.Body)
+	if err != nil {
+		middleware.ReturnError(w, "error reading address details", 400)
+		return
+	}
+	defer req.Body.Close()
+
+	addresses := &ignoreAddressRequest{}
+	if err := json.Unmarshal(body, addresses); err != nil {
+		middleware.ReturnError(w, "error reading addresses", 400)
+		return
+	}
+
+	oid, err := h.addrClient.Ignore(req.Context(), userContext, id, addresses.AddressIDs, addresses.IgnoreValue)
+	if oid != userContext.GetOrgID() {
+		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	if err != nil {
+		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	middleware.ReturnSuccess(w, "addresses ignored", 200)
+}
+
+type exportAddressRequest struct {
+	AllAddresses bool    `json:"all_addresses"`
+	AddressIDs   []int64 `json:"address_ids,omitempty"`
+}
+
+func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var body []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	body, err = ioutil.ReadAll(req.Body)
+	if err != nil {
+		middleware.ReturnError(w, "error reading address details", 400)
+		return
+	}
+	defer req.Body.Close()
+
+	exportAddrs := &exportAddressRequest{}
+	if err := json.Unmarshal(body, exportAddrs); err != nil {
+		middleware.ReturnError(w, "error reading addresses", 400)
+		return
+	}
+	requestedAddrIDs := make(map[int64]struct{}, len(exportAddrs.AddressIDs))
+	for _, addrID := range exportAddrs.AddressIDs {
+		requestedAddrIDs[addrID] = struct{}{}
+	}
+
+	allAddresses := make([]*am.ScanGroupAddress, 0)
+
+	var lastIndex int64
+	for {
+		filter := &am.ScanGroupAddressFilter{
+			OrgID:   userContext.GetOrgID(),
+			GroupID: id,
+			Start:   lastIndex,
+			Limit:   1000,
+		}
+		oid, addrs, err := h.addrClient.Get(req.Context(), userContext, filter)
+		if err != nil {
+			log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+			middleware.ReturnError(w, "internal error", 500)
+			return
+		}
+
+		if len(addrs) == 0 {
+			break
+		}
+
+		var lastAddr int64
+		for _, addr := range addrs {
+			if addr.AddressID > lastAddr {
+				lastAddr = addr.AddressID
+			}
+
+			if exportAddrs.AllAddresses {
+				allAddresses = append(allAddresses, addr)
+			} else if _, ok := requestedAddrIDs[addr.AddressID]; ok {
+				allAddresses = append(allAddresses, addr)
+			}
+
+			if oid != addr.OrgID {
+				log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", id).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+				middleware.ReturnError(w, "failed to get addresses", 500)
+				return
+			}
+		}
+		lastIndex = lastAddr
+	}
+
+	data, err := json.Marshal(allAddresses)
+	if err != nil {
+		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+		middleware.ReturnError(w, "internal error during processing", 500)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=addresses.%d.%d.json", id, time.Now().Unix()))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
 }
 
 func groupIDFromRequest(req *http.Request) (int, error) {

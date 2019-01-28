@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -51,6 +52,9 @@ func main() {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
+		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
+		r.Patch("/group/{id}/delete", addrHandlers.DeleteAddresses)
+		r.Patch("/group/{id}/ignore", addrHandlers.IgnoreAddresses)
 	})
 
 	// testing scangroups
@@ -270,31 +274,44 @@ func testAddrClient() am.AddressService {
 		defer addrLock.RUnlock()
 		addresses := make([]*am.ScanGroupAddress, 0)
 		i := 0
-		for _, addr := range allAddresses {
-			log.Info().Msgf("%#v", addr)
-			if filter.GroupID == addr.GroupID {
-				if addr.AddressID >= filter.Start && filter.Limit <= i {
-					addresses = append(addresses, addr)
-					i++
-				} else if filter.Limit > i {
-					break
-				}
+		log.Info().Msgf("GETTING ADDRS: %#v", filter)
+		sortedKeys := make([]int64, 0)
+
+		for addrID, addr := range allAddresses {
+			if filter.GroupID != addr.GroupID {
+				continue
+			}
+			sortedKeys = append(sortedKeys, addrID)
+		}
+		sort.Slice(sortedKeys, func(i, j int) bool { return sortedKeys[i] < sortedKeys[j] })
+
+		for _, key := range sortedKeys {
+			addr := allAddresses[key]
+			if filter.Limit < i {
+				log.Info().Msgf("limit %d i %d", filter.Limit, i)
+				break
+			}
+
+			if addr.AddressID > filter.Start && filter.Limit > i {
+				log.Info().Msgf("adding addr %#v", addr)
+				addresses = append(addresses, addr)
+				i++
 			}
 		}
+
 		return userContext.GetOrgID(), addresses, nil
 	}
 
 	addrClient.CountFn = func(ctx context.Context, userContext am.UserContext, groupID int) (oid int, count int, err error) {
 		addrLock.RLock()
 		defer addrLock.RUnlock()
-		addrs := make([]*am.ScanGroupAddress, 0)
+		i := 0
 		for _, addr := range allAddresses {
-			log.Info().Msgf("%#v", addr)
 			if addr.GroupID == groupID {
-				addrs = append(addrs, addr)
+				i++
 			}
 		}
-		return userContext.GetOrgID(), len(addrs), nil
+		return userContext.GetOrgID(), i, nil
 	}
 
 	addrClient.UpdateFn = func(ctx context.Context, userContext am.UserContext, addresses map[string]*am.ScanGroupAddress) (oid int, count int, err error) {
@@ -319,6 +336,15 @@ func testAddrClient() am.AddressService {
 		defer addrLock.Unlock()
 		for _, id := range addressIDs {
 			delete(allAddresses, id)
+		}
+		return userContext.GetOrgID(), nil
+	}
+
+	addrClient.IgnoreFn = func(ctx context.Context, userContext am.UserContext, groupID int, addressIDs []int64, ignoreValue bool) (oid int, err error) {
+		addrLock.Lock()
+		defer addrLock.Unlock()
+		for _, id := range addressIDs {
+			allAddresses[id].Ignored = ignoreValue
 		}
 		return userContext.GetOrgID(), nil
 	}
