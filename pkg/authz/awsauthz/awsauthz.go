@@ -13,29 +13,22 @@ import (
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/token"
-	"github.com/linkai-io/frontend/pkg/token/awstoken"
 	"github.com/rs/zerolog/log"
-	validator "gopkg.in/go-playground/validator.v9"
 )
 
 type AWSAuthenticate struct {
-	env         string
-	region      string
-	orgClient   am.OrganizationService
-	userContext am.UserContext
-	svc         *cip.CognitoIdentityProvider
-	validate    *validator.Validate
-	tokener     token.Tokener
+	env    string
+	region string
+	svc    *cip.CognitoIdentityProvider
+
+	tokener token.Tokener
 }
 
-func New(env, region string, orgClient am.OrganizationService, userContext am.UserContext) *AWSAuthenticate {
+func New(env, region string, tokener token.Tokener) *AWSAuthenticate {
 	return &AWSAuthenticate{
-		env:         env,
-		region:      region,
-		orgClient:   orgClient,
-		userContext: userContext,
-		validate:    validator.New(),
-		tokener:     awstoken.New(env, region),
+		env:     env,
+		region:  region,
+		tokener: tokener,
 	}
 }
 
@@ -50,37 +43,27 @@ func (a *AWSAuthenticate) Init(config []byte) error {
 	return nil
 }
 
-func (a *AWSAuthenticate) getOrgData(ctx context.Context, orgName string) (*am.Organization, error) {
-	_, org, err := a.orgClient.Get(ctx, a.userContext, orgName)
-	if err != nil {
-		return nil, err
-	}
-	return org, nil
-}
-
-func (a *AWSAuthenticate) Login(ctx context.Context, details *authz.LoginDetails) (map[string]string, error) {
+func (a *AWSAuthenticate) Login(ctx context.Context, orgData *am.Organization, details *authz.LoginDetails) (map[string]string, error) {
 	response := make(map[string]string, 0)
 
-	if err := a.validate.Struct(details); err != nil {
-		return response, err
-	}
+	log.Info().
+		Str("username", details.Username).
+		Str("user_pool_id", orgData.UserPoolID).
+		Str("user_pool_client_id", orgData.UserPoolAppClientID).
+		Str("org_name", orgData.OrgName).
+		Msg("got organization data")
 
-	org, err := a.getOrgData(ctx, details.OrgName)
-	if err != nil {
-		return response, err
-	}
-	log.Info().Str("username", details.Username).Str("user_pool_id", org.UserPoolID).Str("user_pool_client_id", org.UserPoolAppClientID).Str("org_name", org.OrgName).Msg("got organization data")
 	input := &cip.AdminInitiateAuthInput{
 		AuthFlow:       cip.AuthFlowTypeAdminNoSrpAuth,
 		AuthParameters: map[string]string{"USERNAME": details.Username, "PASSWORD": details.Password},
-		ClientId:       aws.String(org.UserPoolAppClientID),
-		UserPoolId:     aws.String(org.UserPoolID),
+		ClientId:       aws.String(orgData.UserPoolAppClientID),
+		UserPoolId:     aws.String(orgData.UserPoolID),
 	}
 
 	req := a.svc.AdminInitiateAuthRequest(input)
 	out, err := req.Send()
 	if err != nil {
-		log.Error().Err(err).Str("org_name", org.OrgName).Str("username", details.Username).Msg("authentication failure")
+		log.Error().Err(err).Str("org_name", orgData.OrgName).Str("username", details.Username).Msg("authentication failure")
 		return response, err
 	}
 
@@ -99,23 +82,14 @@ func (a *AWSAuthenticate) Login(ctx context.Context, details *authz.LoginDetails
 // SetNewPassword for when a user first logs in and needs to set their new password.
 // Instead of requiring us to send / expose the session & UID, we simply re-issue the flow but this time
 // capture the challenge and provide the new password.
-func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.LoginDetails) (map[string]string, error) {
+func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, orgData *am.Organization, details *authz.LoginDetails) (map[string]string, error) {
 	response := make(map[string]string, 0)
-
-	if err := a.validate.Struct(details); err != nil {
-		return response, err
-	}
-
-	org, err := a.getOrgData(ctx, details.OrgName)
-	if err != nil {
-		return response, err
-	}
 
 	input := &cip.AdminInitiateAuthInput{
 		AuthFlow:       cip.AuthFlowTypeAdminNoSrpAuth,
 		AuthParameters: map[string]string{"USERNAME": details.Username, "PASSWORD": details.Password},
-		ClientId:       aws.String(org.UserPoolAppClientID),
-		UserPoolId:     aws.String(org.UserPoolID),
+		ClientId:       aws.String(orgData.UserPoolAppClientID),
+		UserPoolId:     aws.String(orgData.UserPoolID),
 	}
 
 	req := a.svc.AdminInitiateAuthRequest(input)
@@ -132,8 +106,8 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.Log
 		ChallengeName:      cip.ChallengeNameTypeNewPasswordRequired,
 		ChallengeResponses: newPassParams,
 		Session:            out.Session,
-		ClientId:           aws.String(org.UserPoolAppClientID),
-		UserPoolId:         aws.String(org.UserPoolID),
+		ClientId:           aws.String(orgData.UserPoolAppClientID),
+		UserPoolId:         aws.String(orgData.UserPoolID),
 	}
 
 	newReq := a.svc.AdminRespondToAuthChallengeRequest(newPass)
@@ -154,13 +128,10 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, details *authz.Log
 func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetails) (map[string]string, error) {
 	response := make(map[string]string, 0)
 
-	if err := a.validate.Struct(details); err != nil {
-		return response, err
-	}
-
-	// it's OK to call unsafe extract here because even if they 'refresh' a token they control (from their own userpool)
-	// the authorizer lambda checks the signature against a valid JWK which we have stored in our DB for the organization name
-	// also, the token will fail validation because it's expired so, *shrug*
+	// it's OK to call unsafe extract here because even if they 'refresh' a token they control 
+	// (from their own userpool)
+	// the authorizer lambda checks the signature against a valid JWK which we have stored in our DB
+	// for the organization name.
 	accessToken, err := a.tokener.UnsafeExtractAccess(ctx, details.AccessToken)
 	if err != nil {
 		return response, err
@@ -194,46 +165,30 @@ func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetai
 }
 
 // Forgot password flow
-func (a *AWSAuthenticate) Forgot(ctx context.Context, details *authz.ResetDetails) error {
-	if err := a.validate.Struct(details); err != nil {
-		return err
-	}
-	log.Info().Msg("calling getOrgData in forgot")
-	org, err := a.getOrgData(ctx, details.OrgName)
-	if err != nil {
-		return err
-	}
+func (a *AWSAuthenticate) Forgot(ctx context.Context, orgData *am.Organization, details *authz.ResetDetails) error {
 
 	input := &cip.ForgotPasswordInput{
 		Username: aws.String(details.Username),
-		ClientId: aws.String(org.UserPoolAppClientID),
+		ClientId: aws.String(orgData.UserPoolAppClientID),
 	}
 
 	req := a.svc.ForgotPasswordRequest(input)
-	_, err = req.Send()
+	_, err := req.Send()
 	return err
 }
 
 // Reset password flow
-func (a *AWSAuthenticate) Reset(ctx context.Context, details *authz.ResetDetails) error {
-	if err := a.validate.Struct(details); err != nil {
-		return err
-	}
-
-	org, err := a.getOrgData(ctx, details.OrgName)
-	if err != nil {
-		return err
-	}
+func (a *AWSAuthenticate) Reset(ctx context.Context, orgData *am.Organization, details *authz.ResetDetails) error {
 
 	input := &cip.ConfirmForgotPasswordInput{
 		Username:         aws.String(details.Username),
 		ConfirmationCode: aws.String(details.VerificationCode),
 		Password:         aws.String(details.Password),
-		ClientId:         aws.String(org.UserPoolAppClientID),
+		ClientId:         aws.String(orgData.UserPoolAppClientID),
 	}
 
 	req := a.svc.ConfirmForgotPasswordRequest(input)
-	_, err = req.Send()
+	_, err := req.Send()
 
 	return err
 }

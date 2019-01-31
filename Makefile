@@ -10,6 +10,8 @@ build:
 upload:
 	aws s3 sync dist/console/ s3://linkai-infra/frontend/lambdas/console/
 
+
+
 # Authentication
 buildauth:
 	GOOS=linux go build -o dist/console/main ./cmd/console/auth/ && zip -j dist/console/auth_handler.zip dist/console/main && rm dist/console/main
@@ -60,3 +62,17 @@ buildorg:
 
 deployorg: buildorg upload
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/org_handler.zip --function-name dev-console-handler-orgservice
+
+# Scangroup Handler
+buildscangroup:
+	GOOS=linux go build -o dist/console/main ./cmd/console/scangroup/ && zip -j dist/console/scangroup_handler.zip dist/console/main && rm dist/console/main
+
+deployscangroup: buildscangroup upload
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/scangroup_handler.zip --function-name dev-console-handler-scangroupservice
+
+# Address Handler
+buildaddress:
+	GOOS=linux go build -o dist/console/main ./cmd/console/address/ && zip -j dist/console/address_handler.zip dist/console/main && rm dist/console/main
+
+deployaddress: buildaddress upload
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/address_handler.zip --function-name dev-console-handler-addressservice

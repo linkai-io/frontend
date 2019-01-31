@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/linkai-io/frontend/pkg/authz"
-	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/middleware"
+	"github.com/linkai-io/frontend/pkg/token"
 	"github.com/rs/zerolog/log"
 	validator "gopkg.in/go-playground/validator.v9"
 
@@ -25,13 +25,17 @@ type UserHandlers struct {
 	userClient       am.UserService
 	orgClient        am.OrganizationService
 	ContextExtractor middleware.UserContextExtractor
+	tokener          token.Tokener
+	authenticator    authz.Authenticator
 }
 
-func New(userClient am.UserService, orgClient am.OrganizationService, userEnv *UserEnv) *UserHandlers {
+func New(userClient am.UserService, tokener token.Tokener, authenticator authz.Authenticator, orgClient am.OrganizationService, userEnv *UserEnv) *UserHandlers {
 	return &UserHandlers{
 		userClient:       userClient,
 		orgClient:        orgClient,
 		env:              userEnv,
+		tokener:          tokener,
+		authenticator:    authenticator,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
 }
@@ -108,14 +112,14 @@ func (h *UserHandlers) ChangePassword(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	authenticator := awsauthz.New(h.env.Env, h.env.Region, h.orgClient, userContext)
-	if err := authenticator.Init(nil); err != nil {
-		log.Error().Err(err).Msg("internal authenticator error")
+	_, orgData, err := h.orgClient.GetByID(req.Context(), userContext, userContext.GetOrgID())
+	if err != nil {
+		log.Error().Err(err).Msg("error getting org by id")
 		middleware.ReturnError(w, "internal authenticator error", 500)
 		return
 	}
 
-	tokens, err := authenticator.SetNewPassword(req.Context(), loginDetails)
+	tokens, err := h.authenticator.SetNewPassword(req.Context(), orgData, loginDetails)
 	if err != nil {
 		log.Error().Err(err).Msg("internal authenticator error")
 		middleware.ReturnError(w, err.Error(), 500)

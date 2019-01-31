@@ -53,17 +53,23 @@ func init() {
 }
 
 // Help function to generate an IAM policy
-func generatePolicy(accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
+func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
 	log.Info().Msg("returning success policy")
 	return events.APIGatewayCustomAuthorizerResponse{
 		PrincipalID: accessToken.CognitoUserName,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",
-			Statement: []events.IAMPolicyStatement{events.IAMPolicyStatement{
-				Effect:   "Allow",
-				Action:   []string{"execute-api:Invoke"},
-				Resource: []string{policyResource},
-			},
+			Statement: []events.IAMPolicyStatement{
+				events.IAMPolicyStatement{
+					Effect:   "Allow",
+					Action:   []string{"execute-api:Invoke"},
+					Resource: []string{policyResource},
+				},
+				events.IAMPolicyStatement{
+					Effect:   "Allow",
+					Action:   []string{"s3:Get*"},
+					Resource: []string{fmt.Sprintf("arn:aws:s3:::%s-linkai-webdata/%s/*", env, orgCID)},
+				},
 			},
 		},
 		Context: nil,
@@ -119,7 +125,12 @@ func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerR
 		return returnUnauthorized("bad cookie value")
 	}
 
-	return generatePolicy(accessToken)
+	if safeCookie.OrgCID == "" {
+		log.Error().Err(err).Msg("orgCID was empty")
+		return returnUnauthorized("bad cookie value")
+	}
+
+	return generatePolicy(safeCookie.OrgCID, accessToken)
 }
 
 func main() {

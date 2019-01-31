@@ -60,6 +60,7 @@ func TestExpired(t *testing.T) {
 
 	at := awstoken.New("dev", "us-east-1")
 	_, err := at.ValidateAccessToken(context.Background(), org, accessKey)
+
 	if vErr, ok := err.(*jwt.ValidationError); ok {
 
 		if vErr.Errors == jwt.ValidationErrorExpired {

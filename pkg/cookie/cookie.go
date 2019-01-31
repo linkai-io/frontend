@@ -9,7 +9,8 @@ import (
 )
 
 type AuthCookie struct {
-	Data string `json:"data"`
+	Data   string `json:"data"`
+	OrgCID string `json:"org_custom_id"`
 }
 
 type SecureCookie struct {
@@ -31,8 +32,8 @@ func New(hashKey, blockKey []byte) *SecureCookie {
 	return c
 }
 
-func (c *SecureCookie) SetAuthCookie(w http.ResponseWriter, data string) error {
-	value := &AuthCookie{Data: data}
+func (c *SecureCookie) SetAuthCookie(w http.ResponseWriter, data string, orgCID string) error {
+	value := &AuthCookie{Data: data, OrgCID: orgCID}
 	encoded, err := c.s.Encode("linkai_auth", value)
 	if err != nil {
 		return err

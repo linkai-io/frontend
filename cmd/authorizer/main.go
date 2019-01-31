@@ -140,7 +140,7 @@ func returnUnauthorized(msg string) (events.APIGatewayCustomAuthorizerResponse, 
 			},
 			},
 		},
-		Context: map[string]interface{}{"message": msg, "customErrorMessage": msg},
+		Context: map[string]interface{}{"message": msg, "messageString": msg},
 	}, nil
 }
 

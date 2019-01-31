@@ -63,16 +63,21 @@ func (h *ScanGroupHandlers) GetScanGroups(w http.ResponseWriter, req *http.Reque
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	oid, groups, err := h.scanGroupClient.Groups(req.Context(), userContext)
 	if err != nil {
-		middleware.ReturnError(w, "error listing groups", 500)
+		logger.Error().Err(err).Msg("error getting groups for user")
+		middleware.ReturnError(w, "error listing groups: "+err.Error(), 500)
 		return
 	}
 
+	logger.Info().Msgf("groups: %#v", groups)
+
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
-		middleware.ReturnError(w, "internal error", 500)
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
+		middleware.ReturnError(w, "internal authorization error", 500)
+		return
 	}
 
 	groupsForUser := make([]*serializers.ScanGroupForUser, len(groups))
@@ -91,22 +96,25 @@ func (h *ScanGroupHandlers) GetScanGroupByID(w http.ResponseWriter, req *http.Re
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "id")
 	groupID, err := strconv.Atoi(param)
 	if err != nil {
+		logger.Error().Err(err).Msg("invalid group_id parameter")
 		middleware.ReturnError(w, "invalid parameter", 403)
 		return
 	}
 
 	oid, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
 	if err != nil {
+		logger.Error().Err(err).Msg("error getting group")
 		middleware.ReturnError(w, "error getting group", 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -124,17 +132,19 @@ func (h *ScanGroupHandlers) GetScanGroupByName(w http.ResponseWriter, req *http.
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
 
 	oid, group, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
+		logger.Error().Err(err).Msg("error listing groups")
 		middleware.ReturnError(w, "error listing groups", 400)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -162,22 +172,18 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
 	if strings.Contains(param, "/") {
+		logger.Error().Msg("invalid character '/' in group name")
 		middleware.ReturnError(w, "'/' is not allowed in the group name", 401)
 		return
 	}
 
-	oid, exists, _ := h.scanGroupClient.GetByName(req.Context(), userContext, param)
+	_, exists, _ := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if exists != nil {
 		middleware.ReturnError(w, "group name already exists", 400)
-		return
-	}
-
-	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
-		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
@@ -188,8 +194,6 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	}
 	defer req.Body.Close()
 
-	log.Info().Msgf("blarg: %s", string(body))
-
 	groupDetails := &ScanGroupDetails{}
 	if err := json.Unmarshal(body, groupDetails); err != nil {
 		middleware.ReturnError(w, "error reading scangroup", 400)
@@ -197,7 +201,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	}
 
 	if err := h.validate.Struct(groupDetails); err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("invalid data passed")
+		logger.Error().Err(err).Msg("invalid data passed")
 		middleware.ReturnError(w, err.Error(), 401) // TODO: don't expose internal errors
 		return
 	}
@@ -206,14 +210,13 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	group := &am.ScanGroup{}
 	group.GroupName = groupDetails.GroupName
 	group.OrgID = userContext.GetOrgID()
-	group.CreatedBy = userContext.GetUserCID() // replaced with user email
 	group.CreatedByID = userContext.GetUserID()
 	group.CreationTime = now
-	group.ModifiedBy = userContext.GetUserCID() // replaced with user email
 	group.ModifiedByID = userContext.GetUserID()
 	group.ModifiedTime = now
 	group.OriginalInputS3URL = "s3://empty"
 	group.Paused = true
+
 	group.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
 			RequestsPerSecond: groupDetails.ConcurrentRequests,
@@ -239,28 +242,23 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		},
 	}
 
-	oid, gid, err = h.scanGroupClient.Create(req.Context(), userContext, group)
+	oid, gid, err := h.scanGroupClient.Create(req.Context(), userContext, group)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error creating scangroup")
+		logger.Error().Err(err).Msg("error creating scangroup")
 		middleware.ReturnError(w, "error creating scangroup", 400)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
-	}
-
-	environment := h.env.Env
-	if h.env.Env == "prod" {
-		environment = ""
 	}
 
 	created := &groupCreated{
 		Status:           "OK",
 		GroupID:          gid,
-		UploadAddressURI: fmt.Sprintf("%s/address/%d/initial", environment, gid),
+		UploadAddressURI: fmt.Sprintf("/address/%d/initial", gid),
 	}
 
 	data, err := json.Marshal(created)
@@ -282,23 +280,26 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
 
 	oid, original, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to get group by name")
 		middleware.ReturnError(w, "group not found", 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
 		middleware.ReturnError(w, "error reading group details", 400)
 		return
 	}
@@ -306,13 +307,13 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 
 	updatedGroup := &ScanGroupDetails{}
 	if err := json.Unmarshal(body, updatedGroup); err != nil {
-		log.Error().Err(err).Msg("failed to unmarshal")
+		logger.Error().Err(err).Msg("failed to unmarshal")
 		middleware.ReturnError(w, "error reading group", 400)
 		return
 	}
 
 	if err := h.validate.Struct(updatedGroup); err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("invalid data passed")
+		logger.Error().Err(err).Msg("invalid data passed")
 		middleware.ReturnError(w, err.Error(), 401) // TODO: don't expose internal errors
 		return
 	}
@@ -323,7 +324,6 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 	}
 
 	original.GroupName = updatedGroup.GroupName
-	original.ModifiedBy = userContext.GetUserCID() // replaced with user email
 	original.ModifiedByID = userContext.GetUserID()
 	original.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
@@ -352,7 +352,8 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 
 	_, _, err = h.scanGroupClient.Update(req.Context(), userContext, original)
 	if err != nil {
-		middleware.ReturnError(w, "error updating scangroup", 400)
+		logger.Error().Err(err).Msg("failed to update scangroup")
+		middleware.ReturnError(w, "internal error updating scangroup", 500)
 		return
 	}
 
@@ -367,24 +368,26 @@ func (h *ScanGroupHandlers) DeleteScanGroup(w http.ResponseWriter, req *http.Req
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
 
 	oid, group, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to get group by name")
 		middleware.ReturnError(w, "failure retrieving group", 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
 	_, _, err = h.scanGroupClient.Delete(req.Context(), userContext, group.GroupID)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("deletion failure")
+		logger.Error().Err(err).Msg("deletion failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -405,23 +408,26 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
-	log.Info().Str("group_name", param).Msg("looking up group")
+	logger.Info().Str("group_name", param).Msg("looking up group")
 	oid, group, err := h.scanGroupClient.GetByName(req.Context(), userContext, param)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to get group by name")
 		middleware.ReturnError(w, "group not found", 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
 		middleware.ReturnError(w, "error reading group details", 400)
 		return
 	}
@@ -429,6 +435,7 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 
 	status := &groupStatus{}
 	if err := json.Unmarshal(body, status); err != nil {
+		logger.Error().Err(err).Msg("failed to read status")
 		middleware.ReturnError(w, "error reading status", 400)
 		return
 	}
@@ -443,7 +450,7 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 	}
 
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("deletion failure")
+		logger.Error().Err(err).Msg("deletion failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}

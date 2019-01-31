@@ -1,6 +1,10 @@
 package authz
 
-import "context"
+import (
+	"context"
+
+	"github.com/linkai-io/am/am"
+)
 
 const (
 	AuthFailed              = "AUTH_FAILED"
@@ -37,9 +41,9 @@ type UserDetails struct {
 // Authenticator authenticates a user
 type Authenticator interface {
 	Init(config []byte) error
-	Login(ctx context.Context, details *LoginDetails) (map[string]string, error)
-	SetNewPassword(ctx context.Context, details *LoginDetails) (map[string]string, error)
+	Login(ctx context.Context, orgData *am.Organization, details *LoginDetails) (map[string]string, error)
+	SetNewPassword(ctx context.Context, orgData *am.Organization, details *LoginDetails) (map[string]string, error)
 	Refresh(ctx context.Context, details *TokenDetails) (map[string]string, error)
-	Forgot(ctx context.Context, details *ResetDetails) error
-	Reset(ctx context.Context, details *ResetDetails) error
+	Forgot(ctx context.Context, orgData *am.Organization, details *ResetDetails) error
+	Reset(ctx context.Context, orgData *am.Organization, details *ResetDetails) error
 }

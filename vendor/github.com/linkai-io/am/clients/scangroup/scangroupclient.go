@@ -119,6 +119,7 @@ func (c *Client) AllGroups(ctx context.Context, userContext am.UserContext, filt
 
 func (c *Client) Groups(ctx context.Context, userContext am.UserContext) (oid int, groups []*am.ScanGroup, err error) {
 	var stream service.ScanGroup_GroupsClient
+	oid = userContext.GetOrgID()
 
 	in := &service.GroupsRequest{
 		UserContext: convert.DomainToUserContext(userContext),
@@ -147,8 +148,18 @@ func (c *Client) Groups(ctx context.Context, userContext am.UserContext) (oid in
 		if err != nil {
 			return 0, nil, err
 		}
-		groups = append(groups, convert.ScanGroupToDomain(group.GetGroup()))
-		oid = int(group.GetOrgID())
+
+		domainGroup := group.GetGroup()
+		// empty group
+		if domainGroup.GetOrgID() == 0 && domainGroup.GetGroupID() == 0 {
+			continue
+		}
+
+		groups = append(groups, convert.ScanGroupToDomain(domainGroup))
+		if domainGroup.GetOrgID() != int32(oid) {
+			log.Info().Msgf("%#v OID: %d", domainGroup, oid)
+			return 0, nil, am.ErrOrgIDMismatch
+		}
 	}
 
 	return oid, groups, nil

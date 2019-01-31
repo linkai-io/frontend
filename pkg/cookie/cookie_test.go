@@ -18,9 +18,10 @@ var (
 func TestCookie(t *testing.T) {
 	c := cookie.New(testHashKey, testBlockKey)
 	data := "1234"
+	orgCID := "orgcid"
 
 	setHandler := func(w http.ResponseWriter, r *http.Request) {
-		c.SetAuthCookie(w, data)
+		c.SetAuthCookie(w, data, orgCID)
 		fmt.Fprintf(w, "OK")
 	}
 
@@ -59,9 +60,10 @@ func TestExpiredTestCookie(t *testing.T) {
 	c := cookie.New(testHashKey, testBlockKey)
 	c.SetExpires(1)
 	data := "1234"
+	orgCID := "orgCID"
 
 	setHandler := func(w http.ResponseWriter, r *http.Request) {
-		c.SetAuthCookie(w, data)
+		c.SetAuthCookie(w, data, orgCID)
 		fmt.Fprintf(w, "OK")
 	}
 

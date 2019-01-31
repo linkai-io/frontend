@@ -41,6 +41,9 @@ func TestGetAddresses(t *testing.T) {
 		}
 		return userContext.GetOrgID(), addresses, nil
 	}
+	addrClient.CountFn = func(ctx context.Context, userContext am.UserContext, groupID int) (int, int, error) {
+		return userContext.GetOrgID(), 1, nil
+	}
 
 	scanGroupClient := &mock.ScanGroupService{}
 	addr := address.New(addrClient, scanGroupClient)

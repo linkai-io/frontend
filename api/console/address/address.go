@@ -15,7 +15,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
-	"github.com/rs/zerolog/log"
 
 	"github.com/linkai-io/am/am"
 )
@@ -49,6 +48,7 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	groupID, err := groupIDFromRequest(req)
 	if err != nil {
@@ -58,14 +58,14 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 
 	filter, err := h.ParseGetFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("failed parse url query parameters")
+		logger.Error().Err(err).Msg("failed parse url query parameters")
 		middleware.ReturnError(w, "invalid parameters supplied", 401)
 		return
 	}
 
 	oid, addrs, err := h.addrClient.Get(req.Context(), userContext, filter)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("failed to get addresses")
+		logger.Error().Err(err).Msg("failed to get addresses")
 		middleware.ReturnError(w, "failed to get addresses: "+err.Error(), 500)
 		return
 	}
@@ -76,7 +76,7 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 			lastAddr = addr.AddressID
 		}
 		if oid != addr.OrgID {
-			log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+			logger.Error().Err(err).Msg("authorization failure")
 			middleware.ReturnError(w, "failed to get addresses", 500)
 			return
 		}
@@ -84,7 +84,7 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 
 	oid, total, err := h.addrClient.Count(req.Context(), userContext, groupID)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("failed to get address count")
+		logger.Error().Err(err).Msg("failed to get address count")
 		middleware.ReturnError(w, "failed to get address count: "+err.Error(), 500)
 		return
 	}
@@ -98,6 +98,7 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 
 	data, err := json.Marshal(response)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to get marshal response")
 		middleware.ReturnError(w, "failed return addresses", 500)
 		return
 	}
@@ -190,24 +191,26 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
 	}
-	log.Info().Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("processing list")
+	logger.Info().Msg("processing list")
 	defer req.Body.Close()
 
 	addrs, parserErrors := inputlist.ParseList(req.Body, 100000)
-	log.Info().Int("addr_len", len(addrs)).Msg("parsed list")
+	logger.Info().Int("addr_len", len(addrs)).Msg("parsed list")
 	if len(parserErrors) != 0 {
-		log.Error().Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error processing input")
+		logger.Error().Int("GroupID", groupID).Msg("error processing input")
 		putResponse.ParserErrors = parserErrors
 		putResponse.Status = "NG"
 		data, err = json.Marshal(putResponse)
 		if err != nil {
-			middleware.ReturnError(w, "internal marshal error", 500)
+			logger.Error().Err(err).Int("GroupID", groupID).Msg("error processing input")
+			middleware.ReturnError(w, "internal error", 500)
 			return
 		}
 		w.WriteHeader(400)
@@ -216,18 +219,18 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 
 	sgAddrs := makeAddrs(addrs, userContext.GetOrgID(), userContext.GetUserID(), groupID)
-	log.Info().Int("sgaddr_len", len(sgAddrs)).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("created sg addrs")
+	logger.Info().Int("sgaddr_len", len(sgAddrs)).Msg("created scangroup addresses")
 
 	oid, count, err := h.addrClient.Update(req.Context(), userContext, sgAddrs)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("failed to add addresses")
+		logger.Error().Err(err).Msg("failed to add addresses")
 		middleware.ReturnError(w, "failed to add addresses to scangroup", 500)
 		return
 	}
-	log.Info().Int("count", count).Int("OrgID", userContext.GetOrgID()).Int("GroupID", groupID).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("got count from update")
+	logger.Info().Int("count", count).Msg("got count from update")
 
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -238,12 +241,12 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 
 	data, err = json.Marshal(putResponse)
 	if err != nil {
-		middleware.ReturnError(w, "internal marshal error", 500)
+		logger.Error().Err(err).Msg("failed to marshal response")
+		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
 	w.WriteHeader(200)
-	log.Info().Msgf("RESPONSE: %s", string(data))
 	fmt.Fprintf(w, string(data))
 }
 
@@ -287,6 +290,7 @@ func (h *AddressHandlers) GetGroupCount(w http.ResponseWriter, req *http.Request
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	id, err := groupIDFromRequest(req)
 	if err != nil {
@@ -296,14 +300,15 @@ func (h *AddressHandlers) GetGroupCount(w http.ResponseWriter, req *http.Request
 
 	oid, count, err := h.addrClient.Count(req.Context(), userContext, id)
 	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
 	data, err = json.Marshal(&countResponse{Status: "OK", GroupID: id, Count: count})
 	if err != nil {
-		middleware.ReturnError(w, "internal marshal error", 500)
+		logger.Error().Err(err).Msg("error marshaling response")
+		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
@@ -325,6 +330,8 @@ func (h *AddressHandlers) DeleteAddresses(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	logger := middleware.UserContextLogger(userContext)
+
 	id, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
@@ -333,6 +340,7 @@ func (h *AddressHandlers) DeleteAddresses(w http.ResponseWriter, req *http.Reque
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
 		middleware.ReturnError(w, "error reading address details", 400)
 		return
 	}
@@ -340,19 +348,20 @@ func (h *AddressHandlers) DeleteAddresses(w http.ResponseWriter, req *http.Reque
 
 	addresses := &deleteAddressRequest{}
 	if err := json.Unmarshal(body, addresses); err != nil {
+		logger.Error().Err(err).Msg("failed to unmarshal addresses")
 		middleware.ReturnError(w, "error reading addresses", 400)
 		return
 	}
 
 	oid, err := h.addrClient.Delete(req.Context(), userContext, id, addresses.AddressIDs)
-	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+	if err != nil {
+		logger.Error().Err(err).Msg("error deleting addresses")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
-	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -375,6 +384,8 @@ func (h *AddressHandlers) IgnoreAddresses(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	logger := middleware.UserContextLogger(userContext)
+
 	id, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
@@ -383,6 +394,7 @@ func (h *AddressHandlers) IgnoreAddresses(w http.ResponseWriter, req *http.Reque
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
 		middleware.ReturnError(w, "error reading address details", 400)
 		return
 	}
@@ -390,19 +402,20 @@ func (h *AddressHandlers) IgnoreAddresses(w http.ResponseWriter, req *http.Reque
 
 	addresses := &ignoreAddressRequest{}
 	if err := json.Unmarshal(body, addresses); err != nil {
+		logger.Error().Err(err).Msg("failed to read addresses")
 		middleware.ReturnError(w, "error reading addresses", 400)
 		return
 	}
 
 	oid, err := h.addrClient.Ignore(req.Context(), userContext, id, addresses.AddressIDs, addresses.IgnoreValue)
-	if oid != userContext.GetOrgID() {
-		log.Error().Err(am.ErrOrgIDMismatch).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+	if err != nil {
+		logger.Error().Err(err).Msg("error ignoring addresses")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
 
-	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}
@@ -424,6 +437,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+	logger := middleware.UserContextLogger(userContext)
 
 	id, err := groupIDFromRequest(req)
 	if err != nil {
@@ -433,6 +447,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
 		middleware.ReturnError(w, "error reading address details", 400)
 		return
 	}
@@ -440,6 +455,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 
 	exportAddrs := &exportAddressRequest{}
 	if err := json.Unmarshal(body, exportAddrs); err != nil {
+		logger.Error().Err(err).Msg("failed to read addresses")
 		middleware.ReturnError(w, "error reading addresses", 400)
 		return
 	}
@@ -460,7 +476,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 		}
 		oid, addrs, err := h.addrClient.Get(req.Context(), userContext, filter)
 		if err != nil {
-			log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+			logger.Error().Err(err).Msg("error deleting addresses")
 			middleware.ReturnError(w, "internal error", 500)
 			return
 		}
@@ -482,7 +498,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 			}
 
 			if oid != addr.OrgID {
-				log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("GroupID", id).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("authorization failure")
+				logger.Error().Err(err).Msg("authorization failure")
 				middleware.ReturnError(w, "failed to get addresses", 500)
 				return
 			}
@@ -492,7 +508,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 
 	data, err := json.Marshal(allAddresses)
 	if err != nil {
-		log.Error().Err(err).Int("OrgID", userContext.GetOrgID()).Int("UserID", userContext.GetUserID()).Str("TraceID", userContext.GetTraceID()).Msg("error deleting addresses")
+		logger.Error().Err(err).Msg("error during marshal")
 		middleware.ReturnError(w, "internal error during processing", 500)
 		return
 	}

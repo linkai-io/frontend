@@ -20,7 +20,7 @@ func TestNewGroupValidators(t *testing.T) {
 		port3      bool
 		concurrent bool
 	}
-	newGroup := &scangroup.NewScanGroup{}
+	newGroup := &scangroup.ScanGroupDetails{}
 	newGroup.GroupName = "test/"
 	domains := []string{"ok", "日本", ")@#asdbadf", "bad.bad", "bad,"}
 	newGroup.CustomSubNames = domains
@@ -59,7 +59,7 @@ func TestNewGroupValidators(t *testing.T) {
 		t.Fatalf("%#v\n", er)
 	}
 
-	validGroup := &scangroup.NewScanGroup{}
+	validGroup := &scangroup.ScanGroupDetails{}
 	validGroup.GroupName = "日本"
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 10

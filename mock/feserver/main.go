@@ -20,9 +20,14 @@ import (
 	"github.com/linkai-io/frontend/api/console/org"
 	"github.com/linkai-io/frontend/api/console/scangroup"
 	"github.com/linkai-io/frontend/api/console/user"
+	"github.com/linkai-io/frontend/api/console/webdata"
+	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
+	"github.com/linkai-io/frontend/pkg/token/awstoken"
 )
 
 func main() {
+	env := "local"
+	region := "us-east-1"
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("service", "FakeServer").Logger()
 
@@ -31,6 +36,10 @@ func main() {
 	addrClient := testAddrClient()
 	userClient := testUserClient()
 	scanGroupClient := testScanGroupClient()
+	webClient := testWebClient()
+
+	tokener := awstoken.New(env, region)
+	authenticator := awsauthz.New(env, region, tokener)
 
 	addrHandlers := address.New(addrClient, scanGroupClient)
 	addrHandlers.ContextExtractor = fakeContext
@@ -38,10 +47,13 @@ func main() {
 	orgHandlers := org.New(orgClient)
 	orgHandlers.ContextExtractor = fakeContext
 
-	userHandlers := user.New(userClient, orgClient, &user.UserEnv{Env: "local", Region: "us-east-1"})
+	userHandlers := user.New(userClient, tokener, authenticator, orgClient, &user.UserEnv{Env: env, Region: region})
 	userHandlers.ContextExtractor = fakeContext
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, &scangroup.ScanGroupEnv{Env: "local", Region: "us-east-1"})
+	webHandlers := webdata.New(webClient)
+	webHandlers.ContextExtractor = fakeContext
+
+	scanGroupHandlers := scangroup.New(scanGroupClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
 	scanGroupHandlers.ContextExtractor = fakeContext
 	r.NotFound(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
@@ -84,6 +96,12 @@ func main() {
 		r.Patch("/password", userHandlers.ChangePassword)
 	})
 
+	r.Route("/web", func(r chi.Router) {
+		r.Get("/snapshots/{id}", webHandlers.GetSnapshots)
+		r.Get("/certificates/{id}", webHandlers.GetCertificates)
+		r.Get("/responses/{id}", webHandlers.GetResponses)
+	})
+
 	log.Info().Msg("listening on :3000")
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
@@ -93,6 +111,114 @@ func main() {
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
 	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue"}, true
+}
+
+func testWebClient() am.WebDataService {
+	webClient := &mock.WebDataService{}
+	var respID int64
+	var certID int64
+	var snapshotID int64
+
+	webClient.GetResponsesFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebResponseFilter) (int, []*am.HTTPResponse, error) {
+
+		responses := make([]*am.HTTPResponse, 2)
+		id := atomic.AddInt64(&respID, 1)
+		responses[0] = makeResponse(userContext, filter, id)
+		id = atomic.AddInt64(&respID, 1)
+		responses[1] = makeResponse(userContext, filter, id)
+		return userContext.GetOrgID(), responses, nil
+	}
+
+	webClient.GetCertificatesFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebCertificateFilter) (int, []*am.WebCertificate, error) {
+		certs := make([]*am.WebCertificate, 2)
+		id := atomic.AddInt64(&certID, 1)
+		certs[0] = makeCert(userContext, filter, id)
+		id = atomic.AddInt64(&certID, 1)
+		certs[1] = makeCert(userContext, filter, id)
+		return userContext.GetOrgID(), certs, nil
+	}
+
+	webClient.GetSnapshotsFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebSnapshotFilter) (int, []*am.WebSnapshot, error) {
+		snaps := make([]*am.WebSnapshot, 2)
+		id := atomic.AddInt64(&snapshotID, 1)
+		snaps[0] = makeSnapshot(userContext, filter, id)
+		id = atomic.AddInt64(&snapshotID, 1)
+		snaps[1] = makeSnapshot(userContext, filter, id)
+		return userContext.GetOrgID(), snaps, nil
+	}
+
+	return webClient
+}
+
+func makeSnapshot(userContext am.UserContext, filter *am.WebSnapshotFilter, respID int64) *am.WebSnapshot {
+	return &am.WebSnapshot{
+		SnapshotID:           respID,
+		OrgID:                userContext.GetOrgID(),
+		GroupID:              filter.GroupID,
+		AddressID:            respID,
+		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
+		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
+		SnapshotLink:         "/something/something.png",
+		SerializedDOMHash:    "abcd",
+		SerializedDOMLink:    "/something/something",
+		ResponseTimestamp:    time.Now().UnixNano(),
+		IsDeleted:            false,
+	}
+}
+
+func makeCert(userContext am.UserContext, filter *am.WebCertificateFilter, respID int64) *am.WebCertificate {
+	return &am.WebCertificate{
+		OrgID:                             userContext.GetOrgID(),
+		GroupID:                           filter.GroupID,
+		CertificateID:                     respID,
+		ResponseTimestamp:                 time.Now().UnixNano(),
+		HostAddress:                       fmt.Sprintf("%d.example.com", respID),
+		Port:                              "443",
+		Protocol:                          "TLS 1.2",
+		KeyExchange:                       "ECDHE_RSA",
+		KeyExchangeGroup:                  "P-256",
+		Cipher:                            "AES_128_GCM",
+		Mac:                               "",
+		CertificateValue:                  0,
+		SubjectName:                       fmt.Sprintf("%d.example.com", respID),
+		SanList:                           []string{fmt.Sprintf("%d.example.com", respID)},
+		Issuer:                            "Amazon",
+		ValidFrom:                         1535328000,
+		ValidTo:                           1569585600,
+		CertificateTransparencyCompliance: "unknown",
+		IsDeleted:                         false,
+	}
+}
+
+func makeResponse(userContext am.UserContext, filter *am.WebResponseFilter, respID int64) *am.HTTPResponse {
+	return &am.HTTPResponse{
+		ResponseID:           respID,
+		OrgID:                userContext.GetOrgID(),
+		GroupID:              filter.GroupID,
+		AddressID:            1,
+		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
+		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
+		Scheme:               "http",
+		HostAddress:          fmt.Sprintf("%d.example.com", respID),
+		IPAddress:            fmt.Sprintf("1.1.1.%d", respID),
+		ResponsePort:         "80",
+		RequestedPort:        "80",
+		RequestID:            "1234",
+		Status:               200,
+		StatusText:           "OK",
+		URL:                  fmt.Sprintf("http://%d.example.com", respID),
+		Headers: map[string]string{
+			"cookie": "somecookie",
+		},
+		MimeType:          "text/html",
+		RawBody:           "blah",
+		RawBodyLink:       "/a/a/a/a/a/abcd",
+		RawBodyHash:       "abcd",
+		ResponseTimestamp: time.Now().UnixNano(),
+		IsDocument:        true,
+		WebCertificate:    nil,
+		IsDeleted:         false,
+	}
 }
 
 func testUserClient() am.UserService {

@@ -46,6 +46,7 @@ Thank you,<br>
 The linkai.io team`
 )
 
+// OrgProvisioner interface for creating all resources necessary to provision an organization
 type OrgProvisioner interface {
 	AddSupportOrganization(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string, password string) (string, string, error)
 	Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error)
@@ -67,6 +68,7 @@ type OrgProvision struct {
 	fedSvc     *identity.CognitoIdentity
 }
 
+// NewOrgProvision in the env/region
 func NewOrgProvision(env, region string, userClient am.UserService, orgClient am.OrganizationService) *OrgProvision {
 	p := &OrgProvision{orgClient: orgClient, userClient: userClient}
 	p.env = env
@@ -75,7 +77,6 @@ func NewOrgProvision(env, region string, userClient am.UserService, orgClient am
 	cfg.Region = p.region
 
 	p.createURLS()
-
 	p.svc = cip.New(cfg)
 	p.fedSvc = identity.New(cfg)
 	return p
@@ -201,11 +202,13 @@ func (p *OrgProvision) Add(ctx context.Context, userContext am.UserContext, orgD
 	}
 	log.Info().Msgf("creating org %#v", orgData)
 
-	_, _, _, _, err = p.orgClient.Create(ctx, userContext, orgData, userCID)
+	oid, uid, orgCID, _, err := p.orgClient.Create(ctx, userContext, orgData, userCID)
 	if err != nil {
 		p.cleanUp(ctx, orgData)
 		return "", err
 	}
+	log.Info().Int("org_id", oid).Int("user_id", uid).Str("org_cid", orgCID).Str("user_cid", userCID).Msg("created user in db")
+
 	return userCID, nil
 }
 
@@ -573,6 +576,7 @@ func (p *OrgProvision) createOwnerUser(ctx context.Context, orgData *am.Organiza
 	return *out.User.Username, err
 }
 
+// DeleteSupportOrganization delete the support org
 func (p *OrgProvision) DeleteSupportOrganization(ctx context.Context, userContext am.UserContext, orgName string) (string, string, error) {
 	_, org, err := p.orgClient.Get(ctx, userContext, orgName)
 	if err != nil {
@@ -639,6 +643,7 @@ func (p *OrgProvision) deleteIdentityPool(ctx context.Context, orgData *am.Organ
 	return nil
 }
 
+// List TODO: implement
 func (p *OrgProvision) List() (map[string]*am.Organization, error) {
 	return nil, nil
 }

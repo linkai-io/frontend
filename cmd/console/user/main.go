@@ -4,6 +4,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
+	"github.com/linkai-io/frontend/pkg/token/awstoken"
+
 	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/api/console/user"
@@ -39,7 +42,9 @@ func init() {
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	userHandlers := user.New(userClient, orgClient, userEnv)
+	tokener := awstoken.New(userEnv.Env, userEnv.Region)
+	authenticator := awsauthz.New(userEnv.Env, userEnv.Region, tokener)
+	userHandlers := user.New(userClient, tokener, authenticator, orgClient, userEnv)
 
 	r.Route("/user", func(r chi.Router) {
 		//r.Get("/", GetUser)

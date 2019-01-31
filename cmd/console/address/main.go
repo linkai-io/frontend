@@ -32,12 +32,15 @@ func init() {
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	addr := address.New(addrClient, scanGroupClient)
+	addrHandlers := address.New(addrClient, scanGroupClient)
 
 	r.Route("/address", func(r chi.Router) {
-		r.Get("/group/{id}", addr.GetAddresses)
-		r.Put("/group/{id}/initial", addr.PutInitialAddresses)
-		r.Get("/group/{id}/count", addr.GetGroupCount)
+		r.Get("/group/{id}", addrHandlers.GetAddresses)
+		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
+		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
+		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
+		r.Patch("/group/{id}/delete", addrHandlers.DeleteAddresses)
+		r.Patch("/group/{id}/ignore", addrHandlers.IgnoreAddresses)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)

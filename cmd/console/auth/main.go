@@ -10,9 +10,11 @@ import (
 	"github.com/linkai-io/am/pkg/lb/consul"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/api/console/auth"
+	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/cookie"
 	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
+	"github.com/linkai-io/frontend/pkg/token/awstoken"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -68,7 +70,14 @@ func init() {
 
 func main() {
 	r := chi.NewRouter()
-	authHandlers := auth.New(orgClient, secureCookie, authEnv)
+	tokener := awstoken.New(env, region)
+	authenticator := awsauthz.New(authEnv.Env, authEnv.Region, tokener)
+	if err := authenticator.Init(nil); err != nil {
+		log.Fatal().Err(err).Msg("internal authenticator error")
+		return
+	}
+
+	authHandlers := auth.New(orgClient, authenticator, tokener, secureCookie, authEnv)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/health", middleware.Health)
