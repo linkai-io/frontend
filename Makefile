@@ -76,3 +76,10 @@ buildaddress:
 
 deployaddress: buildaddress upload
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/address_handler.zip --function-name dev-console-handler-addressservice
+
+# WebData Handler
+buildwebdata:
+	GOOS=linux go build -o dist/console/main ./cmd/console/webdata/ && zip -j dist/console/webdata_handler.zip dist/console/main && rm dist/console/main
+
+deploywebdata: buildwebdata upload
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name dev-console-handler-webdataservice

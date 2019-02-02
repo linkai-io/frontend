@@ -144,22 +144,6 @@
   version = "v3.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:fe1f5a8a2884a361b21421c8a07df5f1a66ce7171904235bad427659a42b0d70"
-  name = "github.com/gammazero/deque"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2afb3858e9c73b567e0e05ea79906f4e1138bd4e"
-
-[[projects]]
-  branch = "master"
-  digest = "1:56d108880235425ce767421db2ed706fd4a164cc1507a2e7ecd7b85e009b23d6"
-  name = "github.com/gammazero/workerpool"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "86a96b5d5d92a0b49e0b9f278ae4615090b6172d"
-
-[[projects]]
   digest = "1:b8d8afedc1ea9028d6b8a037a61acaf5bac8ffb1ceb4b285a0af6654bfc62f16"
   name = "github.com/go-chi/chi"
   packages = ["."]
@@ -207,17 +191,6 @@
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
-
-[[projects]]
-  digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
-  name = "github.com/gomodule/redigo"
-  packages = [
-    "internal",
-    "redis",
-  ]
-  pruneopts = "UT"
-  revision = "9c11da706d9b7902c6da69c592f75637793fe121"
-  version = "v2.0.0"
 
 [[projects]]
   digest = "1:856bd1e35f6da8ce5671a5df09d0e89bf01e9b74b3dabb6d097d39b3813801e1"
@@ -315,7 +288,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b40c05647e21213346e93c93a1a37545c625fe1e6735eaeff2f0454e6cc9f08b"
+  digest = "1:95d202953d413bff5bd00fd4ece65e103a647cde6bc4e5c6d0fc2beac08f152c"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -327,16 +300,10 @@
     "clients/webdata",
     "mock",
     "pkg/bq",
-    "pkg/browser",
-    "pkg/cache",
     "pkg/convert",
-    "pkg/dnsclient",
     "pkg/filestorage",
-    "pkg/generators",
     "pkg/inputlist",
     "pkg/lb/consul",
-    "pkg/parsers",
-    "pkg/redisclient",
     "pkg/retrier",
     "pkg/secrets",
     "pkg/state",
@@ -346,20 +313,9 @@
     "protocservices/scangroup",
     "protocservices/user",
     "protocservices/webdata",
-    "services/module",
-    "services/module/web",
-    "services/module/web/state",
   ]
   pruneopts = "UT"
   revision = "1eae672814af3f01762e95a36d420fe118de6310"
-
-[[projects]]
-  digest = "1:1b46adc9e3d878cdf38a164cfdac2e19340f4d2662aa5bee88062f6ee08ac9df"
-  name = "github.com/miekg/dns"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "8fc2e5773bbd308ca2fcc962fd8d25c1bd0f6743"
-  version = "v1.1.4"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -407,10 +363,9 @@
   version = "v1.1"
 
 [[projects]]
-  digest = "1:2d60c78b08f7cf14a58da81a49f1f1276bba6dff9625aca35636162ce415f808"
+  digest = "1:759969381c91e420814a1ccc9c7329910cbc2c528db73b19c78f599253c696a0"
   name = "github.com/wirepair/gcd"
   packages = [
-    ".",
     "gcdapi",
     "gcdmessage",
   ]
@@ -443,35 +398,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d5891c5bca9c62e5d394ca26491d2b710a1dc08cedeb0ca8f9ac4c3305120b02"
-  name = "golang.org/x/crypto"
-  packages = [
-    "ed25519",
-    "ed25519/internal/edwards25519",
-  ]
-  pruneopts = "UT"
-  revision = "b01c7a72566457eb1420261cdafef86638fc3861"
-
-[[projects]]
-  branch = "master"
-  digest = "1:17bd53704d6036f24d511f744a3db2baf414430db7942e9616aadc710b2257a6"
+  digest = "1:599a0860458c883212bbc3be8f034ee638224b082b2ffde271f06f098ace3af1"
   name = "golang.org/x/net"
   packages = [
-    "bpf",
     "context",
     "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
-    "internal/iana",
-    "internal/socket",
     "internal/timeseries",
-    "ipv4",
-    "ipv6",
     "publicsuffix",
     "trace",
-    "websocket",
   ]
   pruneopts = "UT"
   revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
@@ -492,11 +430,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:aba2486bbebaadd1f62bde3c363ddbd984efade895833d86ed069f586fd9e899"
+  digest = "1:e148a4a19f62c442c03fbab1c8810780d739bcc3e9e6b818971035e1c4946582"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "aca44879d5644da7c5b8ec6a1115e9b6ea6c40d9"
+  revision = "afcc84fd7533758f95a6e93ae710aa945a0b7e73"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -568,7 +506,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "8ac453e89fca495c0d17f98932642f392e2a11f3"
+  revision = "4b09977fb92221987e99d190c8f88f2c92727a29"
 
 [[projects]]
   digest = "1:6dfe7f3314a390dc9e21368dd41236169bf40ae69674f42b7bd45db537751a94"
@@ -650,7 +588,6 @@
     "github.com/linkai-io/am/pkg/inputlist",
     "github.com/linkai-io/am/pkg/lb/consul",
     "github.com/linkai-io/am/pkg/secrets",
-    "github.com/linkai-io/am/services/module/web",
     "github.com/pkg/errors",
     "github.com/rs/zerolog",
     "github.com/rs/zerolog/log",

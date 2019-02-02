@@ -96,10 +96,13 @@ func main() {
 		r.Patch("/password", userHandlers.ChangePassword)
 	})
 
-	r.Route("/web", func(r chi.Router) {
-		r.Get("/snapshots/{id}", webHandlers.GetSnapshots)
-		r.Get("/certificates/{id}", webHandlers.GetCertificates)
-		r.Get("/responses/{id}", webHandlers.GetResponses)
+	r.Route("/webdata", func(r chi.Router) {
+		r.Get("/group/{id}/snapshots", webHandlers.GetSnapshots)
+		r.Post("/group/{id}/snapshots/download", webHandlers.ExportSnapshots)
+		r.Get("/group/{id}/certificates", webHandlers.GetCertificates)
+		r.Post("/group/{id}/certificates/download", webHandlers.ExportCertificates)
+		r.Get("/group/{id}/responses", webHandlers.GetResponses)
+		r.Post("/group/{id}/responses/download", webHandlers.ExportResponses)
 	})
 
 	log.Info().Msg("listening on :3000")
@@ -120,6 +123,9 @@ func testWebClient() am.WebDataService {
 	var snapshotID int64
 
 	webClient.GetResponsesFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebResponseFilter) (int, []*am.HTTPResponse, error) {
+		if filter.Start > 2 {
+			return userContext.GetOrgID(), make([]*am.HTTPResponse, 0), nil
+		}
 
 		responses := make([]*am.HTTPResponse, 2)
 		id := atomic.AddInt64(&respID, 1)
@@ -130,6 +136,9 @@ func testWebClient() am.WebDataService {
 	}
 
 	webClient.GetCertificatesFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebCertificateFilter) (int, []*am.WebCertificate, error) {
+		if filter.Start > 2 {
+			return userContext.GetOrgID(), make([]*am.WebCertificate, 0), nil
+		}
 		certs := make([]*am.WebCertificate, 2)
 		id := atomic.AddInt64(&certID, 1)
 		certs[0] = makeCert(userContext, filter, id)
@@ -139,6 +148,9 @@ func testWebClient() am.WebDataService {
 	}
 
 	webClient.GetSnapshotsFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebSnapshotFilter) (int, []*am.WebSnapshot, error) {
+		if filter.Start > 2 {
+			return userContext.GetOrgID(), make([]*am.WebSnapshot, 0), nil
+		}
 		snaps := make([]*am.WebSnapshot, 2)
 		id := atomic.AddInt64(&snapshotID, 1)
 		snaps[0] = makeSnapshot(userContext, filter, id)
@@ -208,7 +220,8 @@ func makeResponse(userContext am.UserContext, filter *am.WebResponseFilter, resp
 		StatusText:           "OK",
 		URL:                  fmt.Sprintf("http://%d.example.com", respID),
 		Headers: map[string]string{
-			"cookie": "somecookie",
+			"cookie":         "somecookie",
+			"content-length": "443",
 		},
 		MimeType:          "text/html",
 		RawBody:           "blah",
