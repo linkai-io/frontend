@@ -128,7 +128,7 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, orgData *am.Organi
 func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetails) (map[string]string, error) {
 	response := make(map[string]string, 0)
 
-	// it's OK to call unsafe extract here because even if they 'refresh' a token they control 
+	// it's OK to call unsafe extract here because even if they 'refresh' a token they control
 	// (from their own userpool)
 	// the authorizer lambda checks the signature against a valid JWK which we have stored in our DB
 	// for the organization name.
@@ -160,8 +160,13 @@ func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetai
 	if out.AuthenticationResult == nil {
 		return response, errors.New("empty authentication result")
 	}
-
-	return a.successMap(out.AuthenticationResult)
+	log.Info().Msgf("OUT: %#v\n", out)
+	responseData := make(map[string]string, 2)
+	responseData["state"] = authz.AuthSuccess
+	responseData["access_token"] = *out.AuthenticationResult.AccessToken
+	responseData["expires"] = strconv.FormatInt(*out.AuthenticationResult.ExpiresIn, 10)
+	responseData["token_type"] = *out.AuthenticationResult.TokenType
+	return responseData, nil
 }
 
 // Forgot password flow

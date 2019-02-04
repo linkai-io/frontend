@@ -54,7 +54,7 @@ func init() {
 
 // Help function to generate an IAM policy
 func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
-	log.Info().Msg("returning success policy")
+	log.Info().Str("OrgCID", orgCID).Str("cognito_user_name", accessToken.CognitoUserName).Msg("returning success policy")
 	return events.APIGatewayCustomAuthorizerResponse{
 		PrincipalID: accessToken.CognitoUserName,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
@@ -67,7 +67,7 @@ func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGa
 				},
 				events.IAMPolicyStatement{
 					Effect:   "Allow",
-					Action:   []string{"s3:Get*"},
+					Action:   []string{"s3:GetObject", "s3:ListBucket"},
 					Resource: []string{fmt.Sprintf("arn:aws:s3:::%s-linkai-webdata/%s/*", env, orgCID)},
 				},
 			},
@@ -88,7 +88,7 @@ func returnUnauthorized(msg string) (events.APIGatewayCustomAuthorizerResponse, 
 			},
 			},
 		},
-		Context: map[string]interface{}{"message": msg, "customErrorMessage": msg},
+		Context: map[string]interface{}{"message": msg, "errorMsg": msg},
 	}, nil
 }
 

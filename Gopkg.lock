@@ -288,7 +288,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:95d202953d413bff5bd00fd4ece65e103a647cde6bc4e5c6d0fc2beac08f152c"
+  digest = "1:3b7b1c2840b542864e48af5b5e90ec82b1906c290177395c012f9b086125b239"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -315,7 +315,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "1eae672814af3f01762e95a36d420fe118de6310"
+  revision = "680bf53d9808bc7c2a6df724acc2923328db0ba4"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -434,7 +434,7 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "afcc84fd7533758f95a6e93ae710aa945a0b7e73"
+  revision = "7ae0202eb74c2b534255c71b5a15fa4115aabbcc"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"

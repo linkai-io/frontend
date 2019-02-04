@@ -200,6 +200,10 @@ func (h *WebHandlers) GetSnapshots(w http.ResponseWriter, req *http.Request) {
 
 	var lastID int64
 	for _, snapshot := range snapshots {
+		if lastID == 0 {
+			logger.Info().Msgf("data: %#v", snapshot)
+		}
+		
 		if snapshot.SnapshotID > lastID {
 			lastID = snapshot.SnapshotID
 		}

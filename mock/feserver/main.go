@@ -437,7 +437,7 @@ func testAddrClient() am.AddressService {
 				i++
 			}
 		}
-
+		log.Info().Int("length", len(addresses)).Msg("returning addresses")
 		return userContext.GetOrgID(), addresses, nil
 	}
 
@@ -466,7 +466,7 @@ func testAddrClient() am.AddressService {
 				allAddresses[addr.AddressID] = addr
 			}
 		}
-		log.Info().Msg("updated addresses")
+		log.Info().Int("count", len(addresses)).Msg("updated addresses")
 		return userContext.GetOrgID(), len(addresses), nil
 	}
 

@@ -70,7 +70,7 @@ func init() {
 
 func main() {
 	r := chi.NewRouter()
-	tokener := awstoken.New(env, region)
+	tokener := awstoken.New(authEnv.Env, authEnv.Region)
 	authenticator := awsauthz.New(authEnv.Env, authEnv.Region, tokener)
 	if err := authenticator.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("internal authenticator error")

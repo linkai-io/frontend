@@ -116,8 +116,9 @@ func (t *AWSToken) ValidateAccessToken(ctx context.Context, org *am.Organization
 	if tok.IssuedAt == 0 {
 		return nil, errors.New("iat empty or missing")
 	}
-
-	if tok.Issuer != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID) {
+	issuer := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", t.region, org.UserPoolID)
+	log.Info().Str("issuer", issuer).Str("tok_issuer", tok.Issuer).Msg("comparing issuer with tok.Issuer")
+	if tok.Issuer != issuer {
 		return nil, errors.New("invalid token issuer detected")
 	}
 
