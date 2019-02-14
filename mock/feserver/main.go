@@ -62,6 +62,7 @@ func main() {
 	// for addresses
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
+		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
@@ -91,7 +92,7 @@ func main() {
 
 	// testing user
 	r.Route("/user", func(r chi.Router) {
-		//r.Get("/", GetUser)
+		r.Post("/feedback", userHandlers.SubmitFeedback)
 		r.Patch("/details", userHandlers.UpdateUser)
 		r.Patch("/password", userHandlers.ChangePassword)
 	})
@@ -103,6 +104,7 @@ func main() {
 		r.Post("/group/{id}/certificates/download", webHandlers.ExportCertificates)
 		r.Get("/group/{id}/responses", webHandlers.GetResponses)
 		r.Post("/group/{id}/responses/download", webHandlers.ExportResponses)
+		r.Get("/group/{id}/urls", webHandlers.GetURLList)
 	})
 
 	log.Info().Msg("listening on :3000")
@@ -132,6 +134,19 @@ func testWebClient() am.WebDataService {
 		responses[0] = makeResponse(userContext, filter, id)
 		id = atomic.AddInt64(&respID, 1)
 		responses[1] = makeResponse(userContext, filter, id)
+		return userContext.GetOrgID(), responses, nil
+	}
+
+	webClient.GetURLListFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebResponseFilter) (int, []*am.URLListResponse, error) {
+		if filter.Start > 4 {
+			return userContext.GetOrgID(), make([]*am.URLListResponse, 0), nil
+		}
+
+		responses := make([]*am.URLListResponse, 2)
+		id := atomic.AddInt64(&respID, 1)
+		responses[0] = makeURLResponse(userContext, filter, id)
+		id = atomic.AddInt64(&respID, 2)
+		responses[1] = makeURLResponse(userContext, filter, id)
 		return userContext.GetOrgID(), responses, nil
 	}
 
@@ -199,6 +214,29 @@ func makeCert(userContext am.UserContext, filter *am.WebCertificateFilter, respI
 		ValidTo:                           1569585600,
 		CertificateTransparencyCompliance: "unknown",
 		IsDeleted:                         false,
+	}
+}
+func makeURLResponse(userContext am.UserContext, filter *am.WebResponseFilter, respID int64) *am.URLListResponse {
+	urls := make([]*am.URLData, 2)
+	urls[0] = &am.URLData{
+		ResponseID:  respID,
+		URL:         "http://google.com/font",
+		RawBodyLink: "/a/b/c/d/blah",
+		MimeType:    "font/ttf",
+	}
+	urls[1] = &am.URLData{
+		ResponseID:  respID + 1,
+		URL:         "http://somethingelse.com/blah",
+		RawBodyLink: "/a/b/c/d/nah",
+		MimeType:    "text/html",
+	}
+	return &am.URLListResponse{
+		OrgID:                userContext.GetOrgID(),
+		GroupID:              filter.GroupID,
+		URLRequestTimestamp:  time.Now().Add(time.Hour * -5).UnixNano(),
+		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
+		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
+		URLs:                 urls,
 	}
 }
 
@@ -407,6 +445,24 @@ func testAddrClient() am.AddressService {
 	addrLock := &sync.RWMutex{}
 	var addrID int64
 	atomic.AddInt64(&addrID, 1)
+
+	addrClient.GetHostListFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupHostList, error) {
+		// fake host list
+		hosts := make([]*am.ScanGroupHostList, 0)
+		i := filter.Start
+
+		for ; i < filter.Start+int64(50); i++ {
+			host := &am.ScanGroupHostList{
+				OrgID:       userContext.GetOrgID(),
+				GroupID:     filter.GroupID,
+				HostAddress: fmt.Sprintf("%d.example.com", i),
+				AddressIDs:  []int64{int64(i * 1000), int64(i*1000 + 1)},
+				IPAddresses: []string{fmt.Sprintf("192.168.1.%d", i), fmt.Sprintf("192.168.1.%d", i+1)},
+			}
+			hosts = append(hosts, host)
+		}
+		return userContext.GetOrgID(), hosts, nil
+	}
 
 	addrClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupAddress, error) {
 		addrLock.RLock()

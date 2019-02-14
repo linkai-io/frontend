@@ -10,8 +10,6 @@ build:
 upload:
 	aws s3 sync dist/console/ s3://linkai-infra/frontend/lambdas/console/
 
-
-
 # Authentication
 buildauth:
 	GOOS=linux go build -o dist/console/main ./cmd/console/auth/ && zip -j dist/console/auth_handler.zip dist/console/main && rm dist/console/main
@@ -82,4 +80,11 @@ buildwebdata:
 	GOOS=linux go build -o dist/console/main ./cmd/console/webdata/ && zip -j dist/console/webdata_handler.zip dist/console/main && rm dist/console/main
 
 deploywebdata: buildwebdata upload
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name dev-console-handler-webdataservice
+
+#User Handler
+builduser:
+	GOOS=linux go build -o dist/console/main ./cmd/console/user/ && zip -j dist/console/user_handler.zip dist/console/main && rm dist/console/main
+	
+deployuser:
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name dev-console-handler-webdataservice

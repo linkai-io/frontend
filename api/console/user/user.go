@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/linkai-io/frontend/pkg/authz"
 	"github.com/linkai-io/frontend/pkg/middleware"
@@ -38,6 +40,61 @@ func New(userClient am.UserService, tokener token.Tokener, authenticator authz.A
 		authenticator:    authenticator,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
+}
+
+func (h *UserHandlers) SubmitFeedback(w http.ResponseWriter, req *http.Request) {
+	var data []byte
+	var err error
+
+	type feedbackDetails struct {
+		Type     string `json:"type" validate:"required,oneof=feedback bug feature"`
+		Message  string `json:"message" validate:"required,gte=5"`
+		Location string `json:"location" validate:"required"`
+		Screen   string `json:"screen" validate:"required"`
+	}
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		logger.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading feedback body", 500)
+		return
+	}
+	defer req.Body.Close()
+
+	feedback := &feedbackDetails{}
+	if err := json.Unmarshal(data, feedback); err != nil {
+		logger.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading feedback details", 500)
+		return
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(feedback); err != nil {
+		middleware.ReturnError(w, err.Error(), 500)
+		return
+	}
+	userID := strconv.Itoa(userContext.GetUserID())
+	resp, err := http.PostForm("https://docs.google.com/forms/d/e/1FAIpQLSf9yJ-M2Vjc2MywIi0xIO1Nn6yCXc9rT2zTQ7upNnK8OJWZmw/formResponse",
+		url.Values{
+			"entry.1802046778": {userID},
+			"entry.1301026583": {feedback.Type},
+			"entry.1849748799": {feedback.Location},
+			"entry.2108597312": {feedback.Screen},
+			"entry.634199886":  {feedback.Message},
+		})
+	defer req.Body.Close()
+	if resp.StatusCode == 200 {
+		middleware.ReturnSuccess(w, "OK", 200)
+	}
+	logger.Warn().Int("status", resp.StatusCode).Msg("google forms returned error")
+	middleware.ReturnError(w, "error from feedback server", 500)
 }
 
 func (h *UserHandlers) UpdateUser(w http.ResponseWriter, req *http.Request) {

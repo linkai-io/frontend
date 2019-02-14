@@ -160,7 +160,7 @@ func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetai
 	if out.AuthenticationResult == nil {
 		return response, errors.New("empty authentication result")
 	}
-	log.Info().Msgf("OUT: %#v\n", out)
+
 	responseData := make(map[string]string, 2)
 	responseData["state"] = authz.AuthSuccess
 	responseData["access_token"] = *out.AuthenticationResult.AccessToken

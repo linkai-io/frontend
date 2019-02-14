@@ -12,6 +12,7 @@ import (
 
 	"github.com/linkai-io/am/pkg/convert"
 	"github.com/linkai-io/am/pkg/inputlist"
+	"github.com/linkai-io/am/pkg/parsers"
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
@@ -26,6 +27,12 @@ type AddressResponse struct {
 	Total     int                    `json:"total"`
 }
 
+type HostlistResponse struct {
+	Hosts     []*am.ScanGroupHostList `json:"hosts"`
+	Status    string                  `json:"status"`
+	LastIndex int64                   `json:"last_index"`
+}
+
 type AddressHandlers struct {
 	addrClient       am.AddressService
 	scanGroupClient  am.ScanGroupService
@@ -38,6 +45,73 @@ func New(addrClient am.AddressService, scanGroupClient am.ScanGroupService) *Add
 		scanGroupClient:  scanGroupClient,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
+}
+
+func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) {
+	var err error
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	groupID, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	filter, err := h.ParseGetFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed parse url query parameters")
+		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		return
+	}
+
+	oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get addresses")
+		middleware.ReturnError(w, "failed to get addresses: "+err.Error(), 500)
+		return
+	}
+
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(err).Msg("authorization failure")
+		middleware.ReturnError(w, "failed to get addresses", 500)
+		return
+	}
+
+	var lastAddr int64
+	for _, host := range hosts {
+		host.ETLD, err = parsers.GetETLD(host.HostAddress)
+		if err != nil {
+			logger.Warn().Err(err).Msg("failed parsing etld from host address")
+			host.ETLD = host.HostAddress
+		}
+		for _, addrID := range host.AddressIDs {
+			if addrID > lastAddr {
+				lastAddr = addrID
+			}
+		}
+	}
+
+	response := &HostlistResponse{
+		Status:    "ok",
+		LastIndex: lastAddr,
+		Hosts:     hosts,
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get marshal response")
+		middleware.ReturnError(w, "failed return hostlist", 500)
+		return
+	}
+
+	fmt.Fprintf(w, string(data))
+
 }
 
 func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request) {
@@ -166,8 +240,8 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		if err != nil {
 			return nil, err
 		}
-		if filter.Limit > 1000 {
-			return nil, errors.New("limit max size exceeded (1000)")
+		if filter.Limit > 5000 {
+			return nil, errors.New("limit max size exceeded (5000)")
 		}
 	}
 	return filter, nil

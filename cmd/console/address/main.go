@@ -36,6 +36,7 @@ func main() {
 
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
+		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)

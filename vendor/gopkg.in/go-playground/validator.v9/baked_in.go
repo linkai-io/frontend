@@ -158,6 +158,7 @@ var (
 		"html":             isHTML,
 		"html_encoded":     isHTMLEncoded,
 		"url_encoded":      isURLEncoded,
+		"dir":              isDir,
 	}
 )
 
@@ -309,12 +310,48 @@ func isSSN(fl FieldLevel) bool {
 
 // IsLongitude is the validation function for validating if the field's value is a valid longitude coordinate.
 func isLongitude(fl FieldLevel) bool {
-	return longitudeRegex.MatchString(fl.Field().String())
+	field := fl.Field()
+
+	var v string
+	switch field.Kind() {
+	case reflect.String:
+		v = field.String()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v = strconv.FormatInt(field.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v = strconv.FormatUint(field.Uint(), 10)
+	case reflect.Float32:
+		v = strconv.FormatFloat(field.Float(), 'f', -1, 32)
+	case reflect.Float64:
+		v = strconv.FormatFloat(field.Float(), 'f', -1, 64)
+	default:
+		panic(fmt.Sprintf("Bad field type %T", field.Interface()))
+	}
+
+	return longitudeRegex.MatchString(v)
 }
 
 // IsLatitude is the validation function for validating if the field's value is a valid latitude coordinate.
 func isLatitude(fl FieldLevel) bool {
-	return latitudeRegex.MatchString(fl.Field().String())
+	field := fl.Field()
+
+	var v string
+	switch field.Kind() {
+	case reflect.String:
+		v = field.String()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v = strconv.FormatInt(field.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v = strconv.FormatUint(field.Uint(), 10)
+	case reflect.Float32:
+		v = strconv.FormatFloat(field.Float(), 'f', -1, 32)
+	case reflect.Float64:
+		v = strconv.FormatFloat(field.Float(), 'f', -1, 64)
+	default:
+		panic(fmt.Sprintf("Bad field type %T", field.Interface()))
+	}
+
+	return latitudeRegex.MatchString(v)
 }
 
 // IsDataURI is the validation function for validating if the field's value is a valid data URI.
@@ -1844,4 +1881,20 @@ func isFQDN(fl FieldLevel) bool {
 
 	return strings.ContainsAny(val, ".") &&
 		hostnameRegexRFC952.MatchString(val)
+}
+
+// IsDir is the validation function for validating if the current field's value is a valid directory.
+func isDir(fl FieldLevel) bool {
+	field := fl.Field()
+
+	if field.Kind() == reflect.String {
+		fileInfo, err := os.Stat(field.String())
+		if err != nil {
+			return false
+		}
+
+		return fileInfo.IsDir()
+	}
+
+	panic(fmt.Sprintf("Bad field type %T", field.Interface()))
 }

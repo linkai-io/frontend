@@ -187,28 +187,38 @@ func (p *OrgProvision) getUserPoolJWK(ctx context.Context, orgData *am.Organizat
 // Add an organization to hakken provided the organization does not already exist.
 func (p *OrgProvision) Add(ctx context.Context, userContext am.UserContext, orgData *am.Organization, roles map[string]string) (string, error) {
 	var err error
+
+	log.Info().Str("OrgName", orgData.OrgName).Msg("checking if organization exists")
 	org, err := p.orgExists(ctx, userContext, orgData)
 	if org != nil {
+		log.Info().Str("OrgName", orgData.OrgName).Msg("organization exists")
 		return "", errors.Wrap(err, "org exists")
 	}
 
 	// TODO: ugh i know this is terrible
+	if err != nil {
+		log.Warn().Err(err).Str("OrgName", orgData.OrgName).Msg("organization lookup error")
+	}
+
 	if !strings.Contains(err.Error(), "no results") {
 		return "", err
 	}
+
 	userCID, err := p.add(ctx, orgData, roles, "")
 	if err != nil {
+		log.Error().Err(err).Msg("failed to create organization in AWS")
 		return "", errors.Wrap(err, "failed to create organization")
 	}
-	log.Info().Msgf("creating org %#v", orgData)
+	log.Info().Msgf("creating org %#v in db", orgData)
 
 	oid, uid, orgCID, _, err := p.orgClient.Create(ctx, userContext, orgData, userCID)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to create org in database")
 		p.cleanUp(ctx, orgData)
 		return "", err
 	}
-	log.Info().Int("org_id", oid).Int("user_id", uid).Str("org_cid", orgCID).Str("user_cid", userCID).Msg("created user in db")
 
+	log.Info().Int("org_id", oid).Int("user_id", uid).Str("org_cid", orgCID).Str("user_cid", userCID).Msg("created user in db")
 	return userCID, nil
 }
 

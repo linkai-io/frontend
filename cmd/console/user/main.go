@@ -48,8 +48,9 @@ func main() {
 
 	r.Route("/user", func(r chi.Router) {
 		//r.Get("/", GetUser)
-		r.Patch("/details", userHandlers.UpdateUser)
-		r.Patch("/password", userHandlers.ChangePassword)
+		//r.Patch("/details", userHandlers.UpdateUser)
+		//r.Patch("/password", userHandlers.ChangePassword)
+		r.Post("/feedback", userHandlers.SubmitFeedback)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)

@@ -28,6 +28,74 @@ func New(webClient am.WebDataService) *WebHandlers {
 	}
 }
 
+type urlListResponse struct {
+	Responses []*am.URLListResponse `json:"responses"`
+	LastIndex int64                 `json:"last_index"`
+	Status    string                `json:"status"`
+}
+
+func (h *WebHandlers) GetURLList(w http.ResponseWriter, req *http.Request) {
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+	logger.Info().Msg("Retrieving urls...")
+	groupID, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	filter, err := h.ParseResponseFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed parse url query parameters")
+		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		return
+	}
+
+	oid, responses, err := h.webClient.GetURLList(req.Context(), userContext, filter)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to retrieve url list")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	var lastID int64
+	for _, response := range responses {
+		if oid != response.OrgID {
+			logger.Error().Err(err).Msg("authorization failure")
+			middleware.ReturnError(w, "failed to get url list", 500)
+			return
+		}
+
+		for _, urlData := range response.URLs {
+			if urlData.ResponseID > lastID {
+				lastID = urlData.ResponseID
+			}
+		}
+	}
+
+	resp := &urlListResponse{
+		LastIndex: lastID,
+		Responses: responses,
+		Status:    "OK",
+	}
+
+	data, _ := json.Marshal(resp)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+
+}
+
 type webResponse struct {
 	Responses []*am.HTTPResponse `json:"responses"`
 	LastIndex int64              `json:"last_index"`
@@ -41,7 +109,7 @@ func (h *WebHandlers) GetResponses(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	logger := middleware.UserContextLogger(userContext)
-	log.Info().Msg("Retrieving responses...")
+	logger.Info().Msg("Retrieving responses...")
 	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
@@ -73,9 +141,10 @@ func (h *WebHandlers) GetResponses(w http.ResponseWriter, req *http.Request) {
 		if response.ResponseID > lastID {
 			lastID = response.ResponseID
 		}
-		if oid != userContext.GetOrgID() {
+
+		if oid != response.OrgID {
 			logger.Error().Err(err).Msg("authorization failure")
-			middleware.ReturnError(w, "failed to get responses", 500)
+			middleware.ReturnError(w, "failed to get addresses", 500)
 			return
 		}
 	}
@@ -203,7 +272,7 @@ func (h *WebHandlers) GetSnapshots(w http.ResponseWriter, req *http.Request) {
 		if lastID == 0 {
 			logger.Info().Msgf("data: %#v", snapshot)
 		}
-		
+
 		if snapshot.SnapshotID > lastID {
 			lastID = snapshot.SnapshotID
 		}
@@ -427,6 +496,10 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 		GroupID:           groupID,
 		WithResponseTime:  false,
 		SinceResponseTime: 0,
+		MimeType:          "",
+		WithHeader:        "",
+		WithoutHeader:     "",
+		LatestOnlyValue:   false,
 		Start:             0,
 		Limit:             0,
 	}
@@ -450,6 +523,14 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 		}
 	}
 
+	filter.WithHeader = values.Get("with_header")
+	filter.WithoutHeader = values.Get("without_header")
+	filter.MimeType = values.Get("mime_type")
+
+	if values.Get("latest_only") == "true" {
+		filter.LatestOnlyValue = true
+	}
+
 	limit := values.Get("limit")
 	if limit == "" {
 		filter.Limit = 0
@@ -462,6 +543,7 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 			return nil, errors.New("limit max size exceeded (1000)")
 		}
 	}
+	log.Info().Msgf("Applying filter: %#v", filter)
 	return filter, nil
 }
 
@@ -473,7 +555,9 @@ func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, gro
 		WithResponseTime:  false,
 		SinceResponseTime: 0,
 		WithValidTo:       false,
-		ValidToTime:       0,
+		ValidToValue:      0,
+		WithValidFrom:     false,
+		ValidFromValue:    0,
 		Start:             0,
 		Limit:             0,
 	}
@@ -490,7 +574,7 @@ func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, gro
 	validTo := values.Get("valid_to")
 	if validTo != "" {
 		filter.WithValidTo = true
-		filter.ValidToTime, err = strconv.ParseInt(validTo, 10, 64)
+		filter.ValidToValue, err = strconv.ParseInt(validTo, 10, 64)
 		if err != nil {
 			return nil, err
 		}
