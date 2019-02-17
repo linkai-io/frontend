@@ -13,6 +13,7 @@ import (
 	"github.com/linkai-io/am/pkg/convert"
 	"github.com/linkai-io/am/pkg/inputlist"
 	"github.com/linkai-io/am/pkg/parsers"
+	"github.com/rs/zerolog/log"
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
@@ -183,16 +184,27 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID int) (*am.ScanGroupAddressFilter, error) {
 	var err error
 	filter := &am.ScanGroupAddressFilter{
-		OrgID:               orgID,
-		GroupID:             groupID,
-		WithIgnored:         false,
-		IgnoredValue:        false,
-		WithLastScannedTime: false,
-		SinceScannedTime:    0,
-		WithLastSeenTime:    false,
-		SinceSeenTime:       0,
-		Start:               0,
-		Limit:               0,
+		OrgID:                     orgID,
+		GroupID:                   groupID,
+		Start:                     0,
+		Limit:                     0,
+		WithIgnored:               false,
+		IgnoredValue:              false,
+		WithBeforeLastScannedTime: false,
+		WithAfterLastScannedTime:  false,
+		AfterScannedTime:          0,
+		BeforeScannedTime:         0,
+		WithBeforeLastSeenTime:    false,
+		WithAfterLastSeenTime:     false,
+		AfterSeenTime:             0,
+		BeforeSeenTime:            0,
+		WithIsWildcard:            false,
+		IsWildcardValue:           false,
+		WithIsHostedService:       false,
+		IsHostedServiceValue:      false,
+		MatchesHost:               "",
+		MatchesIP:                 "",
+		NSRecord:                  0,
 	}
 
 	ignored := values.Get("ignored")
@@ -204,19 +216,55 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		filter.IgnoredValue = false
 	}
 
-	sinceScanned := values.Get("since_scanned")
-	if sinceScanned != "" {
-		filter.WithLastScannedTime = true
-		filter.SinceScannedTime, err = strconv.ParseInt(sinceScanned, 10, 64)
+	wildcard := values.Get("wildcard")
+	if wildcard == "true" {
+		filter.WithIsWildcard = true
+		filter.IsWildcardValue = true
+	} else if wildcard == "false" {
+		filter.WithIsWildcard = true
+		filter.IsWildcardValue = false
+	}
+
+	hosted := values.Get("hosted")
+	if hosted == "true" {
+		filter.WithIsHostedService = true
+		filter.IsHostedServiceValue = true
+	} else if hosted == "false" {
+		filter.WithIsHostedService = true
+		filter.IsHostedServiceValue = false
+	}
+
+	beforeScanned := values.Get("before_scanned")
+	if beforeScanned != "" {
+		filter.WithBeforeLastScannedTime = true
+		filter.BeforeScannedTime, err = strconv.ParseInt(beforeScanned, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	sinceSeen := values.Get("since_seen")
-	if sinceSeen != "" {
-		filter.WithLastSeenTime = true
-		filter.SinceSeenTime, err = strconv.ParseInt(sinceSeen, 10, 64)
+	afterScanned := values.Get("after_scanned")
+	if afterScanned != "" {
+		filter.WithAfterLastScannedTime = true
+		filter.AfterScannedTime, err = strconv.ParseInt(afterScanned, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	beforeSeen := values.Get("before_seen")
+	if beforeSeen != "" {
+		filter.WithBeforeLastSeenTime = true
+		filter.BeforeSeenTime, err = strconv.ParseInt(beforeSeen, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	afterSeen := values.Get("after_seen")
+	if afterSeen != "" {
+		filter.WithAfterLastSeenTime = true
+		filter.AfterSeenTime, err = strconv.ParseInt(afterSeen, 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -244,6 +292,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 			return nil, errors.New("limit max size exceeded (5000)")
 		}
 	}
+	log.Info().Msgf("restricting results with filter %v", filter)
 	return filter, nil
 }
 
@@ -347,6 +396,47 @@ func makeAddrs(in map[string]struct{}, orgID, userID, groupID int) map[string]*a
 		i++
 	}
 	return addrs
+}
+
+type statsResponse struct {
+	Status     string                 `json:"status"`
+	GroupStats map[int]*am.GroupStats `json:"group_stats"`
+	Count      int                    `json:"count"`
+}
+
+func (h *AddressHandlers) GetGroupStats(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	oid, count, err := h.addrClient.Count(req.Context(), userContext, id)
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	data, err = json.Marshal(&countResponse{Status: "OK", GroupID: id, Count: count})
+	if err != nil {
+		logger.Error().Err(err).Msg("error marshaling response")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
 }
 
 type countResponse struct {

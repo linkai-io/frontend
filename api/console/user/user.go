@@ -42,6 +42,42 @@ func New(userClient am.UserService, tokener token.Tokener, authenticator authz.A
 	}
 }
 
+// Logout a user from cognito and redirect to login page.
+func (h *UserHandlers) Logout(w http.ResponseWriter, req *http.Request) {
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	_, orgData, err := h.orgClient.GetByID(req.Context(), userContext, userContext.GetOrgID())
+	if err != nil {
+		w.Header().Set("Set-Cookie", "linkai_auth=")
+		w.Header().Set("Location", "/login/")
+		middleware.ReturnError(w, "failed to find organization to logout user", 301)
+		return
+	}
+
+	tok, err := h.tokener.ValidateAccessToken(req.Context(), orgData, req.Header.Get("Authorization"))
+	if err != nil {
+		w.Header().Set("Set-Cookie", "linkai_auth=")
+		w.Header().Set("Location", "/login/")
+		middleware.ReturnError(w, "invalid token", 301)
+		return
+	}
+
+	if err := h.authenticator.Logout(req.Context(), orgData, tok.Subject); err != nil {
+		w.Header().Set("Set-Cookie", "linkai_auth=")
+		w.Header().Set("Location", "/login/")
+		middleware.ReturnError(w, "failed to logout user", 300)
+		return
+	}
+
+	w.Header().Set("Set-Cookie", "linkai_auth=")
+	w.Header().Set("Location", "/login/")
+	middleware.ReturnSuccess(w, "OK", 301)
+}
+
 func (h *UserHandlers) SubmitFeedback(w http.ResponseWriter, req *http.Request) {
 	var data []byte
 	var err error
@@ -92,6 +128,7 @@ func (h *UserHandlers) SubmitFeedback(w http.ResponseWriter, req *http.Request) 
 	defer req.Body.Close()
 	if resp.StatusCode == 200 {
 		middleware.ReturnSuccess(w, "OK", 200)
+		return
 	}
 	logger.Warn().Int("status", resp.StatusCode).Msg("google forms returned error")
 	middleware.ReturnError(w, "error from feedback server", 500)

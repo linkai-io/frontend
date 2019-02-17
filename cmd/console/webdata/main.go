@@ -41,6 +41,7 @@ func main() {
 		r.Post("/group/{id}/certificates/download", webHandlers.ExportCertificates)
 		r.Get("/group/{id}/responses", webHandlers.GetResponses)
 		r.Post("/group/{id}/responses/download", webHandlers.ExportResponses)
+		r.Get("/group/{id}/urls", webHandlers.GetURLList)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)

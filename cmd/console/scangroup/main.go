@@ -40,6 +40,7 @@ func main() {
 
 	r.Route("/scangroup", func(r chi.Router) {
 		r.Get("/groups", scanGroupHandlers.GetScanGroups)
+		r.Get("/groups/stats", scanGroupHandlers.GetGroupStats)
 		r.Get("/name/{name}", scanGroupHandlers.GetScanGroupByName)
 		r.Post("/name/{name}", scanGroupHandlers.CreateScanGroup)
 		r.Patch("/name/{name}", scanGroupHandlers.UpdateScanGroup)

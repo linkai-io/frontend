@@ -42,6 +42,7 @@ type UserDetails struct {
 type Authenticator interface {
 	Init(config []byte) error
 	Login(ctx context.Context, orgData *am.Organization, details *LoginDetails) (map[string]string, error)
+	Logout(ctx context.Context, orgData *am.Organization, userName string) error
 	SetNewPassword(ctx context.Context, orgData *am.Organization, details *LoginDetails) (map[string]string, error)
 	Refresh(ctx context.Context, details *TokenDetails) (map[string]string, error)
 	Forgot(ctx context.Context, orgData *am.Organization, details *ResetDetails) error

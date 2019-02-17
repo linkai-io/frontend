@@ -73,6 +73,7 @@ func main() {
 	// testing scangroups
 	r.Route("/scangroup", func(r chi.Router) {
 		r.Get("/groups", scanGroupHandlers.GetScanGroups)
+		r.Get("/groups/stats", scanGroupHandlers.GetGroupStats)
 		r.Get("/name/{name}", scanGroupHandlers.GetScanGroupByName)
 		r.Post("/name/{name}", scanGroupHandlers.CreateScanGroup)
 		r.Patch("/name/{name}", scanGroupHandlers.UpdateScanGroup)
@@ -435,6 +436,27 @@ func testScanGroupClient() am.ScanGroupService {
 			}
 		}
 		return userContext.GetOrgID(), 0, am.ErrScanGroupNotExists
+	}
+
+	scanGroupClient.GroupStatsFn = func(ctx context.Context, userContext am.UserContext) (int, map[int]*am.GroupStats, error) {
+		groupLock.Lock()
+		defer groupLock.Unlock()
+		stats := make(map[int]*am.GroupStats, len(groups))
+		for i, g := range groups {
+			stats[g.GroupID] = &am.GroupStats{
+				OrgID:           userContext.GetOrgID(),
+				GroupID:         g.GroupID,
+				ActiveAddresses: 10,
+				BatchSize:       1000,
+				LastUpdated:     time.Now().Add(-1 * time.Minute).UnixNano(),
+				BatchStart:      time.Now().Add(-10 * time.Minute).UnixNano(),
+				BatchEnd:        time.Now().Add(-30 * time.Second).UnixNano(),
+			}
+			if i > 1 {
+				stats[g.GroupID].BatchEnd = 0
+			}
+		}
+		return userContext.GetOrgID(), stats, nil
 	}
 	return scanGroupClient
 }

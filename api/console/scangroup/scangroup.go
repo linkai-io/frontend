@@ -56,6 +56,46 @@ func New(scanGroupClient am.ScanGroupService, env *ScanGroupEnv) *ScanGroupHandl
 	}
 }
 
+type statsResponse struct {
+	Status     string                 `json:"status"`
+	GroupStats map[int]*am.GroupStats `json:"group_stats"`
+}
+
+func (h *ScanGroupHandlers) GetGroupStats(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	oid, stats, err := h.scanGroupClient.GroupStats(req.Context(), userContext)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get group statistics")
+		middleware.ReturnError(w, "internal error getting group statistics", 500)
+		return
+	}
+
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	data, err = json.Marshal(&statsResponse{Status: "OK", GroupStats: stats})
+	if err != nil {
+		logger.Error().Err(err).Msg("error marshaling response")
+		middleware.ReturnError(w, "internal error", 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
 func (h *ScanGroupHandlers) GetScanGroups(w http.ResponseWriter, req *http.Request) {
 	log.Info().Msg("getting scan groups for user")
 	userContext, ok := h.ContextExtractor(req.Context())

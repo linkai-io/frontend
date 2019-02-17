@@ -247,45 +247,53 @@ func DomainToHostList(in *am.ScanGroupHostList) *prototypes.HostListData {
 
 func AddressFilterToDomain(in *prototypes.AddressFilter) *am.ScanGroupAddressFilter {
 	return &am.ScanGroupAddressFilter{
-		OrgID:                int(in.OrgID),
-		GroupID:              int(in.GroupID),
-		Start:                in.Start,
-		Limit:                int(in.Limit),
-		WithIgnored:          in.WithIgnored,
-		IgnoredValue:         in.IgnoredValue,
-		WithLastScannedTime:  in.WithLastScannedTime,
-		SinceScannedTime:     in.SinceScannedTime,
-		WithLastSeenTime:     in.WithLastSeenTime,
-		SinceSeenTime:        in.SinceSeenTime,
-		WithIsWildcard:       in.WithIsWildcard,
-		IsWildcardValue:      in.IsWildcardValue,
-		WithIsHostedService:  in.WithIsHostedService,
-		IsHostedServiceValue: in.IsHostedServiceValue,
-		MatchesHost:          in.MatchesHost,
-		MatchesIP:            in.MatchesIP,
-		NSRecord:             int(in.NSRecord),
+		OrgID:                     int(in.OrgID),
+		GroupID:                   int(in.GroupID),
+		Start:                     in.Start,
+		Limit:                     int(in.Limit),
+		WithIgnored:               in.WithIgnored,
+		IgnoredValue:              in.IgnoredValue,
+		WithBeforeLastScannedTime: in.WithBeforeLastScannedTime,
+		WithAfterLastScannedTime:  in.WithAfterLastScannedTime,
+		AfterScannedTime:          in.AfterScannedTime,
+		BeforeScannedTime:         in.BeforeScannedTime,
+		WithBeforeLastSeenTime:    in.WithBeforeLastSeenTime,
+		WithAfterLastSeenTime:     in.WithAfterLastScannedTime,
+		AfterSeenTime:             in.AfterSeenTime,
+		BeforeSeenTime:            in.BeforeSeenTime,
+		WithIsWildcard:            in.WithIsWildcard,
+		IsWildcardValue:           in.IsWildcardValue,
+		WithIsHostedService:       in.WithIsHostedService,
+		IsHostedServiceValue:      in.IsHostedServiceValue,
+		MatchesHost:               in.MatchesHost,
+		MatchesIP:                 in.MatchesIP,
+		NSRecord:                  int(in.NSRecord),
 	}
 }
 
 func DomainToAddressFilter(in *am.ScanGroupAddressFilter) *prototypes.AddressFilter {
 	return &prototypes.AddressFilter{
-		OrgID:                int32(in.OrgID),
-		GroupID:              int32(in.GroupID),
-		Start:                in.Start,
-		Limit:                int32(in.Limit),
-		WithIgnored:          in.WithIgnored,
-		IgnoredValue:         in.IgnoredValue,
-		WithLastScannedTime:  in.WithLastScannedTime,
-		SinceScannedTime:     in.SinceScannedTime,
-		WithLastSeenTime:     in.WithLastSeenTime,
-		SinceSeenTime:        in.SinceSeenTime,
-		WithIsWildcard:       in.WithIsWildcard,
-		IsWildcardValue:      in.IsWildcardValue,
-		WithIsHostedService:  in.WithIsHostedService,
-		IsHostedServiceValue: in.IsHostedServiceValue,
-		MatchesHost:          in.MatchesHost,
-		MatchesIP:            in.MatchesIP,
-		NSRecord:             int32(in.NSRecord),
+		OrgID:                     int32(in.OrgID),
+		GroupID:                   int32(in.GroupID),
+		Start:                     in.Start,
+		Limit:                     int32(in.Limit),
+		WithIgnored:               in.WithIgnored,
+		IgnoredValue:              in.IgnoredValue,
+		WithBeforeLastScannedTime: in.WithBeforeLastScannedTime,
+		WithAfterLastScannedTime:  in.WithAfterLastScannedTime,
+		BeforeScannedTime:         in.BeforeScannedTime,
+		AfterScannedTime:          in.AfterScannedTime,
+		WithBeforeLastSeenTime:    in.WithBeforeLastSeenTime,
+		WithAfterLastSeenTime:     in.WithAfterLastScannedTime,
+		BeforeSeenTime:            in.BeforeSeenTime,
+		AfterSeenTime:             in.AfterSeenTime,
+		WithIsWildcard:            in.WithIsWildcard,
+		IsWildcardValue:           in.IsWildcardValue,
+		WithIsHostedService:       in.WithIsHostedService,
+		IsHostedServiceValue:      in.IsHostedServiceValue,
+		MatchesHost:               in.MatchesHost,
+		MatchesIP:                 in.MatchesIP,
+		NSRecord:                  int32(in.NSRecord),
 	}
 }
 
@@ -484,4 +492,45 @@ func CTSubdomainRecordsToDomain(in map[string]*prototypes.CTSubdomain) map[strin
 		subRecords[k] = CTSubdomainRecordToDomain(v)
 	}
 	return subRecords
+}
+
+func DomainToGroupStats(in *am.GroupStats) *scangroup.GroupStats {
+	return &scangroup.GroupStats{
+		OrgID:           int32(in.OrgID),
+		GroupID:         int32(in.GroupID),
+		ActiveAddresses: in.ActiveAddresses,
+		BatchSize:       in.BatchSize,
+		LastUpdated:     in.LastUpdated,
+		BatchStart:      in.BatchStart,
+		BatchEnd:        in.BatchEnd,
+	}
+}
+
+func DomainToGroupsStats(in map[int]*am.GroupStats) map[int32]*scangroup.GroupStats {
+	stats := make(map[int32]*scangroup.GroupStats, len(in))
+	for groupID, stat := range in {
+		stats[int32(groupID)] = DomainToGroupStats(stat)
+	}
+	return stats
+}
+
+func GroupStatsToDomain(in *scangroup.GroupStats) *am.GroupStats {
+	return &am.GroupStats{
+		OrgID:           int(in.OrgID),
+		GroupID:         int(in.GroupID),
+		ActiveAddresses: in.ActiveAddresses,
+		BatchSize:       in.BatchSize,
+		LastUpdated:     in.LastUpdated,
+		BatchStart:      in.BatchStart,
+		BatchEnd:        in.BatchEnd,
+	}
+}
+
+func GroupsStatsToDomain(in map[int32]*scangroup.GroupStats) map[int]*am.GroupStats {
+	stats := make(map[int]*am.GroupStats, len(in))
+	for groupID, stat := range in {
+		stats[int(groupID)] = GroupStatsToDomain(stat)
+	}
+
+	return stats
 }

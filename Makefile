@@ -85,6 +85,6 @@ deploywebdata: buildwebdata upload
 #User Handler
 builduser:
 	GOOS=linux go build -o dist/console/main ./cmd/console/user/ && zip -j dist/console/user_handler.zip dist/console/main && rm dist/console/main
-	
-deployuser:
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name dev-console-handler-webdataservice
+
+deployuser: builduser upload
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/user_handler.zip --function-name dev-console-handler-userservice

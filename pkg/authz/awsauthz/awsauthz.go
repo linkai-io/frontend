@@ -198,6 +198,18 @@ func (a *AWSAuthenticate) Reset(ctx context.Context, orgData *am.Organization, d
 	return err
 }
 
+func (a *AWSAuthenticate) Logout(ctx context.Context, orgData *am.Organization, userName string) error {
+	input := &cip.AdminUserGlobalSignOutInput{
+		Username:   aws.String(userName),
+		UserPoolId: aws.String(orgData.UserPoolID),
+	}
+
+	req := a.svc.AdminUserGlobalSignOutRequest(input)
+	_, err := req.Send()
+
+	return err
+}
+
 func (a *AWSAuthenticate) successMap(authResult *cip.AuthenticationResultType) (map[string]string, error) {
 	response := make(map[string]string, 5)
 	response["state"] = authz.AuthSuccess
