@@ -214,7 +214,7 @@ func (a *AWSAuthenticate) successMap(authResult *cip.AuthenticationResultType) (
 	response := make(map[string]string, 5)
 	response["state"] = authz.AuthSuccess
 	response["access_token"] = *authResult.AccessToken
-	response["id_token"] = *authResult.IdToken
+	//response["id_token"] = *authResult.IdToken
 	response["refresh_token"] = *authResult.RefreshToken
 	response["expires"] = strconv.FormatInt(*authResult.ExpiresIn, 10)
 	response["token_type"] = *authResult.TokenType

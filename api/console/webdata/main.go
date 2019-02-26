@@ -180,12 +180,14 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 
 	var lastIndex int64
 	for {
+		filters := &am.FilterType{}
+		filters.AddInt64("after_response_time", time.Now().Add(time.Hour*48).UnixNano())
 		filter := &am.WebResponseFilter{
-			OrgID:             userContext.GetOrgID(),
-			GroupID:           id,
-			Start:             lastIndex,
-			SinceResponseTime: time.Now().Add(time.Hour * 48).UnixNano(),
-			Limit:             1000,
+			OrgID:   userContext.GetOrgID(),
+			GroupID: id,
+			Start:   lastIndex,
+			Filters: filters,
+			Limit:   1000,
 		}
 		oid, responses, err := h.webClient.GetResponses(req.Context(), userContext, filter)
 		if err != nil {
@@ -492,25 +494,20 @@ func (h *WebHandlers) ExportCertificates(w http.ResponseWriter, req *http.Reques
 func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID int) (*am.WebResponseFilter, error) {
 	var err error
 	filter := &am.WebResponseFilter{
-		OrgID:             orgID,
-		GroupID:           groupID,
-		WithResponseTime:  false,
-		SinceResponseTime: 0,
-		MimeType:          "",
-		WithHeader:        "",
-		WithoutHeader:     "",
-		LatestOnlyValue:   false,
-		Start:             0,
-		Limit:             0,
+		OrgID:   orgID,
+		GroupID: groupID,
+		Filters: &am.FilterType{},
+		Start:   0,
+		Limit:   0,
 	}
 
-	sinceTime := values.Get("since_response_time")
-	if sinceTime != "" {
-		filter.WithResponseTime = true
-		filter.SinceResponseTime, err = strconv.ParseInt(sinceTime, 10, 64)
+	afterRequest := values.Get("after_request_time")
+	if afterRequest != "" {
+		afterRequestTime, err := strconv.ParseInt(afterRequest, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("after_request_time", afterRequestTime)
 	}
 
 	start := values.Get("start")
@@ -523,12 +520,27 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 		}
 	}
 
-	filter.WithHeader = values.Get("with_header")
-	filter.WithoutHeader = values.Get("without_header")
-	filter.MimeType = values.Get("mime_type")
+	if len(values["with_header"]) > 0 {
+		filter.Filters.AddStrings("header_names", values["with_header"])
+	}
+
+	if len(values["without_header"]) > 0 {
+		filter.Filters.AddStrings("not_header_names", values["without_header"])
+	}
+
+	if len(values["mime_type"]) > 0 {
+		filter.Filters.AddStrings("mime_type", values["mime_type"])
+	}
 
 	if values.Get("latest_only") == "true" {
-		filter.LatestOnlyValue = true
+		filter.Filters.AddBool("latest_only", true)
+	}
+
+	headerName := values.Get("header_pair_names")
+	headerValue := values.Get("header_pair_values")
+	if headerName != "" && headerValue != "" {
+		filter.Filters.AddString("header_pair_names", headerName)
+		filter.Filters.AddString("header_pair_values", headerValue)
 	}
 
 	limit := values.Get("limit")
@@ -550,34 +562,70 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, groupID int) (*am.WebCertificateFilter, error) {
 	var err error
 	filter := &am.WebCertificateFilter{
-		OrgID:             orgID,
-		GroupID:           groupID,
-		WithResponseTime:  false,
-		SinceResponseTime: 0,
-		WithValidTo:       false,
-		ValidToValue:      0,
-		WithValidFrom:     false,
-		ValidFromValue:    0,
-		Start:             0,
-		Limit:             0,
+		OrgID:   orgID,
+		GroupID: groupID,
+		Filters: &am.FilterType{},
+		Start:   0,
+		Limit:   0,
 	}
 
-	sinceTime := values.Get("since_response_time")
-	if sinceTime != "" {
-		filter.WithResponseTime = true
-		filter.SinceResponseTime, err = strconv.ParseInt(sinceTime, 10, 64)
+	afterResponse := values.Get("after_response_time")
+	if afterResponse != "" {
+		afterResponseTime, err := strconv.ParseInt(afterResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("after_response_time", afterResponseTime)
 	}
 
-	validTo := values.Get("valid_to")
-	if validTo != "" {
-		filter.WithValidTo = true
-		filter.ValidToValue, err = strconv.ParseInt(validTo, 10, 64)
+	beforeResponse := values.Get("before_response_time")
+	if beforeResponse != "" {
+		beforeResponseTime, err := strconv.ParseInt(beforeResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("before_response_time", beforeResponseTime)
+	}
+
+	afterValidTo := values.Get("after_valid_to")
+	if afterValidTo != "" {
+		validToValue, err := strconv.ParseInt(afterValidTo, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("after_valid_to", validToValue)
+	}
+
+	beforeValidTo := values.Get("before_valid_to")
+	if beforeValidTo != "" {
+		validToValue, err := strconv.ParseInt(beforeValidTo, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("before_valid_to", validToValue)
+	}
+
+	afterValidFrom := values.Get("after_valid_from")
+	if afterValidFrom != "" {
+		validToValue, err := strconv.ParseInt(afterValidFrom, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("after_valid_from", validToValue)
+	}
+
+	beforeValidFrom := values.Get("before_valid_from")
+	if beforeValidFrom != "" {
+		validToValue, err := strconv.ParseInt(beforeValidFrom, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("before_valid_from", validToValue)
+	}
+
+	hostAddress := values.Get("host_address")
+	if hostAddress != "" {
+		filter.Filters.AddString("host_address", hostAddress)
 	}
 
 	start := values.Get("start")
@@ -608,21 +656,25 @@ func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, gro
 func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupID int) (*am.WebSnapshotFilter, error) {
 	var err error
 	filter := &am.WebSnapshotFilter{
-		OrgID:             orgID,
-		GroupID:           groupID,
-		WithResponseTime:  false,
-		SinceResponseTime: 0,
-		Start:             0,
-		Limit:             0,
+		OrgID:   orgID,
+		GroupID: groupID,
+		Filters: &am.FilterType{},
+		Start:   0,
+		Limit:   0,
 	}
 
-	sinceTime := values.Get("since_response_time")
-	if sinceTime != "" {
-		filter.WithResponseTime = true
-		filter.SinceResponseTime, err = strconv.ParseInt(sinceTime, 10, 64)
+	afterResponse := values.Get("after_response_time")
+	if afterResponse != "" {
+		afterResponseTime, err := strconv.ParseInt(afterResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("after_response_time", afterResponseTime)
+	}
+
+	hostAddress := values.Get("host_address")
+	if hostAddress != "" {
+		filter.Filters.AddString("host_address", hostAddress)
 	}
 
 	start := values.Get("start")

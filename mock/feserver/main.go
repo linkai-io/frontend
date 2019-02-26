@@ -10,6 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/linkai-io/am/pkg/convert"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -179,18 +181,21 @@ func testWebClient() am.WebDataService {
 }
 
 func makeSnapshot(userContext am.UserContext, filter *am.WebSnapshotFilter, respID int64) *am.WebSnapshot {
+	host := fmt.Sprintf("%d.example.com", respID)
+	ip := fmt.Sprintf("1.1.1.%d", respID)
 	return &am.WebSnapshot{
-		SnapshotID:           respID,
-		OrgID:                userContext.GetOrgID(),
-		GroupID:              filter.GroupID,
-		AddressID:            respID,
-		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
-		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
-		SnapshotLink:         "/something/something.png",
-		SerializedDOMHash:    "abcd",
-		SerializedDOMLink:    "/something/something",
-		ResponseTimestamp:    time.Now().UnixNano(),
-		IsDeleted:            false,
+		SnapshotID:        respID,
+		OrgID:             userContext.GetOrgID(),
+		GroupID:           filter.GroupID,
+		AddressHash:       convert.HashAddress(ip, host),
+		HostAddress:       host,
+		IPAddress:         ip,
+		ResponsePort:      80,
+		SnapshotLink:      "/something/something.png",
+		SerializedDOMHash: "abcd",
+		SerializedDOMLink: "/something/something",
+		ResponseTimestamp: time.Now().UnixNano(),
+		IsDeleted:         false,
 	}
 }
 
@@ -232,32 +237,32 @@ func makeURLResponse(userContext am.UserContext, filter *am.WebResponseFilter, r
 		MimeType:    "text/html",
 	}
 	return &am.URLListResponse{
-		OrgID:                userContext.GetOrgID(),
-		GroupID:              filter.GroupID,
-		URLRequestTimestamp:  time.Now().Add(time.Hour * -5).UnixNano(),
-		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
-		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
-		URLs:                 urls,
+		OrgID:               userContext.GetOrgID(),
+		GroupID:             filter.GroupID,
+		URLRequestTimestamp: time.Now().Add(time.Hour * -5).UnixNano(),
+		HostAddress:         fmt.Sprintf("%d.example.com", respID),
+		IPAddress:           fmt.Sprintf("1.1.1.%d", respID),
+		URLs:                urls,
 	}
 }
 
 func makeResponse(userContext am.UserContext, filter *am.WebResponseFilter, respID int64) *am.HTTPResponse {
+	host := fmt.Sprintf("%d.example.com", respID)
+	ip := fmt.Sprintf("1.1.1.%d", respID)
 	return &am.HTTPResponse{
-		ResponseID:           respID,
-		OrgID:                userContext.GetOrgID(),
-		GroupID:              filter.GroupID,
-		AddressID:            1,
-		AddressIDHostAddress: fmt.Sprintf("%d.example.com", respID),
-		AddressIDIPAddress:   fmt.Sprintf("1.1.1.%d", respID),
-		Scheme:               "http",
-		HostAddress:          fmt.Sprintf("%d.example.com", respID),
-		IPAddress:            fmt.Sprintf("1.1.1.%d", respID),
-		ResponsePort:         "80",
-		RequestedPort:        "80",
-		RequestID:            "1234",
-		Status:               200,
-		StatusText:           "OK",
-		URL:                  fmt.Sprintf("http://%d.example.com", respID),
+		ResponseID:    respID,
+		OrgID:         userContext.GetOrgID(),
+		GroupID:       filter.GroupID,
+		AddressHash:   convert.HashAddress(ip, host),
+		Scheme:        "http",
+		HostAddress:   host,
+		IPAddress:     ip,
+		ResponsePort:  "80",
+		RequestedPort: "80",
+		RequestID:     "1234",
+		Status:        200,
+		StatusText:    "OK",
+		URL:           fmt.Sprintf("http://%d.example.com", respID),
 		Headers: map[string]string{
 			"cookie":         "somecookie",
 			"content-length": "443",

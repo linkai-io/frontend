@@ -184,90 +184,151 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID int) (*am.ScanGroupAddressFilter, error) {
 	var err error
 	filter := &am.ScanGroupAddressFilter{
-		OrgID:                     orgID,
-		GroupID:                   groupID,
-		Start:                     0,
-		Limit:                     0,
-		WithIgnored:               false,
-		IgnoredValue:              false,
-		WithBeforeLastScannedTime: false,
-		WithAfterLastScannedTime:  false,
-		AfterScannedTime:          0,
-		BeforeScannedTime:         0,
-		WithBeforeLastSeenTime:    false,
-		WithAfterLastSeenTime:     false,
-		AfterSeenTime:             0,
-		BeforeSeenTime:            0,
-		WithIsWildcard:            false,
-		IsWildcardValue:           false,
-		WithIsHostedService:       false,
-		IsHostedServiceValue:      false,
-		MatchesHost:               "",
-		MatchesIP:                 "",
-		NSRecord:                  0,
+		OrgID:   orgID,
+		GroupID: groupID,
+		Start:   0,
+		Limit:   0,
+		Filters: &am.FilterType{},
 	}
 
 	ignored := values.Get("ignored")
 	if ignored == "true" {
-		filter.WithIgnored = true
-		filter.IgnoredValue = true
+		filter.Filters.AddBool("ignored", true)
 	} else if ignored == "false" {
-		filter.WithIgnored = true
-		filter.IgnoredValue = false
+		filter.Filters.AddBool("ignored", false)
 	}
 
 	wildcard := values.Get("wildcard")
 	if wildcard == "true" {
-		filter.WithIsWildcard = true
-		filter.IsWildcardValue = true
+		filter.Filters.AddBool("wildcard", true)
 	} else if wildcard == "false" {
-		filter.WithIsWildcard = true
-		filter.IsWildcardValue = false
+		filter.Filters.AddBool("wildcard", false)
 	}
 
 	hosted := values.Get("hosted")
 	if hosted == "true" {
-		filter.WithIsHostedService = true
-		filter.IsHostedServiceValue = true
+		filter.Filters.AddBool("hosted", true)
 	} else if hosted == "false" {
-		filter.WithIsHostedService = true
-		filter.IsHostedServiceValue = false
+		filter.Filters.AddBool("hosted", false)
 	}
 
 	beforeScanned := values.Get("before_scanned")
 	if beforeScanned != "" {
-		filter.WithBeforeLastScannedTime = true
-		filter.BeforeScannedTime, err = strconv.ParseInt(beforeScanned, 10, 64)
+		beforeScannedTime, err := strconv.ParseInt(beforeScanned, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("before_scanned_time", beforeScannedTime)
 	}
 
 	afterScanned := values.Get("after_scanned")
 	if afterScanned != "" {
-		filter.WithAfterLastScannedTime = true
-		filter.AfterScannedTime, err = strconv.ParseInt(afterScanned, 10, 64)
+		afterScannedTime, err := strconv.ParseInt(afterScanned, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("after_scanned_time", afterScannedTime)
 	}
 
 	beforeSeen := values.Get("before_seen")
 	if beforeSeen != "" {
-		filter.WithBeforeLastSeenTime = true
-		filter.BeforeSeenTime, err = strconv.ParseInt(beforeSeen, 10, 64)
+		beforeSeenTime, err := strconv.ParseInt(beforeSeen, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("before_seen_time", beforeSeenTime)
 	}
 
 	afterSeen := values.Get("after_seen")
 	if afterSeen != "" {
-		filter.WithAfterLastSeenTime = true
-		filter.AfterSeenTime, err = strconv.ParseInt(afterSeen, 10, 64)
+		afterSeenTime, err := strconv.ParseInt(afterSeen, 10, 64)
 		if err != nil {
 			return nil, err
 		}
+		filter.Filters.AddInt64("before_seen_time", afterSeenTime)
+	}
+
+	beforeDiscovered := values.Get("before_discovered")
+	if beforeDiscovered != "" {
+		beforeDiscoveredTime, err := strconv.ParseInt(beforeDiscovered, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("before_discovered_time", beforeDiscoveredTime)
+	}
+
+	afterDiscovered := values.Get("after_discovered")
+	if afterDiscovered != "" {
+		afterDiscoveredTime, err := strconv.ParseInt(afterDiscovered, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("before_seen_time", afterDiscoveredTime)
+	}
+
+	aboveConfidence := values.Get("above_confidence")
+	if aboveConfidence != "" {
+		aboveConfidenceValue, err := strconv.ParseFloat(beforeDiscovered, 32)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32("above_confidence", float32(aboveConfidenceValue))
+	}
+
+	belowConfidence := values.Get("below_confidence")
+	if belowConfidence != "" {
+		belowConfidenceValue, err := strconv.ParseFloat(belowConfidence, 32)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32("below_confidence", float32(belowConfidenceValue))
+	}
+
+	aboveUserConfidence := values.Get("above_user_confidence")
+	if aboveUserConfidence != "" {
+		aboveUserConfidenceValue, err := strconv.ParseFloat(aboveUserConfidence, 32)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32("above_user_confidence", float32(aboveUserConfidenceValue))
+	}
+
+	belowUserConfidence := values.Get("below_user_confidence")
+	if belowUserConfidence != "" {
+		belowUserConfidenceValue, err := strconv.ParseFloat(belowUserConfidence, 32)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32("below_user_confidence", float32(belowUserConfidenceValue))
+	}
+
+	nsRecord := values.Get("ns_record")
+	if nsRecord != "" {
+		nsRecordValue, err := strconv.Atoi(belowUserConfidence)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt32("ns_record", int32(nsRecordValue))
+	}
+
+	ipAddress := values.Get("ip_address")
+	if ipAddress != "" {
+		filter.Filters.AddString("ip_address", ipAddress)
+	}
+
+	hostAddress := values.Get("host_address")
+	if hostAddress != "" {
+		filter.Filters.AddString("host_address", hostAddress)
+	}
+
+	endHostAddress := values.Get("ends_host_address")
+	if endHostAddress != "" {
+		filter.Filters.AddString("ends_host_address", endHostAddress)
+	}
+
+	startHostAddress := values.Get("starts_host_address")
+	if startHostAddress != "" {
+		filter.Filters.AddString("starts_host_address", startHostAddress)
 	}
 
 	start := values.Get("start")
@@ -324,8 +385,13 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	logger.Info().Msg("processing list")
 	defer req.Body.Close()
 
-	addrs, parserErrors := inputlist.ParseList(req.Body, 100000)
+	addrs, parserErrors := inputlist.ParseList(req.Body, 1000) // 10000
 	logger.Info().Int("addr_len", len(addrs)).Msg("parsed list")
+	if len(addrs) > 1000 {
+		middleware.ReturnError(w, "too many addresses during alpha", 401)
+		return
+	}
+
 	if len(parserErrors) != 0 {
 		logger.Error().Int("GroupID", groupID).Msg("error processing input")
 		putResponse.ParserErrors = parserErrors
@@ -396,47 +462,6 @@ func makeAddrs(in map[string]struct{}, orgID, userID, groupID int) map[string]*a
 		i++
 	}
 	return addrs
-}
-
-type statsResponse struct {
-	Status     string                 `json:"status"`
-	GroupStats map[int]*am.GroupStats `json:"group_stats"`
-	Count      int                    `json:"count"`
-}
-
-func (h *AddressHandlers) GetGroupStats(w http.ResponseWriter, req *http.Request) {
-	var err error
-	var data []byte
-
-	userContext, ok := h.ContextExtractor(req.Context())
-	if !ok {
-		middleware.ReturnError(w, "missing user context", 401)
-		return
-	}
-	logger := middleware.UserContextLogger(userContext)
-
-	id, err := groupIDFromRequest(req)
-	if err != nil {
-		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
-		return
-	}
-
-	oid, count, err := h.addrClient.Count(req.Context(), userContext, id)
-	if oid != userContext.GetOrgID() {
-		logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
-		middleware.ReturnError(w, "internal error", 500)
-		return
-	}
-
-	data, err = json.Marshal(&countResponse{Status: "OK", GroupID: id, Count: count})
-	if err != nil {
-		logger.Error().Err(err).Msg("error marshaling response")
-		middleware.ReturnError(w, "internal error", 500)
-		return
-	}
-
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(data))
 }
 
 type countResponse struct {

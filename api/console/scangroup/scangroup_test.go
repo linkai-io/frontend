@@ -62,7 +62,7 @@ func TestNewGroupValidators(t *testing.T) {
 	validGroup := &scangroup.ScanGroupDetails{}
 	validGroup.GroupName = "日本"
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
-	validGroup.ConcurrentRequests = 10
+	validGroup.ConcurrentRequests = 5
 	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
 	if err := validate.Struct(validGroup); err != nil {
 		t.Fatalf("should not have got error on validation: %#v\n", err)

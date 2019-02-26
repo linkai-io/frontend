@@ -57,7 +57,7 @@
   version = "v1.8.2"
 
 [[projects]]
-  digest = "1:41b16c956a50bd6dd29c0e643d2018f96ed4139d787c188acbac374ab1781ee7"
+  digest = "1:6766cbd0e9ff836bcefb8cf96367f7bde6c18ff8f1ce703c2c3ff735618f9d8e"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -99,8 +99,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "10ce3494cb43d3d8dd58b4e5fa40edc2136bf96b"
-  version = "v1.16.36"
+  revision = "b4d97e9cf75f3815bd694b8e0d6f9d81492c3586"
+  version = "v1.17.5"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -288,7 +288,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:98c383b2e73c041a97bc470e00cb9feb5889c72dd61bbd2863273e07df8485a6"
+  digest = "1:eb249df4597af6592c52274abb1ae4893bd1f4b89ff60d36be3084b2390022a4"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -316,7 +316,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "1519a333b5684ff61be706b9668b4fa9069d397c"
+  revision = "6f52722c2e6e77010b84f6f830e69108bae85493"
 
 [[projects]]
   digest = "1:1b46adc9e3d878cdf38a164cfdac2e19340f4d2662aa5bee88062f6ee08ac9df"
@@ -414,11 +414,11 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
+  revision = "7f87c0fbb88b590338857bcb720678c2583d4dea"
 
 [[projects]]
   branch = "master"
-  digest = "1:e00dbd512ed429b0e9947b1123972c4e450c2513b7601817233e103b82a6c233"
+  digest = "1:24e059ae4d60df70876681f7baa6da702d68b2efd97919948fbad6cb727a2123"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -437,11 +437,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898"
+  revision = "fe579d43d83210096a79b46dcca0e3721058393a"
 
 [[projects]]
   branch = "master"
-  digest = "1:1540fd815845f20e31cb95c3b6f7f0f0c8880c3d053845ba4a4a609539446bf6"
+  digest = "1:6ca682cc9faff447b8992389e20fd11e5e7366ba66768b2d0e2c12235fd3dec2"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -451,15 +451,15 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "3e8b2be1363542a95c52ea0796d4a40dacfb5b95"
+  revision = "9b3c75971fc92dd27c6436a37c05c831498658f1"
 
 [[projects]]
   branch = "master"
-  digest = "1:8207c052fb873f83c61a5aa16f6add5feb9881eda2112b56f69fd3b9e7f55c3f"
+  digest = "1:d0e9a312c4610a508569ab25e54d34600b1a96d19b1866ece104ffdf1c1b9d2c"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "d0b11bdaac8adb652bff00e49bcacf992835621a"
+  revision = "cc5685c2db1239775905f3911f0067c0fa74762f"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -531,7 +531,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "bd968387e4aa590b3c6e4ba38ecac1ed314d43ad"
+  revision = "082222b4a5c572e33e82ee9162d1352c7cf38682"
 
 [[projects]]
   digest = "1:6dfe7f3314a390dc9e21368dd41236169bf40ae69674f42b7bd45db537751a94"
