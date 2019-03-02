@@ -35,6 +35,7 @@ func main() {
 
 	webHandlers := wd.New(webClient)
 	r.Route("/webdata", func(r chi.Router) {
+		r.Get("/stats", webHandlers.OrgStats)
 		r.Get("/group/{id}/snapshots", webHandlers.GetSnapshots)
 		r.Post("/group/{id}/snapshots/download", webHandlers.ExportSnapshots)
 		r.Get("/group/{id}/certificates", webHandlers.GetCertificates)

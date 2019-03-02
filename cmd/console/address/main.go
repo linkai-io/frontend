@@ -35,6 +35,7 @@ func main() {
 	addrHandlers := address.New(addrClient, scanGroupClient)
 
 	r.Route("/address", func(r chi.Router) {
+		r.Get("/stats", addrHandlers.OrgStats)
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)

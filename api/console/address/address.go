@@ -28,6 +28,11 @@ type AddressResponse struct {
 	Total     int                    `json:"total"`
 }
 
+type AddressStatsResponse struct {
+	Stats  []*am.ScanGroupAddressStats `json:"stats"`
+	Status string                      `json:"status"`
+}
+
 type HostlistResponse struct {
 	Hosts     []*am.ScanGroupHostList `json:"hosts"`
 	Status    string                  `json:"status"`
@@ -46,6 +51,48 @@ func New(addrClient am.AddressService, scanGroupClient am.ScanGroupService) *Add
 		scanGroupClient:  scanGroupClient,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
+}
+
+func (h *AddressHandlers) OrgStats(w http.ResponseWriter, req *http.Request) {
+	var err error
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	log.Info().Msg("getting stats for org")
+	oid, stats, err := h.addrClient.OrgStats(req.Context(), userContext)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get addresses")
+		middleware.ReturnError(w, "failed to get addresses: "+err.Error(), 500)
+		return
+	}
+
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(err).Msg("authorization failure")
+		middleware.ReturnError(w, "failed to get addresses", 500)
+		return
+	}
+	log.Info().Msgf("stats... %#v\n", stats)
+	for i := 0; i < len(stats); i++ {
+		log.Info().Msgf("%#v\n", stats[i])
+	}
+	response := &AddressStatsResponse{
+		Status: "OK",
+		Stats:  stats,
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get marshal response")
+		middleware.ReturnError(w, "failed return addresses", 500)
+		return
+	}
+
+	fmt.Fprintf(w, string(data))
 }
 
 func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) {
@@ -99,7 +146,7 @@ func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) 
 	}
 
 	response := &HostlistResponse{
-		Status:    "ok",
+		Status:    "OK",
 		LastIndex: lastAddr,
 		Hosts:     hosts,
 	}
@@ -165,7 +212,7 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 	}
 
 	response := &AddressResponse{
-		Status:    "ok",
+		Status:    "OK",
 		LastIndex: lastAddr,
 		Addrs:     addrs,
 		Total:     total,
@@ -190,7 +237,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		Limit:   0,
 		Filters: &am.FilterType{},
 	}
-
+	log.Info().Msgf("parsing URL Filter: %#v\n", values)
 	ignored := values.Get("ignored")
 	if ignored == "true" {
 		filter.Filters.AddBool("ignored", true)
@@ -236,6 +283,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		if err != nil {
 			return nil, err
 		}
+		log.Info().Msgf("adding before seen: %s", beforeSeen)
 		filter.Filters.AddInt64("before_seen_time", beforeSeenTime)
 	}
 
@@ -245,7 +293,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_seen_time", afterSeenTime)
+		filter.Filters.AddInt64("after_seen_time", afterSeenTime)
 	}
 
 	beforeDiscovered := values.Get("before_discovered")
@@ -263,7 +311,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_seen_time", afterDiscoveredTime)
+		filter.Filters.AddInt64("after_discovered_time", afterDiscoveredTime)
 	}
 
 	aboveConfidence := values.Get("above_confidence")
@@ -304,7 +352,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 
 	nsRecord := values.Get("ns_record")
 	if nsRecord != "" {
-		nsRecordValue, err := strconv.Atoi(belowUserConfidence)
+		nsRecordValue, err := strconv.Atoi(nsRecord)
 		if err != nil {
 			return nil, err
 		}
@@ -353,7 +401,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 			return nil, errors.New("limit max size exceeded (5000)")
 		}
 	}
-	log.Info().Msgf("restricting results with filter %v", filter)
+	log.Info().Msgf("restricting results with filter %v %#v", filter, filter.Filters)
 	return filter, nil
 }
 
