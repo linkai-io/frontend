@@ -64,7 +64,7 @@ func (h *ProvisionHandlers) CreateOrg(w http.ResponseWriter, req *http.Request) 
 
 	if _, err := h.provisioner.Add(req.Context(), userContext, org, h.roles); err != nil {
 		log.Error().Err(err).Msg("provisioner error")
-		middleware.ReturnError(w, "error provisioning organization", 500)
+		middleware.ReturnError(w, fmt.Sprintf("error provisioning organization: %v", err), 500)
 		return
 	}
 

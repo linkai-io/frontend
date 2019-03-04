@@ -18,6 +18,7 @@ import (
 	"github.com/linkai-io/frontend/api/console/user"
 	"github.com/linkai-io/frontend/api/console/webdata"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
+	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
 )
 
@@ -55,6 +56,18 @@ func main() {
 		w.WriteHeader(404)
 		fmt.Fprintf(w, "%#v not found", req.URL)
 	}))
+
+	testAuthHandler := &testAuth{}
+	// auth
+	r.Route("/auth", func(r chi.Router) {
+		r.Get("/health", middleware.Health)
+		r.Post("/refresh", testAuthHandler.Refresh)
+		r.Post("/login", testAuthHandler.Login)
+		r.Post("/forgot", testAuthHandler.Forgot)
+		r.Post("/forgot_confirm", testAuthHandler.ForgotConfirm)
+		r.Post("/changepwd", testAuthHandler.ChangePwd)
+	})
+
 	// for addresses
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/stats", addrHandlers.OrgStats)
@@ -95,6 +108,7 @@ func main() {
 		r.Patch("/password", userHandlers.ChangePassword)
 	})
 
+	// webdata
 	r.Route("/webdata", func(r chi.Router) {
 		r.Get("/stats", webHandlers.OrgStats)
 		r.Get("/group/{id}/snapshots", webHandlers.GetSnapshots)
