@@ -316,7 +316,7 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 
 	aboveConfidence := values.Get("above_confidence")
 	if aboveConfidence != "" {
-		aboveConfidenceValue, err := strconv.ParseFloat(beforeDiscovered, 32)
+		aboveConfidenceValue, err := strconv.ParseFloat(aboveConfidence, 32)
 		if err != nil {
 			return nil, err
 		}

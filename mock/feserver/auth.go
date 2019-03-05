@@ -87,14 +87,9 @@ func (h *testAuth) ForgotConfirm(w http.ResponseWriter, req *http.Request) {
 
 // ChangePwd allows a user to change their password provided the current password works.
 func (h *testAuth) ChangePwd(w http.ResponseWriter, req *http.Request) {
-	response := make(map[string]string, 5)
+	response := make(map[string]string, 1)
 
-	response["state"] = authz.AuthSuccess
-	response["access_token"] = "access"
-	//response["id_token"] = *authResult.IdToken
-	response["refresh_token"] = "refersh"
-	response["expires"] = "3600"
-	response["token_type"] = "Bearer"
+	response["status"] = "ok"
 	respData, _ := json.Marshal(response)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(respData))
