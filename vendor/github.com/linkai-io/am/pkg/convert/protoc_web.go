@@ -223,6 +223,21 @@ func HTTPResponsesToDomain(in []*prototypes.HTTPResponse) []*am.HTTPResponse {
 	return responses
 }
 
+func DomainToDetectedTech(in map[string]*am.WebTech) map[string]*prototypes.WebTech {
+	out := make(map[string]*prototypes.WebTech)
+	if in == nil {
+		return out
+	}
+	for k, v := range in {
+		out[k] = &prototypes.WebTech{
+			Matched:  v.Matched,
+			Version:  v.Version,
+			Location: v.Location,
+		}
+	}
+	return out
+}
+
 func DomainToWebData(in *am.WebData) *prototypes.WebData {
 	if in == nil {
 		return nil
@@ -244,7 +259,23 @@ func DomainToWebData(in *am.WebData) *prototypes.WebData {
 		IPAddress:           in.IPAddress,
 		Scheme:              in.Scheme,
 		ResponsePort:        int32(in.ResponsePort),
+		DetectedTech:        DomainToDetectedTech(in.DetectedTech),
 	}
+}
+
+func DetectedTechToDomain(in map[string]*prototypes.WebTech) map[string]*am.WebTech {
+	out := make(map[string]*am.WebTech)
+	if in == nil {
+		return out
+	}
+	for k, v := range in {
+		out[k] = &am.WebTech{
+			Matched:  v.Matched,
+			Version:  v.Version,
+			Location: v.Location,
+		}
+	}
+	return out
 }
 
 func WebDataToDomain(in *prototypes.WebData) *am.WebData {
@@ -268,44 +299,59 @@ func WebDataToDomain(in *prototypes.WebData) *am.WebData {
 		SerializedDOMLink:   in.SerializedDOMLink,
 		ResponseTimestamp:   in.ResponseTimestamp,
 		URLRequestTimestamp: in.URLRequestTimestamp,
+		DetectedTech:        DetectedTechToDomain(in.DetectedTech),
 	}
 }
 
 func DomainToWebSnapshot(in *am.WebSnapshot) *prototypes.WebSnapshot {
 	return &prototypes.WebSnapshot{
-		OrgID:             int32(in.OrgID),
-		GroupID:           int32(in.GroupID),
-		SnapshotID:        in.SnapshotID,
-		SnapshotLink:      in.SnapshotLink,
-		SerializedDOMLink: in.SerializedDOMLink,
-		ResponseTimestamp: in.ResponseTimestamp,
-		IsDeleted:         in.IsDeleted,
-		SerializedDOMHash: in.SerializedDOMHash,
-		URL:               in.URL,
-		AddressHash:       in.AddressHash,
-		HostAddress:       in.HostAddress,
-		IPAddress:         in.IPAddress,
-		ResponsePort:      int32(in.ResponsePort),
-		Scheme:            in.Scheme,
+		OrgID:              int32(in.OrgID),
+		GroupID:            int32(in.GroupID),
+		SnapshotID:         in.SnapshotID,
+		SnapshotLink:       in.SnapshotLink,
+		SerializedDOMLink:  in.SerializedDOMLink,
+		ResponseTimestamp:  in.ResponseTimestamp,
+		IsDeleted:          in.IsDeleted,
+		SerializedDOMHash:  in.SerializedDOMHash,
+		URL:                in.URL,
+		AddressHash:        in.AddressHash,
+		HostAddress:        in.HostAddress,
+		IPAddress:          in.IPAddress,
+		ResponsePort:       int32(in.ResponsePort),
+		Scheme:             in.Scheme,
+		TechCategories:     in.TechCategories,
+		TechNames:          in.TechNames,
+		TechVersions:       in.TechVersions,
+		TechMatchLocations: in.TechMatchLocations,
+		TechMatchData:      in.TechMatchData,
+		TechIcons:          in.TechIcons,
+		TechWebsites:       in.TechWebsites,
 	}
 }
 
 func WebSnapshotToDomain(in *prototypes.WebSnapshot) *am.WebSnapshot {
 	return &am.WebSnapshot{
-		SnapshotID:        in.SnapshotID,
-		OrgID:             int(in.OrgID),
-		GroupID:           int(in.GroupID),
-		SnapshotLink:      in.SnapshotLink,
-		SerializedDOMHash: in.SerializedDOMHash,
-		SerializedDOMLink: in.SerializedDOMLink,
-		ResponseTimestamp: in.ResponseTimestamp,
-		IsDeleted:         in.IsDeleted,
-		URL:               in.URL,
-		AddressHash:       in.AddressHash,
-		HostAddress:       in.HostAddress,
-		IPAddress:         in.IPAddress,
-		ResponsePort:      int(in.ResponsePort),
-		Scheme:            in.Scheme,
+		SnapshotID:         in.SnapshotID,
+		OrgID:              int(in.OrgID),
+		GroupID:            int(in.GroupID),
+		SnapshotLink:       in.SnapshotLink,
+		SerializedDOMHash:  in.SerializedDOMHash,
+		SerializedDOMLink:  in.SerializedDOMLink,
+		ResponseTimestamp:  in.ResponseTimestamp,
+		IsDeleted:          in.IsDeleted,
+		URL:                in.URL,
+		AddressHash:        in.AddressHash,
+		HostAddress:        in.HostAddress,
+		IPAddress:          in.IPAddress,
+		ResponsePort:       int(in.ResponsePort),
+		Scheme:             in.Scheme,
+		TechCategories:     in.TechCategories,
+		TechNames:          in.TechNames,
+		TechVersions:       in.TechVersions,
+		TechMatchLocations: in.TechMatchLocations,
+		TechMatchData:      in.TechMatchData,
+		TechIcons:          in.TechIcons,
+		TechWebsites:       in.TechWebsites,
 	}
 }
 
