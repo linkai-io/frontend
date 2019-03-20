@@ -42,13 +42,15 @@ type HostlistResponse struct {
 type AddressHandlers struct {
 	addrClient       am.AddressService
 	scanGroupClient  am.ScanGroupService
+	orgClient        am.OrganizationService
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(addrClient am.AddressService, scanGroupClient am.ScanGroupService) *AddressHandlers {
+func New(addrClient am.AddressService, scanGroupClient am.ScanGroupService, orgClient am.OrganizationService) *AddressHandlers {
 	return &AddressHandlers{
 		addrClient:       addrClient,
 		scanGroupClient:  scanGroupClient,
+		orgClient:        orgClient,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
 }
@@ -425,6 +427,13 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 	logger := middleware.UserContextLogger(userContext)
 
+	_, org, err := h.orgClient.GetByID(req.Context(), userContext, userContext.GetOrgID())
+	if err != nil {
+		logger.Warn().Err(err).Msg("failed to get org data continuing with subscription defaults")
+	}
+
+	limitTLD, limitHosts := h.getSubscriptionDetails(userContext, org)
+
 	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
@@ -433,9 +442,9 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	logger.Info().Msg("processing list")
 	defer req.Body.Close()
 
-	addrs, parserErrors := inputlist.ParseList(req.Body, 1000) // 10000
+	addrs, parserErrors := inputlist.ParseList(req.Body, int(limitHosts)) // 10000
 	logger.Info().Int("addr_len", len(addrs)).Msg("parsed list")
-	if len(addrs) > 1000 {
+	if len(addrs) > int(limitHosts) {
 		middleware.ReturnError(w, "too many addresses during alpha", 401)
 		return
 	}
@@ -452,6 +461,21 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 		}
 		w.WriteHeader(400)
 		fmt.Fprint(w, string(data))
+		return
+	}
+
+	tlds := make(map[string]struct{}, 0)
+	for host := range addrs {
+		etld, err := parsers.GetETLD(host)
+		if err != nil {
+			continue
+		}
+		tlds[etld] = struct{}{}
+	}
+
+	if len(tlds) > int(limitTLD) {
+		msg := fmt.Sprintf("top level domains (%d) of this input list exceeded limit of %d domains for your plan", len(tlds), limitTLD)
+		middleware.ReturnError(w, msg, 400)
 		return
 	}
 
@@ -485,6 +509,22 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 
 	w.WriteHeader(200)
 	fmt.Fprintf(w, string(data))
+}
+
+func (h *AddressHandlers) getSubscriptionDetails(userContext am.UserContext, org *am.Organization) (limitTLD int32, limitHosts int32) {
+	subID := userContext.GetSubscriptionID()
+	if org == nil {
+		switch subID {
+		case am.SubscriptionMonthlySmall:
+			return 1, 25
+		case am.SubscriptionMonthlyMedium:
+			return 3, 200
+		case am.SubscriptionEnterprise:
+			return 200, 10000
+		}
+	}
+
+	return org.LimitTLD, org.LimitHosts
 }
 
 func makeAddrs(in map[string]struct{}, orgID, userID, groupID int) map[string]*am.ScanGroupAddress {
