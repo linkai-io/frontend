@@ -36,3 +36,8 @@
 [[constraint]]
   name = "github.com/hashicorp/consul"
   version = "1.4.0"
+
+[[constraint]]
+   name = "github.com/linkai-io/am"
+   branch = "tier_restrictions"
+   source = "github.com/linkai-io/am"

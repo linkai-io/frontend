@@ -21,7 +21,7 @@ type OrgDetails struct {
 	City            string `json:"city,omitempty" validate:"omitempty,gte=3,lte=256"`
 	PostalCode      string `json:"postal_code,omitempty" validate:"omitempty,gte=3,lte=24"`
 	StatusID        int    `json:"status_id" validate:"required,oneof=1 2 3 100 1000"`
-	SubscriptionID  int    `json:"subscription_id" validate:"required,oneof=1 10 100 1000"`
+	SubscriptionID  int32  `json:"subscription_id" validate:"required,oneof=1 10 100 101 102 1000"`
 }
 
 // ToOrganization converts the details to an am.Organization if it validates successfully.
@@ -30,22 +30,42 @@ func (o *OrgDetails) ToOrganization() (*am.Organization, error) {
 	if err := validate.Struct(o); err != nil {
 		return nil, err
 	}
+	limitTLD := int32(1)
+	limitHosts := int32(25)
+	limitCustomWebFlows := int32(1)
+	switch o.SubscriptionID {
+	case am.SubscriptionMonthlySmall:
+		limitTLD = 1
+		limitHosts = 25
+		limitCustomWebFlows = 1
+	case am.SubscriptionMonthlyMedium:
+		limitTLD = 3
+		limitHosts = 200
+		limitCustomWebFlows = 3
+	case am.SubscriptionEnterprise:
+		limitTLD = 50
+		limitHosts = 10000
+		limitCustomWebFlows = 10
+	}
 
 	return &am.Organization{
-		OrgName:         o.OrgName,
-		OwnerEmail:      o.OwnerEmail,
-		FirstName:       o.FirstName,
-		LastName:        o.LastName,
-		Phone:           o.Phone,
-		Country:         o.Country,
-		StatePrefecture: o.StatePrefecture,
-		Street:          o.Street,
-		Address1:        o.Address1,
-		Address2:        o.Address2,
-		City:            o.City,
-		PostalCode:      o.PostalCode,
-		StatusID:        o.StatusID,
-		Deleted:         false,
-		SubscriptionID:  o.SubscriptionID,
+		OrgName:             o.OrgName,
+		OwnerEmail:          o.OwnerEmail,
+		FirstName:           o.FirstName,
+		LastName:            o.LastName,
+		Phone:               o.Phone,
+		Country:             o.Country,
+		StatePrefecture:     o.StatePrefecture,
+		Street:              o.Street,
+		Address1:            o.Address1,
+		Address2:            o.Address2,
+		City:                o.City,
+		PostalCode:          o.PostalCode,
+		StatusID:            o.StatusID,
+		Deleted:             false,
+		SubscriptionID:      o.SubscriptionID,
+		LimitTLD:            limitTLD,
+		LimitHosts:          limitHosts,
+		LimitCustomWebFlows: limitCustomWebFlows,
 	}, nil
 }

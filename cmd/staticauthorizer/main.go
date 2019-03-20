@@ -49,9 +49,12 @@ func init() {
 	secureCookie = cookie.New([]byte(hashKey), []byte(blockKey))
 	tokener = awstoken.New(env, region)
 	// TODO: right now this policy states *all* apis, but restricts to stage (env)... so maybe not a big deal?
-	policyResource = fmt.Sprintf("arn:aws:execute-api:%s:%s:*/%s/GET/app/*", region, accountID, env)
+	policyResource = fmt.Sprintf("arn:aws:execute-api:%s:%s:*/%s/", region, accountID, env)
 }
 
+/*
+
+ */
 // Help function to generate an IAM policy
 func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
 	log.Info().Str("OrgCID", orgCID).Str("cognito_user_name", accessToken.CognitoUserName).Msg("returning success policy")
@@ -61,14 +64,22 @@ func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGa
 			Version: "2012-10-17",
 			Statement: []events.IAMPolicyStatement{
 				events.IAMPolicyStatement{
-					Effect:   "Allow",
-					Action:   []string{"execute-api:Invoke"},
-					Resource: []string{policyResource},
+					Effect: "Allow",
+					Action: []string{"execute-api:Invoke"},
+					Resource: []string{
+						policyResource + "GET/app/",
+						policyResource + "GET/app/css/*",
+						policyResource + "GET/app/fonts/*",
+						policyResource + "GET/app/img/*",
+						policyResource + "GET/app/js/*",
+						policyResource + "GET/app/favicon.png",
+						policyResource + "GET/app/index.html",
+					},
 				},
 				events.IAMPolicyStatement{
 					Effect:   "Allow",
-					Action:   []string{"s3:GetObject", "s3:ListBucket"},
-					Resource: []string{fmt.Sprintf("arn:aws:s3:::%s-linkai-webdata/%s/*", env, orgCID)},
+					Action:   []string{"execute-api:Invoke"},
+					Resource: []string{fmt.Sprintf("%sGET/app/data/%s/*", policyResource, orgCID)},
 				},
 			},
 		},

@@ -115,15 +115,16 @@ func generatePolicy(org *am.Organization, user *am.User, accessToken *token.Acce
 
 	// Optional output with custom properties of the String, Number or Boolean type.
 	authResponse.Context = map[string]interface{}{
-		"FirstName": user.FirstName,
-		"LastName":  user.LastName,
-		"CognitoID": accessToken.CognitoUserName,
-		"Email":     user.UserEmail,
-		"UserCID":   user.UserCID,
-		"UserID":    user.UserID,
-		"OrgID":     org.OrgID,
-		"OrgCID":    org.OrgCID,
-		"Group":     accessToken.Groups[0], // for now, only one group
+		"FirstName":      user.FirstName,
+		"LastName":       user.LastName,
+		"CognitoID":      accessToken.CognitoUserName,
+		"Email":          user.UserEmail,
+		"UserCID":        user.UserCID,
+		"UserID":         user.UserID,
+		"OrgID":          org.OrgID,
+		"OrgCID":         org.OrgCID,
+		"SubscriptionID": org.SubscriptionID,
+		"Group":          accessToken.Groups[0], // for now, only one group
 	}
 	return authResponse, nil
 }

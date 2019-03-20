@@ -2,9 +2,7 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"strconv"
 
 	"github.com/apex/gateway"
@@ -35,14 +33,10 @@ func ExtractUserContext(ctx context.Context) (am.UserContext, bool) {
 func UserCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		var subID int
+		userContext := &am.UserContextData{}
 
 		log.Info().Msg("retrieving user context")
-		requestDump, err := httputil.DumpRequest(r, true)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(requestDump))
-
 		requestContext, ok := gateway.RequestContext(r.Context())
 		if !ok {
 			ReturnError(w, "missing request context", 401)
@@ -52,8 +46,6 @@ func UserCtx(next http.Handler) http.Handler {
 			ReturnError(w, "missing authorization context", 401)
 			return
 		}
-
-		userContext := &am.UserContextData{}
 
 		id := stringField("UserID", requestContext.Authorizer)
 		if userContext.UserID, err = strconv.Atoi(id); err != nil {
@@ -86,10 +78,17 @@ func UserCtx(next http.Handler) http.Handler {
 		}
 		userContext.Roles = []string{role}
 
+		subscriptionID := stringField("SubscriptionID", requestContext.Authorizer)
+		if subID, err = strconv.Atoi(subscriptionID); err != nil {
+			ReturnError(w, "invalid subscription id", 401)
+			return
+		}
+		userContext.SubscriptionID = int32(subID)
+
 		userContext.TraceID = requestContext.RequestID
 		userContext.IPAddress = requestContext.Identity.SourceIP
 		ctx := context.WithValue(r.Context(), userCtxKey, userContext)
-		log.Info().Msg("user context created, calling next")
+		log.Info().Msgf("user context created, calling next, %#v", userContext)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

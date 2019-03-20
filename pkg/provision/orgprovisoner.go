@@ -544,7 +544,7 @@ func (p *OrgProvision) createOwnerUser(ctx context.Context, orgData *am.Organiza
 			},
 			cip.AttributeType{
 				Name:  aws.String("dev:custom:subscription"),
-				Value: aws.String(strconv.Itoa(orgData.SubscriptionID)),
+				Value: aws.String(strconv.Itoa(int(orgData.SubscriptionID))),
 			},
 			cip.AttributeType{
 				Name:  aws.String("custom:orgname"),
