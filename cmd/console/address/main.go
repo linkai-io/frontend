@@ -17,6 +17,7 @@ import (
 
 var addrClient am.AddressService
 var scanGroupClient am.ScanGroupService
+var orgClient am.OrganizationService
 
 func init() {
 	zerolog.TimeFieldFormat = ""
@@ -27,12 +28,13 @@ func init() {
 
 	scanGroupClient = initializers.ScanGroupClient()
 	addrClient = initializers.AddressClient()
+	orgClient = initializers.OrgClient()
 }
 
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	addrHandlers := address.New(addrClient, scanGroupClient)
+	addrHandlers := address.New(addrClient, scanGroupClient, orgClient)
 
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/stats", addrHandlers.OrgStats)
