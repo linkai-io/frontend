@@ -227,6 +227,29 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 
+	switch userContext.GetSubscriptionID() {
+	case am.SubscriptionMonthlySmall:
+		_, g, err := h.scanGroupClient.Groups(req.Context(), userContext)
+		if err != nil {
+			middleware.ReturnError(w, "error listing current scan groups", 400)
+			return
+		}
+		if len(g) != 0 {
+			middleware.ReturnError(w, "this pricing plan only allows one scan group", 400)
+			return
+		}
+	case am.SubscriptionMonthlyMedium:
+		_, g, err := h.scanGroupClient.Groups(req.Context(), userContext)
+		if err != nil {
+			middleware.ReturnError(w, "error listing current scan groups", 400)
+			return
+		}
+		if len(g) >= 3 {
+			middleware.ReturnError(w, "this pricing plan only allows three scan groups", 400)
+			return
+		}
+	}
+
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
 		middleware.ReturnError(w, "error reading scangroup from body", 400)
@@ -409,6 +432,11 @@ func (h *ScanGroupHandlers) DeleteScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 	logger := middleware.UserContextLogger(userContext)
+
+	if userContext.GetSubscriptionID() == am.SubscriptionMonthlySmall {
+		middleware.ReturnError(w, "this pricing plan does not allow for deleting scan groups", 400)
+		return
+	}
 
 	param := chi.URLParam(req, "name")
 

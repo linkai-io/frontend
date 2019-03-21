@@ -444,15 +444,21 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 
 	addrs, parserErrors := inputlist.ParseList(req.Body, int(limitHosts)) // 10000
 	logger.Info().Int("addr_len", len(addrs)).Msg("parsed list")
+
 	if len(addrs) > int(limitHosts) {
-		middleware.ReturnError(w, "too many addresses during alpha", 401)
+		middleware.ReturnError(w, "too many addresses during alpha", 400)
+		return
+	}
+
+	if len(addrs) == 0 {
+		middleware.ReturnError(w, "no valid addresses supplied", 400)
 		return
 	}
 
 	if len(parserErrors) != 0 {
 		logger.Error().Int("GroupID", groupID).Msg("error processing input")
 		putResponse.ParserErrors = parserErrors
-		putResponse.Status = "NG"
+		putResponse.Status = "error"
 		data, err = json.Marshal(putResponse)
 		if err != nil {
 			logger.Error().Err(err).Int("GroupID", groupID).Msg("error processing input")
@@ -460,6 +466,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 			return
 		}
 		w.WriteHeader(400)
+		logger.Error().Msgf("%s", string(data))
 		fmt.Fprint(w, string(data))
 		return
 	}
@@ -474,7 +481,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 
 	if len(tlds) > int(limitTLD) {
-		msg := fmt.Sprintf("top level domains (%d) of this input list exceeded limit of %d domains for your plan", len(tlds), limitTLD)
+		msg := fmt.Sprintf("top level domains (%d) of this input list exceeded limit of %d domains for your pricing plan", len(tlds), limitTLD)
 		middleware.ReturnError(w, msg, 400)
 		return
 	}

@@ -58,7 +58,7 @@
   version = "v1.9.0"
 
 [[projects]]
-  digest = "1:934b26cf031b465de923458c5da76fb1e149260ac32ceb7c391c2b77146546f6"
+  digest = "1:d5cdfc5f0045c70db019604480c430c8e06c68bf04a65c8ad9909f44f13a2e87"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "f9b35e02297c8fcca7a55dd30ed8d4e9dc64f5a3"
-  version = "v1.18.5"
+  revision = "fcb19ead441f7659dd7d7589ff3fb0b45a24d863"
+  version = "v1.18.6"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -234,12 +234,12 @@
   version = "v1.4.3"
 
 [[projects]]
-  digest = "1:f47d6109c2034cb16bd62b220e18afd5aa9d5a1630fe5d937ad96a4fb7cbb277"
+  digest = "1:af105c7c5dc0b4ae41991f122cae860b9600f7d226072c2a83127048c991660c"
   name = "github.com/hashicorp/go-cleanhttp"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e8ab9daed8d1ddd2d3c4efba338fe2eeae2e4f18"
-  version = "v0.5.0"
+  revision = "eda1e5db218aad1db63ca4642c8906b26bcf2744"
+  version = "v0.5.1"
 
 [[projects]]
   digest = "1:2be5a35f0c5b35162c41bb24971e5dcf6ce825403296ee435429cdcc4e1e847e"
@@ -305,7 +305,7 @@
 
 [[projects]]
   branch = "tier_restrictions"
-  digest = "1:680677a44e4104ae50d9c5632b9b78f8b50fda5c3bdb9d66628d524af2721ed9"
+  digest = "1:f886216cc7d8642024876f9da2ad3c7a66acfa778ae739a646a56e28a08fcaae"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -334,7 +334,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "56ab541c953776f8799381de6f6fd72bb48d5934"
+  revision = "0e514b4b116b50e8161182067760be7429e9e248"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -425,11 +425,11 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
 
 [[projects]]
   branch = "master"
-  digest = "1:229d84cad0658f5dbd3aac9b7a0519470ac905555c511da44f06416d1a6530fb"
+  digest = "1:79761ff3dabe447009396c3910a0647139cafa0544568b68e8d7d84852a12e09"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -450,7 +450,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "d196dffd7c2beec1957382065df08bcc353b9706"
+  revision = "1272bf9dcd53ea65c09668fb4c76e65deb740072"
 
 [[projects]]
   branch = "master"
@@ -517,7 +517,7 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:fa026a5c59bd2df343ec4a3538e6288dcf4e2ec5281d743ae82c120affe6926a"
+  digest = "1:04f2ff15fc59e1ddaf9900ad0e19e5b19586b31f9dafd4d592b617642b239d8f"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -532,8 +532,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
-  version = "v1.4.0"
+  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
+  version = "v1.5.0"
 
 [[projects]]
   branch = "master"
@@ -547,7 +547,7 @@
   revision = "5fe7a883aa19554f42890211544aa549836af7b7"
 
 [[projects]]
-  digest = "1:73344d5dea2db9e6de56a90125c180b53aa63084edc01a350519f092a88f801e"
+  digest = "1:a0bdff6a1dd68e7fa6edbffe3bef8e061db79543975d1c53afcae3a8d8a6c445"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -584,8 +584,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
-  version = "v1.19.0"
+  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
+  version = "v1.19.1"
 
 [[projects]]
   digest = "1:a5000fcb87d763e1d410111d32f3e1d07a6f7913f7efdf68070636c407da54d1"

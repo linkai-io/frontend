@@ -129,6 +129,9 @@ func (h *AuthHandlers) Refresh(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// add subscription id to response
+	results["subscription_id"] = fmt.Sprintf("%d", orgData.SubscriptionID)
+
 	respData, err := json.Marshal(results)
 	if err != nil {
 		middleware.ReturnError(w, "marshal auth response failed", 500)
@@ -199,6 +202,8 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "login failed", 403)
 		return
 	}
+	// add subscription id to response
+	results["subscription_id"] = fmt.Sprintf("%d", orgData.SubscriptionID)
 
 	respData, err := json.Marshal(results)
 	if err != nil {

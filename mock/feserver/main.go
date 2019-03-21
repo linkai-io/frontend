@@ -38,7 +38,7 @@ func main() {
 	tokener := awstoken.New(env, region)
 	authenticator := awsauthz.New(env, region, tokener)
 
-	addrHandlers := address.New(addrClient, scanGroupClient)
+	addrHandlers := address.New(addrClient, scanGroupClient, orgClient)
 	addrHandlers.ContextExtractor = fakeContext
 
 	orgHandlers := org.New(orgClient)
@@ -128,7 +128,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue"}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 101}, true
 }
 
 func testUserClient() am.UserService {
@@ -154,32 +154,42 @@ func testOrgClient() am.OrganizationService {
 	orgClient := &mock.OrganizationService{}
 
 	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
-		org = &am.Organization{
-			OrgID:                   userContext.GetOrgID(),
-			OrgCID:                  "test",
-			OrgName:                 orgName,
-			OwnerEmail:              "test@" + orgName + ".com",
-			UserPoolID:              "test",
-			UserPoolAppClientID:     "test",
-			UserPoolAppClientSecret: "test",
-			IdentityPoolID:          "test",
-			UserPoolJWK:             "test",
-			FirstName:               "test",
-			LastName:                "test",
-			Phone:                   "test",
-			Country:                 "test",
-			StatePrefecture:         "test",
-			Street:                  "test",
-			Address1:                "test",
-			Address2:                "test",
-			City:                    "test",
-			PostalCode:              "test",
-			CreationTime:            time.Now().UnixNano(),
-			StatusID:                am.OrgStatusActive,
-			Deleted:                 false,
-			SubscriptionID:          am.SubscriptionMonthly,
-		}
+		org = buildOrg(userContext, orgName, userContext.GetOrgID())
+		return userContext.GetOrgID(), org, nil
+	}
+	orgClient.GetByIDFn = func(ctx context.Context, userContext am.UserContext, orgID int) (oid int, org *am.Organization, err error) {
+		org = buildOrg(userContext, "test", userContext.GetOrgID())
 		return userContext.GetOrgID(), org, nil
 	}
 	return orgClient
+}
+
+func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organization {
+	return &am.Organization{
+		OrgID:                   userContext.GetOrgID(),
+		OrgCID:                  "test",
+		OrgName:                 orgName,
+		OwnerEmail:              "test@" + orgName + ".com",
+		UserPoolID:              "test",
+		UserPoolAppClientID:     "test",
+		UserPoolAppClientSecret: "test",
+		IdentityPoolID:          "test",
+		UserPoolJWK:             "test",
+		FirstName:               "test",
+		LastName:                "test",
+		Phone:                   "test",
+		Country:                 "test",
+		StatePrefecture:         "test",
+		Street:                  "test",
+		Address1:                "test",
+		Address2:                "test",
+		City:                    "test",
+		PostalCode:              "test",
+		CreationTime:            time.Now().UnixNano(),
+		StatusID:                am.OrgStatusActive,
+		Deleted:                 false,
+		SubscriptionID:          am.SubscriptionMonthlySmall,
+		LimitHosts:              25,
+		LimitTLD:                1,
+	}
 }
