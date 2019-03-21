@@ -19,7 +19,7 @@ import (
 
 func TestGetAddresses(t *testing.T) {
 	orgClient := &mock.OrganizationService{}
-	orgClient.GetByIDFn = mockGetOrgByIDfunc
+	orgClient.GetByCIDFn = mockGetOrgByCIDfunc
 
 	addrClient := &mock.AddressService{}
 	addrClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupAddress, error) {
@@ -85,7 +85,7 @@ func TestGetAddresses(t *testing.T) {
 
 func TestPutInitialAddresses(t *testing.T) {
 	orgClient := &mock.OrganizationService{}
-	orgClient.GetByIDFn = mockGetOrgByIDfunc
+	orgClient.GetByCIDFn = mockGetOrgByCIDfunc
 
 	addrClient := &mock.AddressService{}
 	addrClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupAddress, error) {
@@ -198,7 +198,7 @@ func TestPutInitialAddresses(t *testing.T) {
 
 }
 
-func mockGetOrgByIDfunc(ctx context.Context, userContext am.UserContext, orgID int) (int, *am.Organization, error) {
+func mockGetOrgByCIDfunc(ctx context.Context, userContext am.UserContext, orgCID string) (int, *am.Organization, error) {
 	return userContext.GetOrgID(), &am.Organization{
 		OrgID:                      userContext.GetOrgID(),
 		OrgCID:                     userContext.GetOrgCID(),

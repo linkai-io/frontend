@@ -427,7 +427,7 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	}
 	logger := middleware.UserContextLogger(userContext)
 
-	_, org, err := h.orgClient.GetByID(req.Context(), userContext, userContext.GetOrgID())
+	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
 	if err != nil {
 		logger.Warn().Err(err).Msg("failed to get org data continuing with subscription defaults")
 	}

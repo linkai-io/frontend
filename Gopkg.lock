@@ -304,7 +304,7 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "tier_restrictions"
+  branch = "master"
   digest = "1:f886216cc7d8642024876f9da2ad3c7a66acfa778ae739a646a56e28a08fcaae"
   name = "github.com/linkai-io/am"
   packages = [
@@ -334,7 +334,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "0e514b4b116b50e8161182067760be7429e9e248"
+  revision = "7648b6e28cc106a800e1911988b26c3229e2d092"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -472,7 +472,7 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "6c81ef8f67ca3f42fc9cd71dfbd5f35b0c4b5771"
+  revision = "f7bb7a8bee54210937e93ec56d007d892c1f0580"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
