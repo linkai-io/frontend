@@ -39,5 +39,5 @@
 
 [[constraint]]
    name = "github.com/linkai-io/am"
-   branch = "master"
+   branch = "notifications"
    source = "github.com/linkai-io/am"
