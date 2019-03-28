@@ -182,50 +182,42 @@ func testEventClient() am.EventService {
 	eventClient := &mock.EventService{}
 	eventLock := &sync.RWMutex{}
 
-	events := make([]*am.Event, 4)
+	events := make(map[int64]*am.Event, 4)
 	events[0] = &am.Event{
 		NotificationID: 0,
 		OrgID:          0,
 		GroupID:        0,
 		TypeID:         am.EventAXFR,
 		EventTimestamp: time.Now().UnixNano(),
-		Data: map[string][]string{
-			am.EventTypes[am.EventAXFR]: []string{"ns1.example.com", "ns2.example.com"},
-		},
-		Read: false,
+		Data:           []string{"ns1.example.com", "ns2.example.com"},
+		Read:           false,
 	}
 	events[1] = &am.Event{
-		NotificationID: 0,
+		NotificationID: 1,
 		OrgID:          0,
 		GroupID:        0,
 		TypeID:         am.EventNewHost,
 		EventTimestamp: time.Now().UnixNano(),
-		Data: map[string][]string{
-			am.EventTypes[am.EventNewHost]: []string{"www.example.com", "test.example.com"},
-		},
-		Read: false,
+		Data:           []string{"www.example.com", "test.example.com"},
+		Read:           false,
 	}
 	events[2] = &am.Event{
-		NotificationID: 0,
+		NotificationID: 2,
 		OrgID:          0,
 		GroupID:        0,
 		TypeID:         am.EventNewWebsite,
 		EventTimestamp: time.Now().UnixNano(),
-		Data: map[string][]string{
-			am.EventTypes[am.EventNewWebsite]: []string{"https://example.com", "443", "http://www.example.com", "80"},
-		},
-		Read: false,
+		Data:           []string{"https://example.com", "443", "http://www.example.com", "80"},
+		Read:           false,
 	}
 	events[3] = &am.Event{
-		NotificationID: 0,
+		NotificationID: 3,
 		OrgID:          0,
 		GroupID:        0,
 		TypeID:         am.EventCertExpiring,
 		EventTimestamp: time.Now().UnixNano(),
-		Data: map[string][]string{
-			am.EventTypes[am.EventCertExpiring]: []string{"example.com", "443", "24 hours"},
-		},
-		Read: false,
+		Data:           []string{"example.com", "443", "24 hours"},
+		Read:           false,
 	}
 
 	eventSettings := &am.UserEventSettings{
@@ -261,15 +253,23 @@ func testEventClient() am.EventService {
 	eventClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.EventFilter) ([]*am.Event, error) {
 		eventLock.Lock()
 		defer eventLock.Unlock()
-		for i := 0; i < len(events); i++ {
-			events[i].OrgID = userContext.GetOrgID()
-			events[i].GroupID = 1
-			events[i].NotificationID = int64(i)
+		cp := make([]*am.Event, 0)
+		for _, v := range events {
+			v.OrgID = userContext.GetOrgID()
+			v.GroupID = 1
+			cp = append(cp, v)
 		}
-		return events, nil
+		return cp, nil
 	}
 
 	eventClient.MarkReadFn = func(ctx context.Context, userContext am.UserContext, notificationIDs []int64) error {
+		eventLock.Lock()
+		defer eventLock.Unlock()
+		for _, id := range notificationIDs {
+			if _, ok := events[id]; ok {
+				delete(events, id)
+			}
+		}
 		return nil
 	}
 

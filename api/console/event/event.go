@@ -119,6 +119,12 @@ func (h *EventHandlers) MarkRead(w http.ResponseWriter, req *http.Request) {
 	middleware.ReturnSuccess(w, "OK", 200)
 }
 
+type UserNotificationSettings struct {
+	Subscriptions     []*am.EventSubscriptions `json:"subscriptions"`
+	ShouldWeeklyEmail bool                     `json:"should_weekly_email"`
+	ShouldDailyEmail  bool                     `json:"should_daily_email"`
+}
+
 func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var body []byte
@@ -139,11 +145,19 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 	}
 	defer req.Body.Close()
 
-	settings := &am.UserEventSettings{}
-	if err := json.Unmarshal(body, settings); err != nil {
+	userSettings := &UserNotificationSettings{}
+	if err := json.Unmarshal(body, userSettings); err != nil {
 		logger.Error().Err(err).Msg("failed to update user notification settings")
 		middleware.ReturnError(w, "error updating user notification settings", 400)
 		return
+	}
+
+	settings := &am.UserEventSettings{
+		WeeklyReportSendDay: 0,
+		ShouldWeeklyEmail:   userSettings.ShouldWeeklyEmail,
+		DailyReportSendHour: 0,
+		ShouldDailyEmail:    userSettings.ShouldDailyEmail,
+		Subscriptions:       userSettings.Subscriptions,
 	}
 
 	if err := h.eventClient.UpdateSettings(req.Context(), userContext, settings); err != nil {
@@ -152,5 +166,5 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	middleware.ReturnSuccess(w, "OK", 200)
+	middleware.ReturnSuccess(w, "Settings updated", 200)
 }
