@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/linkai-io/frontend/pkg/middleware"
 
@@ -35,7 +36,7 @@ func (h *EventHandlers) Get(w http.ResponseWriter, req *http.Request) {
 	logger := middleware.UserContextLogger(userContext)
 	logger.Info().Msg("Retrieving notifications...")
 
-	events, err := h.eventClient.Get(req.Context(), userContext, &am.EventFilter{Start: 0, Limit: 1000, Filters: &am.FilterType{}})
+	events, err := h.eventClient.Get(req.Context(), userContext, &am.EventFilter{Start: 0, Limit: 10, Filters: &am.FilterType{}})
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to retrieve events")
 		middleware.ReturnError(w, "error retrieving notifications", 500)
@@ -123,6 +124,7 @@ type UserNotificationSettings struct {
 	Subscriptions     []*am.EventSubscriptions `json:"subscriptions"`
 	ShouldWeeklyEmail bool                     `json:"should_weekly_email"`
 	ShouldDailyEmail  bool                     `json:"should_daily_email"`
+	UserTimezone      string                   `json:"user_timezone"`
 }
 
 func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request) {
@@ -135,7 +137,7 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 	}
 
 	logger := middleware.UserContextLogger(userContext)
-	logger.Info().Msg("Retrieving notifications...")
+	logger.Info().Msg("Updating notification settings...")
 
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -152,10 +154,25 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	for _, sub := range userSettings.Subscriptions {
+		if _, ok := am.EventTypes[sub.TypeID]; !ok {
+			logger.Error().Msg("invalid subscription type id supplied")
+			middleware.ReturnError(w, "invalid subscription type id supplied", 400)
+			return
+		}
+	}
+
+	if _, err := time.LoadLocation(userSettings.UserTimezone); err != nil {
+		logger.Error().Str("zone", userSettings.UserTimezone).Msg("invalid timezone data provided")
+		middleware.ReturnError(w, "invalid timezone data provided", 400)
+		return
+	}
+
 	settings := &am.UserEventSettings{
 		WeeklyReportSendDay: 0,
 		ShouldWeeklyEmail:   userSettings.ShouldWeeklyEmail,
 		DailyReportSendHour: 0,
+		UserTimezone:        userSettings.UserTimezone,
 		ShouldDailyEmail:    userSettings.ShouldDailyEmail,
 		Subscriptions:       userSettings.Subscriptions,
 	}
