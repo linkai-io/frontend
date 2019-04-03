@@ -5,6 +5,7 @@ import (
 
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/clients/address"
+	"github.com/linkai-io/am/clients/event"
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/clients/scangroup"
 	"github.com/linkai-io/am/clients/user"
@@ -49,4 +50,14 @@ func AddressClient() am.AddressService {
 		log.Fatal().Err(err).Msg("error initializing address client")
 	}
 	return addrClient
+}
+
+// EventClient return a connection to the event service
+func EventClient() am.EventService {
+	eventClient := event.New()
+	eventClient.SetTimeout(time.Second * 15)
+	if err := eventClient.Init(nil); err != nil {
+		log.Fatal().Err(err).Msg("error initializing event client")
+	}
+	return eventClient
 }

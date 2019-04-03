@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -13,6 +14,7 @@ import (
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/mock"
 	"github.com/linkai-io/frontend/api/console/address"
+	"github.com/linkai-io/frontend/api/console/event"
 	"github.com/linkai-io/frontend/api/console/org"
 	"github.com/linkai-io/frontend/api/console/scangroup"
 	"github.com/linkai-io/frontend/api/console/user"
@@ -34,6 +36,7 @@ func main() {
 	userClient := testUserClient()
 	scanGroupClient := testScanGroupClient()
 	webClient := testWebClient()
+	eventClient := testEventClient()
 
 	tokener := awstoken.New(env, region)
 	authenticator := awsauthz.New(env, region, tokener)
@@ -56,6 +59,9 @@ func main() {
 		w.WriteHeader(404)
 		fmt.Fprintf(w, "%#v not found", req.URL)
 	}))
+
+	eventHandlers := event.New(eventClient)
+	eventHandlers.ContextExtractor = fakeContext
 
 	testAuthHandler := &testAuth{}
 	// auth
@@ -120,6 +126,14 @@ func main() {
 		r.Get("/group/{id}/urls", webHandlers.GetURLList)
 	})
 
+	// events
+	r.Route("/event", func(r chi.Router) {
+		r.Get("/events", eventHandlers.Get)
+		r.Patch("/events", eventHandlers.MarkRead)
+		r.Get("/settings", eventHandlers.GetSettings)
+		r.Patch("/settings", eventHandlers.UpdateSettings)
+	})
+
 	log.Info().Msg("listening on :3000")
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
@@ -162,6 +176,115 @@ func testOrgClient() am.OrganizationService {
 		return userContext.GetOrgID(), org, nil
 	}
 	return orgClient
+}
+
+func testEventClient() am.EventService {
+	eventClient := &mock.EventService{}
+	eventLock := &sync.RWMutex{}
+
+	events := make(map[int64]*am.Event, 4)
+	events[0] = &am.Event{
+		NotificationID: 0,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventAXFR,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"ns1.example.com", "ns2.example.com"},
+		Read:           false,
+	}
+	events[1] = &am.Event{
+		NotificationID: 1,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventNewHost,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"www.example.com", "test.example.com"},
+		Read:           false,
+	}
+	events[2] = &am.Event{
+		NotificationID: 2,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventNewWebsite,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"https://example.com", "443", "http://www.example.com", "80"},
+		Read:           false,
+	}
+	events[3] = &am.Event{
+		NotificationID: 3,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventCertExpiring,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"example.com", "443", "24 hours"},
+		Read:           false,
+	}
+
+	eventSettings := &am.UserEventSettings{
+		WeeklyReportSendDay: 0,
+		ShouldWeeklyEmail:   false,
+		DailyReportSendHour: 0,
+		ShouldDailyEmail:    false,
+		UserTimezone:        "America/New_York",
+		Subscriptions: []*am.EventSubscriptions{
+			&am.EventSubscriptions{
+				TypeID:              am.EventAXFR,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+			&am.EventSubscriptions{
+				TypeID:              am.EventCertExpiring,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+			&am.EventSubscriptions{
+				TypeID:              am.EventNewHost,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+			&am.EventSubscriptions{
+				TypeID:              am.EventNewWebsite,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+		},
+	}
+
+	eventClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.EventFilter) ([]*am.Event, error) {
+		eventLock.Lock()
+		defer eventLock.Unlock()
+		cp := make([]*am.Event, 0)
+		for _, v := range events {
+			v.OrgID = userContext.GetOrgID()
+			v.GroupID = 1
+			cp = append(cp, v)
+		}
+		return cp, nil
+	}
+
+	eventClient.MarkReadFn = func(ctx context.Context, userContext am.UserContext, notificationIDs []int64) error {
+		eventLock.Lock()
+		defer eventLock.Unlock()
+		for _, id := range notificationIDs {
+			if _, ok := events[id]; ok {
+				delete(events, id)
+			}
+		}
+		return nil
+	}
+
+	eventClient.GetSettingsFn = func(ctx context.Context, userContext am.UserContext) (*am.UserEventSettings, error) {
+		return eventSettings, nil
+	}
+
+	eventClient.UpdateSettingsFn = func(ctx context.Context, userContext am.UserContext, settings *am.UserEventSettings) error {
+		eventLock.Lock()
+		eventSettings = settings
+		eventLock.Unlock()
+		return nil
+	}
+
+	return eventClient
 }
 
 func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organization {
