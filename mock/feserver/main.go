@@ -79,6 +79,7 @@ func main() {
 		r.Get("/stats", addrHandlers.OrgStats)
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
+		r.Get("/group/{id}/hosts/download", addrHandlers.ExportHostList)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
@@ -142,7 +143,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 101}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 1000}, true
 }
 
 func testUserClient() am.UserService {
@@ -311,8 +312,8 @@ func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organiz
 		CreationTime:            time.Now().UnixNano(),
 		StatusID:                am.OrgStatusActive,
 		Deleted:                 false,
-		SubscriptionID:          am.SubscriptionMonthlySmall,
-		LimitHosts:              25,
-		LimitTLD:                1,
+		SubscriptionID:          am.SubscriptionEnterprise,
+		LimitHosts:              10000,
+		LimitTLD:                100,
 	}
 }

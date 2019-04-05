@@ -34,9 +34,9 @@ type AddressStatsResponse struct {
 }
 
 type HostlistResponse struct {
-	Hosts     []*am.ScanGroupHostList `json:"hosts"`
-	Status    string                  `json:"status"`
-	LastIndex int64                   `json:"last_index"`
+	Hosts    []*am.ScanGroupHostList `json:"hosts"`
+	Status   string                  `json:"status"`
+	LastHost string                  `json:"last_host"`
 }
 
 type AddressHandlers struct {
@@ -122,35 +122,31 @@ func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) 
 
 	oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to get addresses")
-		middleware.ReturnError(w, "failed to get addresses: "+err.Error(), 500)
+		logger.Error().Err(err).Msg("failed to get hosts")
+		middleware.ReturnError(w, "failed to get hosts: "+err.Error(), 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
 		logger.Error().Err(err).Msg("authorization failure")
-		middleware.ReturnError(w, "failed to get addresses", 500)
+		middleware.ReturnError(w, "failed to get hosts", 500)
 		return
 	}
 
-	var lastAddr int64
+	var lastHost string
 	for _, host := range hosts {
 		host.ETLD, err = parsers.GetETLD(host.HostAddress)
 		if err != nil {
 			logger.Warn().Err(err).Msg("failed parsing etld from host address")
 			host.ETLD = host.HostAddress
 		}
-		for _, addrID := range host.AddressIDs {
-			if addrID > lastAddr {
-				lastAddr = addrID
-			}
-		}
+		lastHost = host.HostAddress
 	}
 
 	response := &HostlistResponse{
-		Status:    "OK",
-		LastIndex: lastAddr,
-		Hosts:     hosts,
+		Status:   "OK",
+		LastHost: lastHost,
+		Hosts:    hosts,
 	}
 
 	data, err := json.Marshal(response)
@@ -379,6 +375,11 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 	startHostAddress := values.Get("starts_host_address")
 	if startHostAddress != "" {
 		filter.Filters.AddString("starts_host_address", startHostAddress)
+	}
+
+	startHost := values.Get("start_host")
+	if startHost != "" {
+		filter.Filters.AddString("start_host", startHost)
 	}
 
 	start := values.Get("start")
@@ -757,6 +758,7 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 			GroupID: id,
 			Start:   lastIndex,
 			Limit:   1000,
+			Filters: &am.FilterType{},
 		}
 		oid, addrs, err := h.addrClient.Get(req.Context(), userContext, filter)
 		if err != nil {
@@ -798,6 +800,75 @@ func (h *AddressHandlers) ExportAddresses(w http.ResponseWriter, req *http.Reque
 	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=addresses.%d.%d.json", id, time.Now().Unix()))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
+func (h *AddressHandlers) ExportHostList(w http.ResponseWriter, req *http.Request) {
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	req.Body.Close()
+
+	allHosts := make([]*am.ScanGroupHostList, 0)
+
+	var lastHost string
+	for {
+		filter := &am.ScanGroupAddressFilter{
+			OrgID:   userContext.GetOrgID(),
+			GroupID: id,
+			Limit:   1000,
+			Filters: &am.FilterType{},
+		}
+		filter.Filters.AddString("start_host", lastHost)
+		oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
+		if err != nil {
+			logger.Error().Err(err).Msg("error getting addresses")
+			middleware.ReturnError(w, "internal error", 500)
+			return
+		}
+
+		if len(hosts) == 0 {
+			break
+		}
+
+		for _, host := range hosts {
+			host.ETLD, err = parsers.GetETLD(host.HostAddress)
+			if err != nil {
+				logger.Warn().Err(err).Msg("failed parsing etld from host address")
+				host.ETLD = host.HostAddress
+			}
+
+			allHosts = append(allHosts, host)
+
+			if oid != host.OrgID {
+				logger.Error().Err(err).Msg("authorization failure")
+				middleware.ReturnError(w, "failed to get addresses", 500)
+				return
+			}
+			lastHost = host.HostAddress
+		}
+	}
+
+	data, err := json.Marshal(allHosts)
+	if err != nil {
+		logger.Error().Err(err).Msg("error during marshal")
+		middleware.ReturnError(w, "internal error during processing", 500)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=hosts.%d.%d.json", id, time.Now().Unix()))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }

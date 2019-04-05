@@ -15,7 +15,7 @@ buildauth:
 	GOOS=linux go build -o dist/console/main ./cmd/console/auth/ && zip -j dist/console/auth_handler.zip dist/console/main && rm dist/console/main
 
 deployauth: buildauth upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/auth_handler.zip --function-name dev-console-handler-auth
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/auth_handler.zip --function-name ${APP_ENV}-console-handler-auth
 
 # Lambda Authorizer
 buildauthorizer:
@@ -25,7 +25,7 @@ uploadauthorizer:
 	aws s3 sync dist/authorizer/ s3://linkai-infra/frontend/lambdas/authorizer/
 
 deployauthorizer: buildauthorizer uploadauthorizer
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/authorizer/lambda_authorizer.zip --function-name dev-console-handler-lambda-authorizer
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/authorizer/lambda_authorizer.zip --function-name ${APP_ENV}-console-handler-lambda-authorizer
 
 # Static Contents Authorizer
 buildstaticauthorizer:
@@ -35,7 +35,7 @@ uploadstaticauthorizer:
 	aws s3 sync dist/staticauthorizer/ s3://linkai-infra/frontend/lambdas/staticauthorizer/
 
 deploystaticauthorizer: buildstaticauthorizer uploadstaticauthorizer
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/staticauthorizer/static_authorizer.zip --function-name dev-console-handler-static-authorizer
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/staticauthorizer/static_authorizer.zip --function-name ${APP_ENV}-console-handler-static-authorizer
 
 # Admin features 
 buildadmin:
@@ -45,7 +45,7 @@ uploadadmin:
 	aws s3 sync dist/console/admin s3://linkai-infra/frontend/lambdas/console/admin/
 
 deployadmin: buildadmin uploadadmin
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/admin/admin_handler.zip --function-name dev-console-handler-admin
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/admin/admin_handler.zip --function-name ${APP_ENV}-console-handler-admin
 
 # Support Provision
 supportprovision:
@@ -59,32 +59,39 @@ buildorg:
 	GOOS=linux go build -o dist/console/main ./cmd/console/org/ && zip -j dist/console/org_handler.zip dist/console/main && rm dist/console/main
 
 deployorg: buildorg upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/org_handler.zip --function-name dev-console-handler-orgservice
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/org_handler.zip --function-name ${APP_ENV}-console-handler-orgservice
 
 # Scangroup Handler
 buildscangroup:
 	GOOS=linux go build -o dist/console/main ./cmd/console/scangroup/ && zip -j dist/console/scangroup_handler.zip dist/console/main && rm dist/console/main
 
 deployscangroup: buildscangroup upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/scangroup_handler.zip --function-name dev-console-handler-scangroupservice
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/scangroup_handler.zip --function-name ${APP_ENV}-console-handler-scangroupservice
 
 # Address Handler
 buildaddress:
 	GOOS=linux go build -o dist/console/main ./cmd/console/address/ && zip -j dist/console/address_handler.zip dist/console/main && rm dist/console/main
 
 deployaddress: buildaddress upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/address_handler.zip --function-name dev-console-handler-addressservice
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/address_handler.zip --function-name ${APP_ENV}-console-handler-addressservice
 
 # WebData Handler
 buildwebdata:
 	GOOS=linux go build -o dist/console/main ./cmd/console/webdata/ && zip -j dist/console/webdata_handler.zip dist/console/main && rm dist/console/main
 
 deploywebdata: buildwebdata upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name dev-console-handler-webdataservice
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/webdata_handler.zip --function-name ${APP_ENV}-console-handler-webdataservice
 
 #User Handler
 builduser:
 	GOOS=linux go build -o dist/console/main ./cmd/console/user/ && zip -j dist/console/user_handler.zip dist/console/main && rm dist/console/main
 
 deployuser: builduser upload
-	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/user_handler.zip --function-name dev-console-handler-userservice
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/user_handler.zip --function-name ${APP_ENV}-console-handler-userservice
+
+# Event Handler
+buildevent:
+	GOOS=linux go build -o dist/console/main ./cmd/console/event/ && zip -j dist/console/event_handler.zip dist/console/main && rm dist/console/main
+
+deployevent: buildevent upload 
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/event_handler.zip --function-name ${APP_ENV}-console-handler-eventservice

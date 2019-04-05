@@ -212,7 +212,7 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info().Str("OrgCID", orgData.OrgCID).Msg("setting orgCID in cookie")
-	if err := h.secureCookie.SetAuthCookie(w, results["access_token"], orgData.OrgCID); err != nil {
+	if err := h.secureCookie.SetAuthCookie(w, results["access_token"], orgData.OrgCID, orgData.SubscriptionID); err != nil {
 		middleware.ReturnError(w, "internal cookie failure", 500)
 		return
 	}

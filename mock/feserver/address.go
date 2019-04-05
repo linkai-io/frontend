@@ -52,11 +52,14 @@ func testAddrClient() am.AddressService {
 			orgStats = append(orgStats, &am.ScanGroupAddressStats{
 				OrgID:   userContext.GetOrgID(),
 				GroupID: i,
-				DiscoveredBy: map[string]int32{
-					am.DiscoveryNSInputList:    10,
-					am.DiscoveryBigDataCT:      20,
-					am.DiscoveryBruteMutator:   5,
-					am.DiscoveryBruteSubDomain: 100,
+				DiscoveredBy: []string{
+					am.DiscoveryNSInputList,
+					am.DiscoveryBigDataCT,
+					am.DiscoveryBruteMutator,
+					am.DiscoveryBruteSubDomain,
+				},
+				DiscoveredByCount: []int32{
+					10, 20, 5, 100,
 				},
 				Aggregates: map[string]*am.ScanGroupAggregates{
 					"discovery_trihourly": discoTriHourly,
@@ -77,13 +80,15 @@ func testAddrClient() am.AddressService {
 		// fake host list
 		hosts := make([]*am.ScanGroupHostList, 0)
 		i := filter.Start
-
-		for ; i < filter.Start+int64(50); i++ {
+		if i > 1000 {
+			return userContext.GetOrgID(), hosts, nil
+		}
+		for ; i < filter.Start+int64(100); i++ {
 			host := &am.ScanGroupHostList{
 				OrgID:       userContext.GetOrgID(),
 				GroupID:     filter.GroupID,
 				HostAddress: fmt.Sprintf("%d.example.com", i),
-				AddressIDs:  []int64{int64(i * 1000), int64(i*1000 + 1)},
+				AddressIDs:  []int64{int64(i * 10), int64(i*10 + 1)},
 				IPAddresses: []string{fmt.Sprintf("192.168.1.%d", i), fmt.Sprintf("192.168.1.%d", i+1)},
 			}
 			hosts = append(hosts, host)

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -56,13 +57,68 @@ func init() {
 
  */
 // Help function to generate an IAM policy
-func generatePolicy(orgCID string, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
+func generatePolicy(orgCID string, subscriptionID int32, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
 	log.Info().Str("OrgCID", orgCID).Str("cognito_user_name", accessToken.CognitoUserName).Msg("returning success policy")
+	if subscriptionID == am.SubscriptionSystem {
+		return generateInternalPolicy(orgCID, subscriptionID, accessToken)
+	}
 	return events.APIGatewayCustomAuthorizerResponse{
 		PrincipalID: accessToken.CognitoUserName,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",
 			Statement: []events.IAMPolicyStatement{
+				events.IAMPolicyStatement{
+					Effect: "Allow",
+					Action: []string{"execute-api:Invoke"},
+					Resource: []string{
+						policyResource + "GET/app/",
+						policyResource + "GET/app/css/*",
+						policyResource + "GET/app/fonts/*",
+						policyResource + "GET/app/img/*",
+						policyResource + "GET/app/js/*",
+						policyResource + "GET/app/favicon.png",
+						policyResource + "GET/app/index.html",
+					},
+				},
+				events.IAMPolicyStatement{
+					Effect:   "Allow",
+					Action:   []string{"execute-api:Invoke"},
+					Resource: []string{fmt.Sprintf("%sGET/app/data/%s/*", policyResource, orgCID)},
+				},
+				events.IAMPolicyStatement{
+					Effect: "Deny",
+					Action: []string{"execute-api:Invoke"},
+					Resource: []string{
+						policyResource + "GET/manage*",
+						policyResource + "HEAD/manage*",
+						policyResource + "OPTIONS/manage*",
+					},
+				},
+			},
+		},
+		Context: nil,
+	}, nil
+}
+
+func generateInternalPolicy(orgCID string, subscriptionID int32, accessToken *token.AccessToken) (events.APIGatewayCustomAuthorizerResponse, error) {
+	return events.APIGatewayCustomAuthorizerResponse{
+		PrincipalID: accessToken.CognitoUserName,
+		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
+			Version: "2012-10-17",
+			Statement: []events.IAMPolicyStatement{
+				events.IAMPolicyStatement{
+					Effect: "Allow",
+					Action: []string{"execute-api:Invoke"},
+					Resource: []string{
+						policyResource + "GET/manage/",
+						policyResource + "GET/manage/css/*",
+						policyResource + "GET/manage/fonts/*",
+						policyResource + "GET/manage/img/*",
+						policyResource + "GET/manage/js/*",
+						policyResource + "GET/manage/favicon.png",
+						policyResource + "GET/manage/index.html",
+					},
+				},
 				events.IAMPolicyStatement{
 					Effect: "Allow",
 					Action: []string{"execute-api:Invoke"},
@@ -141,7 +197,12 @@ func handleRequest(ctx context.Context, event events.APIGatewayCustomAuthorizerR
 		return returnUnauthorized("bad cookie value")
 	}
 
-	return generatePolicy(safeCookie.OrgCID, accessToken)
+	if safeCookie.SubscriptionID == 0 {
+		log.Error().Err(err).Msg("SubscriptionID was empty")
+		return returnUnauthorized("bad cookie value")
+	}
+
+	return generatePolicy(safeCookie.OrgCID, safeCookie.SubscriptionID, accessToken)
 }
 
 func main() {

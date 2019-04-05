@@ -58,7 +58,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:2d2d068fd65442dcefe545698fcf0f0a163a91b177f29330f430fe1f6b5c3f4a"
+  digest = "1:b67a72b7b00b4f772c85d7b696e45b1437265189e2379ef6494f8d3af5b21f82"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "97ab38e1626747eaa660ff7e5e7d3f1a37172b36"
-  version = "v1.19.9"
+  revision = "53e87fccca39c3e7d20e5172dbe66aa13ff55d12"
+  version = "v1.19.10"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -304,8 +304,8 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "notifications"
-  digest = "1:870e3d6b55b5afee04f0b3eaa4927be0e26cfa29975d563e0c9f45cdd5a6b727"
+  branch = "master"
+  digest = "1:a358f972df14ee2b1f8e47b582afd492358fd8aac79c577148081af47cc51d80"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -336,7 +336,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "8acdaada6eddf4149e093cb3fcaa8bead9303962"
+  revision = "ee5809db0b81b21df4f0095aad2edc5d9fc6fb16"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -429,7 +429,7 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "8e1b8d32e692162a446e97250c5d34f5a52efed6"
+  revision = "38d8ce5564a5b71b2e3a00553993f1b9a7ae852f"
 
 [[projects]]
   branch = "master"
@@ -454,7 +454,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "b630fd6fe46bcfc98f989005d8b8ec1400e60a6e"
+  revision = "eb5bcb51f2a31c7d5141d810b70815c05d9c9146"
 
 [[projects]]
   branch = "master"
@@ -548,7 +548,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "f467c93bbac2133ff463e1f93d18d8f9f3f04451"
+  revision = "64821d5d210748c883cd2b809589555ae4654203"
 
 [[projects]]
   digest = "1:a0bdff6a1dd68e7fa6edbffe3bef8e061db79543975d1c53afcae3a8d8a6c445"

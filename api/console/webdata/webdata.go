@@ -345,6 +345,7 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 
 	id, err := groupIDFromRequest(req)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed getting group id")
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
 	}
@@ -358,6 +359,7 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 			GroupID: id,
 			Start:   lastIndex,
 			Limit:   1000,
+			Filters: &am.FilterType{},
 		}
 		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
 		if err != nil {
@@ -487,6 +489,7 @@ func (h *WebHandlers) ExportCertificates(w http.ResponseWriter, req *http.Reques
 			GroupID: id,
 			Start:   lastIndex,
 			Limit:   1000,
+			Filters: &am.FilterType{},
 		}
 		oid, certs, err := h.webClient.GetCertificates(req.Context(), userContext, filter)
 		if err != nil {

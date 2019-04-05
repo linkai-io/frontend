@@ -40,6 +40,7 @@ func main() {
 		r.Get("/stats", addrHandlers.OrgStats)
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
+		r.Get("/group/{id}/hosts/download", addrHandlers.ExportHostList)
 		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)

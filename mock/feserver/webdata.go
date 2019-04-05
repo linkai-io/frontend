@@ -26,11 +26,14 @@ func testWebClient() am.WebDataService {
 				ExpiringCerts15Days: 1 * int32(i),
 				ExpiringCerts30Days: 2 * int32(i),
 				UniqueWebServers:    70 * int32(i),
-				ServerTypes: map[string]int32{
-					"Apache":   5,
-					"nginx":    3,
-					"AmazonS3": 10,
-					"IIS":      60,
+				ServerTypes: []string{
+					"Apache",
+					"nginx",
+					"AmazonS3",
+					"IIS",
+				},
+				ServerCounts: []int32{
+					5, 3, 10, 60,
 				},
 			}
 		}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/linkai-io/frontend/pkg/middleware"
@@ -62,15 +63,34 @@ func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 	}
 
 	logger := middleware.UserContextLogger(userContext)
-	logger.Info().Msg("Retrieving notifications...")
+	logger.Info().Msg("Retrieving settings...")
 
 	settings, err := h.eventClient.GetSettings(req.Context(), userContext)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to user notification settings")
+		// hack :|
+		if strings.Contains(err.Error(), "no rows in result set") {
+			handleEmptySettings(w)
+			return
+		}
+		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
 		middleware.ReturnError(w, "error retrieving user notification settings", 500)
 		return
 	}
 
+	if data, err = json.Marshal(settings); err != nil {
+		middleware.ReturnError(w, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
+func handleEmptySettings(w http.ResponseWriter) {
+	var data []byte
+	var err error
+
+	settings := &am.UserEventSettings{}
 	if data, err = json.Marshal(settings); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
@@ -160,6 +180,15 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 			middleware.ReturnError(w, "invalid subscription type id supplied", 400)
 			return
 		}
+
+		if sub.Subscribed == true && sub.SubscribedTimestamp == 0 {
+			sub.SubscribedTimestamp = time.Now().UnixNano()
+		}
+
+		// if they unsubscribe, reset the subscribed timestamp
+		if sub.Subscribed == false {
+			sub.SubscribedTimestamp = 0
+		}
 	}
 
 	if _, err := time.LoadLocation(userSettings.UserTimezone); err != nil {
@@ -175,6 +204,10 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 		UserTimezone:        userSettings.UserTimezone,
 		ShouldDailyEmail:    userSettings.ShouldDailyEmail,
 		Subscriptions:       userSettings.Subscriptions,
+	}
+
+	for _, sub := range userSettings.Subscriptions {
+		logger.Info().Msgf("adding subscriptions: %#v", sub)
 	}
 
 	if err := h.eventClient.UpdateSettings(req.Context(), userContext, settings); err != nil {

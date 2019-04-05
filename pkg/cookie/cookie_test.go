@@ -19,9 +19,10 @@ func TestCookie(t *testing.T) {
 	c := cookie.New(testHashKey, testBlockKey)
 	data := "1234"
 	orgCID := "orgcid"
+	subID := int32(9999)
 
 	setHandler := func(w http.ResponseWriter, r *http.Request) {
-		c.SetAuthCookie(w, data, orgCID)
+		c.SetAuthCookie(w, data, orgCID, subID)
 		fmt.Fprintf(w, "OK")
 	}
 
@@ -49,6 +50,9 @@ func TestCookie(t *testing.T) {
 		if cookie.Data != data {
 			t.Fatalf("expected %v got %v\n", data, cookie.Data)
 		}
+		if cookie.SubscriptionID != subID {
+			t.Fatalf("expected %v got %v\n", cookie.SubscriptionID, subID)
+		}
 	}
 	req = httptest.NewRequest("GET", "http://auth/get", nil)
 	req.Header.Set("Cookie", cookie)
@@ -61,9 +65,10 @@ func TestExpiredTestCookie(t *testing.T) {
 	c.SetExpires(1)
 	data := "1234"
 	orgCID := "orgCID"
+	subID := int32(9999)
 
 	setHandler := func(w http.ResponseWriter, r *http.Request) {
-		c.SetAuthCookie(w, data, orgCID)
+		c.SetAuthCookie(w, data, orgCID, subID)
 		fmt.Fprintf(w, "OK")
 	}
 
