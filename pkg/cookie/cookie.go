@@ -11,7 +11,7 @@ import (
 type AuthCookie struct {
 	Data           string `json:"data"`
 	OrgCID         string `json:"org_custom_id"`
-	SubscriptionID int32  `json:"subscription_id"`
+	SubscriptionID int32  `json:"subscription_id"` // used to check if internal/admin (sub 9999)
 }
 
 type SecureCookie struct {

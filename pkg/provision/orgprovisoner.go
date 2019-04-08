@@ -283,7 +283,7 @@ func (p *OrgProvision) add(ctx context.Context, orgData *am.Organization, roles 
 }
 
 func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organization) (string, error) {
-	poolName := aws.String("org-linkai-" + orgData.OrgName)
+	poolName := aws.String(p.env + "-org-linkai-" + orgData.OrgName)
 
 	if exists := p.checkUserPoolExists(*poolName, ""); exists {
 		return "", errors.New("userpool already exists")
