@@ -5,6 +5,7 @@ import (
 
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/clients/address"
+	"github.com/linkai-io/am/clients/coordinator"
 	"github.com/linkai-io/am/clients/event"
 	"github.com/linkai-io/am/clients/organization"
 	"github.com/linkai-io/am/clients/scangroup"
@@ -20,6 +21,16 @@ func OrgClient() am.OrganizationService {
 		log.Fatal().Err(err).Msg("error initializing organization client")
 	}
 	return orgClient
+}
+
+// CoordinatorClient
+func CoordinatorClient() am.CoordinatorService {
+	coordinatorClient := coordinator.New()
+	coordinatorClient.SetTimeout(time.Second * 15)
+	if err := coordinatorClient.Init(nil); err != nil {
+		log.Fatal().Err(err).Msg("error initializing coordinator client")
+	}
+	return coordinatorClient
 }
 
 // UserClient return a connection to the user service

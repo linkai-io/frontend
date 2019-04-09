@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:75ec87c61601521645db82e3e200e3ff297f01fa71b959c85a48c97f58cbddb1"
+  digest = "1:e2785d9dc421e1adb6011ac011acdc4d68ac221123baa69c55d023f90d6924af"
   name = "cloud.google.com/go"
   packages = [
     "bigquery",
@@ -15,8 +15,8 @@
     "internal/version",
   ]
   pruneopts = "UT"
-  revision = "458e1f376a2b44413160b5d301183b65debaa3f6"
-  version = "v0.37.2"
+  revision = "fcb9a2d5f791d07be64506ab54434de65989d370"
+  version = "v0.37.4"
 
 [[projects]]
   digest = "1:9447e63c3d421bca04c226442321db764b781fe45419d9f0d68c9ed5d6c5caf6"
@@ -58,7 +58,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:b67a72b7b00b4f772c85d7b696e45b1437265189e2379ef6494f8d3af5b21f82"
+  digest = "1:9d475ce5f98c7534c6f52b63872e7cc9ee91f7477185f19f4028b52a0494332c"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "53e87fccca39c3e7d20e5172dbe66aa13ff55d12"
-  version = "v1.19.10"
+  revision = "56c1def75689cceec1fa6f14c2eedb4b798827f9"
+  version = "v1.19.11"
 
 [[projects]]
   digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
@@ -158,7 +158,7 @@
   name = "github.com/gammazero/workerpool"
   packages = ["."]
   pruneopts = "UT"
-  revision = "86a96b5d5d92a0b49e0b9f278ae4615090b6172d"
+  revision = "88d534f22b564446dfea98776bf4ba1c1820b526"
 
 [[projects]]
   digest = "1:1c70b4d7285f792bd387c1adac08825715147fa210b3d2826ffd2bf56be9455b"
@@ -305,12 +305,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a358f972df14ee2b1f8e47b582afd492358fd8aac79c577148081af47cc51d80"
+  digest = "1:f72bec0a2363faa87dbbbf5f073bc8412caed5680eca15da0b3bb552459c50fb"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
     "amtest",
     "clients/address",
+    "clients/coordinator",
     "clients/event",
     "clients/organization",
     "clients/scangroup",
@@ -328,6 +329,7 @@
     "pkg/state",
     "pkg/webtech",
     "protocservices/address",
+    "protocservices/coordinator",
     "protocservices/event",
     "protocservices/organization",
     "protocservices/prototypes",
@@ -336,7 +338,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "ee5809db0b81b21df4f0095aad2edc5d9fc6fb16"
+  revision = "84ae7525b79a1f5402265f55ae20727cf30a1624"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -396,7 +398,7 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:b7ef726b2ea58476971d3aef8364568ea34ed2c3b11c929572a27d6d2ab639d3"
+  digest = "1:63f2090dcc07a5b7737d687e9169c3261ba36a143f19fe7c09a54f7a427b3c0f"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -417,8 +419,8 @@
     "trace/tracestate",
   ]
   pruneopts = "UT"
-  revision = "46618d076d80f4eab85adbcb3be9a370be1dc4e0"
-  version = "v0.20.0"
+  revision = "8930459677fde1e11e3e1b50bbed1acc850b5665"
+  version = "v0.20.1"
 
 [[projects]]
   branch = "master"
@@ -472,11 +474,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e18c1645adfe83d66f80d3676040e478895669f9456ca8bafa6a7290656c1b48"
+  digest = "1:cf353a5a9ffb2d6f850e9c773e25388a425a70c270546480427ed069e87b136a"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "81d4e9dc473e5e8c933f2aaeba2a3d81efb9aed2"
+  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -502,7 +504,7 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:075b5a1b4a6ce96ba06545e24d808762d94b8837f35ba7905c2356ae70a926aa"
+  digest = "1:d238aee1606527815926ec20ca1fa3d1b31589c45119f4783cb8976ba65f1259"
   name = "google.golang.org/api"
   packages = [
     "bigquery/v2",
@@ -517,8 +519,8 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "bce707a4d0ea3488942724b3bcc1c8338f38f991"
-  version = "v0.3.0"
+  revision = "0cbcb99a9ea0c8023c794b2693cbe1def82ed4d7"
+  version = "v0.3.2"
 
 [[projects]]
   digest = "1:04f2ff15fc59e1ddaf9900ad0e19e5b19586b31f9dafd4d592b617642b239d8f"
@@ -621,6 +623,7 @@
     "github.com/linkai-io/am/am",
     "github.com/linkai-io/am/amtest",
     "github.com/linkai-io/am/clients/address",
+    "github.com/linkai-io/am/clients/coordinator",
     "github.com/linkai-io/am/clients/event",
     "github.com/linkai-io/am/clients/organization",
     "github.com/linkai-io/am/clients/scangroup",

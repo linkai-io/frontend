@@ -20,7 +20,10 @@ import (
 
 var orgClient am.OrganizationService
 var userClient am.UserService
+var scanGroupClient am.ScanGroupService
+var coordinatorClient am.CoordinatorService
 var provisioner provision.OrgProvisioner
+
 var roles map[string]string
 
 func init() {
@@ -40,6 +43,8 @@ func init() {
 
 	orgClient = initializers.OrgClient()
 	userClient = initializers.UserClient()
+	scanGroupClient = initializers.ScanGroupClient()
+	coordinatorClient = initializers.CoordinatorClient()
 
 	provisioner = provision.NewOrgProvision(env, region, userClient, orgClient)
 }
@@ -61,9 +66,11 @@ func main() {
 	r.Use(middleware.UserCtx)
 	healthHandlers := admin.NewHealthHandlers()
 	provHandlers := admin.NewProvisionHandlers(orgClient, provisioner, roles)
+	actHandlers := admin.NewActivityHandlers(orgClient, scanGroupClient, coordinatorClient)
 
 	r.Route("/admin", func(admin chi.Router) {
 		admin.Get("/health", healthHandlers.CheckHealth)
+
 		admin.Route("/provision", func(prov chi.Router) {
 			prov.Post("/org/{name}", provHandlers.CreateOrg)
 			prov.Delete("/org/{name}", provHandlers.DeleteOrg)
@@ -71,7 +78,13 @@ func main() {
 			prov.Post("/user/{name}", provHandlers.CreateUser)
 		})
 
+		admin.Route("/activity", func(act chi.Router) {
+			act.Get("/orgs", actHandlers.ListOrganizations)
+			act.Get("/groups", actHandlers.ListGroups)
+			act.Get("/groupstatus", actHandlers.GroupActivity)
+		})
 	})
+
 	err := gateway.ListenAndServe(":3000", r)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve")
