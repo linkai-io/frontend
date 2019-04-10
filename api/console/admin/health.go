@@ -32,9 +32,14 @@ func (h *HealthHandlers) CheckHealth(w http.ResponseWriter, req *http.Request) {
 
 	log.Info().Msg("check health called")
 
-	_, ok := h.ContextExtractor(req.Context())
+	adminContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
 		return
 	}
 

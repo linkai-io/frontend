@@ -3,6 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/linkai-io/am/am"
@@ -14,12 +15,14 @@ type ActivityHandlers struct {
 	orgClient         am.OrganizationService
 	scanGroupClient   am.ScanGroupService
 	coordinatorClient am.CoordinatorService
+	systemContext     am.UserContext
 	ContextExtractor  middleware.UserContextExtractor
 	roles             map[string]string
 }
 
-func NewActivityHandlers(orgClient am.OrganizationService, scanGroupClient am.ScanGroupService, coordinatorClient am.CoordinatorService) *ActivityHandlers {
+func NewActivityHandlers(orgClient am.OrganizationService, scanGroupClient am.ScanGroupService, coordinatorClient am.CoordinatorService, systemContext am.UserContext) *ActivityHandlers {
 	return &ActivityHandlers{
+		systemContext:     systemContext,
 		orgClient:         orgClient,
 		scanGroupClient:   scanGroupClient,
 		coordinatorClient: coordinatorClient,
@@ -40,6 +43,11 @@ func (h *ActivityHandlers) ListOrganizations(w http.ResponseWriter, req *http.Re
 	adminContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
 		return
 	}
 
@@ -79,6 +87,11 @@ func (h *ActivityHandlers) ListGroups(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
+		return
+	}
+
 	filter := &am.ScanGroupFilter{
 		Filters: &am.FilterType{},
 	}
@@ -112,6 +125,11 @@ func (h *ActivityHandlers) GroupActivity(w http.ResponseWriter, req *http.Reques
 	adminContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
 		return
 	}
 
@@ -150,4 +168,50 @@ func (h *ActivityHandlers) GroupActivity(w http.ResponseWriter, req *http.Reques
 	data, _ = json.Marshal(resp)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
+}
+
+type ResetGroupRequest struct {
+	GroupID int  `json:"group_id,omitempty"`
+	All     bool `json:"all,omitempty"`
+}
+
+func (h *ActivityHandlers) ResetGroup(w http.ResponseWriter, req *http.Request) {
+	var data []byte
+	var err error
+
+	log.Info().Msg("reset group activity called")
+
+	adminContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
+		return
+	}
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading data", 500)
+		return
+	}
+	defer req.Body.Close()
+
+	resetRequest := &ResetGroupRequest{}
+	if err := json.Unmarshal(data, resetRequest); err != nil {
+		log.Error().Err(err).Msg("marshal body error")
+		middleware.ReturnError(w, "error reading login data", 500)
+		return
+	}
+
+	resp, err := h.coordinatorClient.StopGroup(req.Context(), h.systemContext, resetRequest.GroupID)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to reset group")
+		middleware.ReturnError(w, "failed to list group for getting group activity: "+err.Error(), 500)
+		return
+	}
+
+	middleware.ReturnSuccess(w, resp, 200)
 }

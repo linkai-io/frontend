@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/linkai-io/am/pkg/secrets"
+
 	"github.com/linkai-io/frontend/api/console/admin"
 
 	"github.com/apex/gateway"
@@ -23,6 +25,7 @@ var userClient am.UserService
 var scanGroupClient am.ScanGroupService
 var coordinatorClient am.CoordinatorService
 var provisioner provision.OrgProvisioner
+var secret *secrets.SecretsCache
 
 var roles map[string]string
 
@@ -45,7 +48,7 @@ func init() {
 	userClient = initializers.UserClient()
 	scanGroupClient = initializers.ScanGroupClient()
 	coordinatorClient = initializers.CoordinatorClient()
-
+	secret = secrets.NewSecretsCache(env, region)
 	provisioner = provision.NewOrgProvision(env, region, userClient, orgClient)
 }
 
@@ -64,9 +67,20 @@ func orgRoles() (map[string]string, error) {
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
+	systemOrgID, err := secret.SystemOrgID()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to get system org id")
+	}
+	systemUserID, err := secret.SystemUserID()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to get system user id")
+	}
 	healthHandlers := admin.NewHealthHandlers()
 	provHandlers := admin.NewProvisionHandlers(orgClient, provisioner, roles)
-	actHandlers := admin.NewActivityHandlers(orgClient, scanGroupClient, coordinatorClient)
+	actHandlers := admin.NewActivityHandlers(orgClient, scanGroupClient, coordinatorClient, &am.UserContextData{
+		OrgID:  systemOrgID,
+		UserID: systemUserID,
+	})
 
 	r.Route("/admin", func(admin chi.Router) {
 		admin.Get("/health", healthHandlers.CheckHealth)
@@ -79,13 +93,14 @@ func main() {
 		})
 
 		admin.Route("/activity", func(act chi.Router) {
+			act.Patch("/reset/groups", actHandlers.ResetGroup)
 			act.Get("/orgs", actHandlers.ListOrganizations)
 			act.Get("/groups", actHandlers.ListGroups)
 			act.Get("/groupstatus", actHandlers.GroupActivity)
 		})
 	})
 
-	err := gateway.ListenAndServe(":3000", r)
+	err = gateway.ListenAndServe(":3000", r)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve")
 	}

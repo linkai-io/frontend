@@ -36,9 +36,14 @@ func (h *ProvisionHandlers) CreateOrg(w http.ResponseWriter, req *http.Request) 
 
 	log.Info().Msg("create org called")
 
-	userContext, ok := h.ContextExtractor(req.Context())
+	adminContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
 		return
 	}
 
@@ -62,7 +67,7 @@ func (h *ProvisionHandlers) CreateOrg(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	if _, err := h.provisioner.Add(req.Context(), userContext, org, h.roles); err != nil {
+	if _, err := h.provisioner.Add(req.Context(), adminContext, org, h.roles); err != nil {
 		log.Error().Err(err).Msg("provisioner error")
 		middleware.ReturnError(w, fmt.Sprintf("error provisioning organization: %v", err), 500)
 		return
@@ -82,9 +87,14 @@ func (h *ProvisionHandlers) DeleteOrg(w http.ResponseWriter, req *http.Request) 
 
 	log.Info().Msg("delete org called")
 
-	userContext, ok := h.ContextExtractor(req.Context())
+	adminContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	if adminContext.GetSubscriptionID() != 9999 {
+		middleware.ReturnError(w, "invalid user access attempt", 401)
 		return
 	}
 
@@ -94,14 +104,14 @@ func (h *ProvisionHandlers) DeleteOrg(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	oid, org, err := h.orgClient.Get(req.Context(), userContext, name)
+	oid, org, err := h.orgClient.Get(req.Context(), adminContext, name)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get org by name")
 		middleware.ReturnError(w, "internal org lookup failure", 500)
 		return
 	}
 
-	if _, err := h.orgClient.Delete(req.Context(), userContext, oid); err != nil {
+	if _, err := h.orgClient.Delete(req.Context(), adminContext, oid); err != nil {
 		log.Error().Err(err).Msg("failed to delete organization")
 		middleware.ReturnError(w, "failed to delete organization, inspect the logs", 500)
 		return
