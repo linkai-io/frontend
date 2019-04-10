@@ -415,7 +415,7 @@ type PutResponse struct {
 	Count        int                     `json:"count,omitempty"`
 }
 
-func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.Request) {
+func (h *AddressHandlers) PutAddresses(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 
@@ -430,10 +430,16 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 
 	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
 	if err != nil {
-		logger.Warn().Err(err).Msg("failed to get org data continuing with subscription defaults")
+		logger.Warn().Err(err).Msg("failed to get org data")
+		middleware.ReturnError(w, "failure to retrieve organization", 500)
+		return
 	}
 
-	limitTLD, limitHosts := h.getSubscriptionDetails(userContext, org)
+	if org.LimitHostsReached {
+		msg := fmt.Sprintf("number of hostnames exceeds the limit (%d) for your pricing plan", org.LimitHosts)
+		middleware.ReturnError(w, msg, 400)
+		return
+	}
 
 	groupID, err := groupIDFromRequest(req)
 	if err != nil {
@@ -443,11 +449,12 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 	logger.Info().Msg("processing list")
 	defer req.Body.Close()
 
-	addrs, parserErrors := inputlist.ParseList(req.Body, int(limitHosts)) // 10000
+	addrs, parserErrors := inputlist.ParseList(req.Body, int(org.LimitHosts)) // 10000
 	logger.Info().Int("addr_len", len(addrs)).Msg("parsed list")
 
-	if len(addrs) > int(limitHosts) {
-		middleware.ReturnError(w, "too many addresses during alpha", 400)
+	if len(addrs) > int(org.LimitHosts) {
+		msg := fmt.Sprintf("hosts (%d) of this input list exceeded limit of %d for your pricing plan", len(addrs), org.LimitHosts)
+		middleware.ReturnError(w, msg, 400)
 		return
 	}
 
@@ -481,8 +488,8 @@ func (h *AddressHandlers) PutInitialAddresses(w http.ResponseWriter, req *http.R
 		tlds[etld] = struct{}{}
 	}
 
-	if len(tlds) > int(limitTLD) {
-		msg := fmt.Sprintf("top level domains (%d) of this input list exceeded limit of %d domains for your pricing plan", len(tlds), limitTLD)
+	if len(tlds) > int(org.LimitTLD) {
+		msg := fmt.Sprintf("top level domains (%d) of this input list exceeded limit of %d domains for your pricing plan", len(tlds), org.LimitTLD)
 		middleware.ReturnError(w, msg, 400)
 		return
 	}

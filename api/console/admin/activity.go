@@ -171,6 +171,7 @@ func (h *ActivityHandlers) GroupActivity(w http.ResponseWriter, req *http.Reques
 }
 
 type ResetGroupRequest struct {
+	OrgID   int  `json:"org_id,omitempty"`
 	GroupID int  `json:"group_id,omitempty"`
 	All     bool `json:"all,omitempty"`
 }
@@ -206,7 +207,8 @@ func (h *ActivityHandlers) ResetGroup(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	resp, err := h.coordinatorClient.StopGroup(req.Context(), h.systemContext, resetRequest.GroupID)
+	log.Info().Int("GroupID", resetRequest.GroupID).Msg("reseting group")
+	resp, err := h.coordinatorClient.StopGroup(req.Context(), h.systemContext, resetRequest.OrgID, resetRequest.GroupID)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to reset group")
 		middleware.ReturnError(w, "failed to list group for getting group activity: "+err.Error(), 500)

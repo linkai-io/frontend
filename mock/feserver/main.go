@@ -80,7 +80,7 @@ func main() {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Get("/group/{id}/hosts/download", addrHandlers.ExportHostList)
-		r.Put("/group/{id}/initial", addrHandlers.PutInitialAddresses)
+		r.Put("/group/{id}/add", addrHandlers.PutAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
 		r.Patch("/group/{id}/delete", addrHandlers.DeleteAddresses)

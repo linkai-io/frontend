@@ -305,7 +305,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f72bec0a2363faa87dbbbf5f073bc8412caed5680eca15da0b3bb552459c50fb"
+  digest = "1:84aafb3480975534d9f0b301a6908ffb94a1d37d42b320bca2d52ff922dc6fdb"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -338,7 +338,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "84ae7525b79a1f5402265f55ae20727cf30a1624"
+  revision = "555133a7b7d707b66f15a5766c1ac79aeac902cb"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -398,7 +398,7 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:63f2090dcc07a5b7737d687e9169c3261ba36a143f19fe7c09a54f7a427b3c0f"
+  digest = "1:ce72568389d111aa2d94b2d6b3c0213ab4699a05cbc6e203ed578f379bedef8f"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -419,8 +419,8 @@
     "trace/tracestate",
   ]
   pruneopts = "UT"
-  revision = "8930459677fde1e11e3e1b50bbed1acc850b5665"
-  version = "v0.20.1"
+  revision = "75c0cca22312e51bfd4fafdbe9197ae399e18b38"
+  version = "v0.20.2"
 
 [[projects]]
   branch = "master"
@@ -553,7 +553,7 @@
   revision = "64821d5d210748c883cd2b809589555ae4654203"
 
 [[projects]]
-  digest = "1:a0bdff6a1dd68e7fa6edbffe3bef8e061db79543975d1c53afcae3a8d8a6c445"
+  digest = "1:c713dfe4945e9b372d4e881e2e6742ad361f326ecfee66b807a2c582402c3a63"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -571,6 +571,7 @@
     "health/grpc_health_v1",
     "internal",
     "internal/backoff",
+    "internal/balancerload",
     "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
@@ -590,8 +591,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
-  version = "v1.19.1"
+  revision = "236199dd5f8031d698fb64091194aecd1c3895b2"
+  version = "v1.20.0"
 
 [[projects]]
   digest = "1:7bb1ad654b21fb8f44c77c07840007d6796f70d42d1b470600f943a508ff8a72"
