@@ -176,6 +176,10 @@ func testOrgClient() am.OrganizationService {
 		org = buildOrg(userContext, "test", userContext.GetOrgID())
 		return userContext.GetOrgID(), org, nil
 	}
+	orgClient.GetByCIDFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
+		org = buildOrg(userContext, orgName, userContext.GetOrgID())
+		return userContext.GetOrgID(), org, nil
+	}
 	return orgClient
 }
 

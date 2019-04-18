@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -106,7 +107,8 @@ func (h *WebHandlers) GetURLList(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var lastID int64
+	var lastIndex int64
+	lastIndex = math.MaxInt64
 	for _, response := range responses {
 		if oid != response.OrgID {
 			logger.Error().Err(err).Msg("authorization failure")
@@ -114,15 +116,18 @@ func (h *WebHandlers) GetURLList(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		for _, urlData := range response.URLs {
-			if urlData.ResponseID > lastID {
-				lastID = urlData.ResponseID
-			}
+		if response.URLRequestTimestamp < lastIndex {
+			lastIndex = response.URLRequestTimestamp
 		}
 	}
 
+	// if we 'went past the end' reset it back to the last index we had.
+	if lastIndex == math.MaxInt64 {
+		lastIndex = filter.Start
+	}
+
 	resp := &urlListResponse{
-		LastIndex: lastID,
+		LastIndex: lastIndex,
 		Responses: responses,
 		Status:    "OK",
 	}
@@ -173,10 +178,11 @@ func (h *WebHandlers) GetResponses(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var lastID int64
+	var lastIndex int64
+	lastIndex = math.MaxInt64
 	for _, response := range responses {
-		if response.ResponseID > lastID {
-			lastID = response.ResponseID
+		if response.ResponseID < lastIndex {
+			lastIndex = response.ResponseID
 		}
 
 		if oid != response.OrgID {
@@ -186,8 +192,13 @@ func (h *WebHandlers) GetResponses(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// if we 'went past the end' reset it back to the last index we had.
+	if lastIndex == math.MaxInt64 {
+		lastIndex = filter.Start
+	}
+
 	resp := &webResponse{
-		LastIndex: lastID,
+		LastIndex: lastIndex,
 		Responses: responses,
 		Status:    "OK",
 	}
@@ -216,6 +227,7 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 	allResponses := make([]*am.HTTPResponse, 0)
 
 	var lastIndex int64
+	lastIndex = math.MaxInt64
 	for {
 		filters := &am.FilterType{}
 		filters.AddInt64("after_response_time", time.Now().Add(time.Hour*48).UnixNano())
@@ -237,10 +249,9 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 			break
 		}
 
-		var lastID int64
 		for _, response := range responses {
-			if response.ResponseID > lastID {
-				lastID = response.ResponseID
+			if response.ResponseID < lastIndex {
+				lastIndex = response.ResponseID
 			}
 
 			allResponses = append(allResponses, response)
@@ -251,7 +262,6 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 				return
 			}
 		}
-		lastIndex = lastID
 	}
 
 	data, err := json.Marshal(allResponses)
@@ -306,14 +316,11 @@ func (h *WebHandlers) GetSnapshots(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var lastID int64
+	var lastIndex int64
+	lastIndex = math.MaxInt64
 	for _, snapshot := range snapshots {
-		if lastID == 0 {
-			logger.Info().Msgf("data: %#v", snapshot)
-		}
-
-		if snapshot.SnapshotID > lastID {
-			lastID = snapshot.SnapshotID
+		if snapshot.URLRequestTimestamp < lastIndex {
+			lastIndex = snapshot.URLRequestTimestamp
 		}
 		if oid != userContext.GetOrgID() {
 			logger.Error().Err(err).Msg("authorization failure")
@@ -322,8 +329,13 @@ func (h *WebHandlers) GetSnapshots(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// if we 'went past the end' reset it back to the last index we had.
+	if lastIndex == math.MaxInt64 {
+		lastIndex = filter.Start
+	}
+
 	resp := &webSnapshots{
-		LastIndex: lastID,
+		LastIndex: lastIndex,
 		Snapshots: snapshots,
 		Status:    "OK",
 	}
@@ -373,9 +385,10 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 		}
 
 		var lastID int64
+		lastID = math.MaxInt64
 		for _, snapshot := range snapshots {
-			if snapshot.SnapshotID > lastID {
-				lastID = snapshot.SnapshotID
+			if snapshot.URLRequestTimestamp < lastID {
+				lastID = snapshot.URLRequestTimestamp
 			}
 
 			allSnapshots = append(allSnapshots, snapshot)
