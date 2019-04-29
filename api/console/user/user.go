@@ -224,3 +224,72 @@ func (h *UserHandlers) ChangePassword(w http.ResponseWriter, req *http.Request) 
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
 }
+
+func (h *UserHandlers) Get(w http.ResponseWriter, req *http.Request) {
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+
+	_, user, err := h.userClient.GetByCID(req.Context(), userContext, userContext.GetUserCID())
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get user details")
+		middleware.ReturnError(w, "error retreiving user details", 500)
+		return
+	}
+
+	data, _ := json.Marshal(user)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
+func (h *UserHandlers) AcceptAgreement(w http.ResponseWriter, req *http.Request) {
+	var data []byte
+	var err error
+
+	type acceptDetails struct {
+		Accept bool `json:"accept"`
+	}
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+
+	if data, err = ioutil.ReadAll(req.Body); err != nil {
+		log.Error().Err(err).Msg("read body error")
+		middleware.ReturnError(w, "error reading login details", 500)
+		return
+	}
+	defer req.Body.Close()
+
+	details := &acceptDetails{}
+	if err := json.Unmarshal(data, details); err != nil {
+		middleware.ReturnError(w, "error reading acceptance details", 500)
+		return
+	}
+
+	logger.Info().Msg("Calling AcceptAgreement...")
+
+	if details.Accept == false {
+		logger.Warn().Msg("user did not accept agreement")
+		middleware.ReturnError(w, "user did not accept agreement", 401)
+		return
+	}
+
+	_, _, err = h.userClient.AcceptAgreement(req.Context(), userContext, details.Accept)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to accept agreement")
+		middleware.ReturnError(w, "error in user acceptance agreement", 500)
+		return
+	}
+
+	middleware.ReturnSuccess(w, "OK", 200)
+}

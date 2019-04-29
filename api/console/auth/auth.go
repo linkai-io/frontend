@@ -146,7 +146,7 @@ func (h *AuthHandlers) Refresh(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.secureCookie.SetAuthCookie(w, results["access_token"], orgData.OrgCID); err != nil {
+	if err := h.secureCookie.SetAuthCookie(w, results["access_token"], orgData.OrgCID, orgData.SubscriptionID); err != nil {
 		middleware.ReturnError(w, "internal cookie failure", 500)
 		return
 	}

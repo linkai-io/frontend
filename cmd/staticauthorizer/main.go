@@ -78,6 +78,7 @@ func generatePolicy(orgCID string, subscriptionID int32, accessToken *token.Acce
 						policyResource + "GET/app/js/*",
 						policyResource + "GET/app/favicon.png",
 						policyResource + "GET/app/index.html",
+						policyResource + "GET/app/agreement.html",
 					},
 				},
 				events.IAMPolicyStatement{
@@ -130,6 +131,7 @@ func generateInternalPolicy(orgCID string, subscriptionID int32, accessToken *to
 						policyResource + "GET/app/js/*",
 						policyResource + "GET/app/favicon.png",
 						policyResource + "GET/app/index.html",
+						policyResource + "GET/app/agreement.html",
 					},
 				},
 				events.IAMPolicyStatement{

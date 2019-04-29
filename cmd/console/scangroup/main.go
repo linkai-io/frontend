@@ -16,6 +16,7 @@ import (
 )
 
 var scanGroupClient am.ScanGroupService
+var userClient am.UserService
 var scanGroupEnv *scangroup.ScanGroupEnv
 var env string
 var region string
@@ -31,12 +32,13 @@ func init() {
 	consul.RegisterDefault(time.Second*5, consulAddr) // Address comes from CONSUL_HTTP_ADDR or from aws metadata
 
 	scanGroupClient = initializers.ScanGroupClient()
+	userClient = initializers.UserClient()
 }
 
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	scanGroupHandlers := scangroup.New(scanGroupClient, scanGroupEnv)
+	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, scanGroupEnv)
 
 	r.Route("/scangroup", func(r chi.Router) {
 		r.Get("/groups", scanGroupHandlers.GetScanGroups)

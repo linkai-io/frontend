@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
@@ -80,6 +81,42 @@ func TestNewGroupValidators(t *testing.T) {
 	}
 }
 
+func testUserClient() am.UserService {
+	userClient := &mock.UserService{}
+	userClient.GetFn = func(ctx context.Context, userContext am.UserContext, userEmail string) (int, *am.User, error) {
+		return userContext.GetOrgID(), &am.User{
+			OrgID:                      userContext.GetOrgID(),
+			OrgCID:                     userContext.GetOrgCID(),
+			UserCID:                    userContext.GetUserCID(),
+			UserID:                     userContext.GetUserID(),
+			UserEmail:                  "test@test.com",
+			FirstName:                  "test",
+			LastName:                   "test",
+			StatusID:                   am.UserStatusActive,
+			CreationTime:               time.Now().UnixNano(),
+			Deleted:                    false,
+			AgreementAccepted:          true,
+			AgreementAcceptedTimestamp: 0}, nil
+
+	}
+	userClient.GetByCIDFn = func(ctx context.Context, userContext am.UserContext, userCID string) (int, *am.User, error) {
+		return userContext.GetOrgID(), &am.User{
+			OrgID:                      userContext.GetOrgID(),
+			OrgCID:                     userContext.GetOrgCID(),
+			UserCID:                    userCID,
+			UserID:                     userContext.GetUserID(),
+			UserEmail:                  "test@test.com",
+			FirstName:                  "test",
+			LastName:                   "test",
+			StatusID:                   am.UserStatusActive,
+			CreationTime:               time.Now().UnixNano(),
+			Deleted:                    false,
+			AgreementAccepted:          true,
+			AgreementAcceptedTimestamp: 0}, nil
+
+	}
+	return userClient
+}
 func TestNewGroupSubscriptionLevels(t *testing.T) {
 	scanGroupClient := &mock.ScanGroupService{}
 
@@ -95,7 +132,7 @@ func TestNewGroupSubscriptionLevels(t *testing.T) {
 		return userContext.GetOrgID(), make([]*am.ScanGroup, 0), nil
 	}
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, &scangroup.ScanGroupEnv{"dev", "us-east-1"})
+	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
 
 	scanGroupHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
 		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101}, true
@@ -179,7 +216,7 @@ func TestDeleteGroupSubscriptionLevels(t *testing.T) {
 		return userContext.GetOrgID(), make([]*am.ScanGroup, 0), nil
 	}
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, &scangroup.ScanGroupEnv{"dev", "us-east-1"})
+	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
 
 	scanGroupHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
 		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101}, true

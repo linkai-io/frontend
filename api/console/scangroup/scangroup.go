@@ -45,11 +45,12 @@ type ScanGroupHandlers struct {
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(scanGroupClient am.ScanGroupService, env *ScanGroupEnv) *ScanGroupHandlers {
+func New(scanGroupClient am.ScanGroupService, userClient am.UserService, env *ScanGroupEnv) *ScanGroupHandlers {
 	validate := validator.New()
 	validate.RegisterValidation("subdomain", ValidateSubDomain)
 	return &ScanGroupHandlers{
 		scanGroupClient:  scanGroupClient,
+		userClient:       userClient,
 		env:              env,
 		ContextExtractor: middleware.ExtractUserContext,
 		validate:         validate,
@@ -213,6 +214,19 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		return
 	}
 	logger := middleware.UserContextLogger(userContext)
+
+	_, user, err := h.userClient.GetByCID(req.Context(), userContext, userContext.GetUserCID())
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get user details")
+		middleware.ReturnError(w, "unable to retrieve user details", 500)
+		return
+	}
+
+	if user.AgreementAccepted == false {
+		logger.Warn().Msg("user has not accepted agreement")
+		middleware.ReturnError(w, "user has not accepted agreement, unable to create scan group.", 401)
+		return
+	}
 
 	param := chi.URLParam(req, "name")
 	if strings.Contains(param, "/") {

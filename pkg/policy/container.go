@@ -1,10 +1,12 @@
 package policy
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -89,7 +91,10 @@ func (p *Container) GetRolePolicies(roleName string) (*events.APIGatewayCustomAu
 		RoleName: aws.String(roleName),
 	}
 	req := p.iam.ListRolePoliciesRequest(i)
-	rolePolicies, err := req.Send()
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+
+	rolePolicies, err := req.Send(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +107,7 @@ func (p *Container) GetRolePolicies(roleName string) (*events.APIGatewayCustomAu
 			PolicyName: aws.String(policyName),
 		}
 		req := p.iam.GetRolePolicyRequest(input)
-		out, err := req.Send()
+		out, err := req.Send(timeoutCtx)
 		if err != nil {
 			return nil, err
 		}

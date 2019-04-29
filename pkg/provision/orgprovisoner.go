@@ -285,7 +285,7 @@ func (p *OrgProvision) add(ctx context.Context, orgData *am.Organization, roles 
 func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organization) (string, error) {
 	poolName := aws.String(p.env + "-org-linkai-" + orgData.OrgName)
 
-	if exists := p.checkUserPoolExists(*poolName, ""); exists {
+	if exists := p.checkUserPoolExists(ctx, *poolName, ""); exists {
 		return "", errors.New("userpool already exists")
 	}
 
@@ -320,7 +320,7 @@ func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organizat
 		Schema: p.userPoolAttributeSchema(),
 	}
 	req := p.svc.CreateUserPoolRequest(userPool)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		poolErr := checkError("create_user_pool", err)
 		return "", poolErr
@@ -329,7 +329,7 @@ func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organizat
 	return *out.UserPool.Id, nil
 }
 
-func (p *OrgProvision) checkUserPoolExists(name, token string) bool {
+func (p *OrgProvision) checkUserPoolExists(ctx context.Context, name, token string) bool {
 
 	input := &cip.ListUserPoolsInput{
 		MaxResults: aws.Int64(50),
@@ -340,7 +340,7 @@ func (p *OrgProvision) checkUserPoolExists(name, token string) bool {
 	}
 
 	req := p.svc.ListUserPoolsRequest(input)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		return false
 	}
@@ -356,7 +356,7 @@ func (p *OrgProvision) checkUserPoolExists(name, token string) bool {
 	}
 
 	if out.NextToken != nil && *out.NextToken != "" {
-		return p.checkUserPoolExists(name, *out.NextToken)
+		return p.checkUserPoolExists(ctx, name, *out.NextToken)
 	}
 
 	return false
@@ -432,7 +432,7 @@ func (p *OrgProvision) createPoolGroups(ctx context.Context, orgData *am.Organiz
 		}
 		log.Info().Str("user_pool_id", orgData.UserPoolID).Str("group_name", k).Str("role_arn", v).Msg("creating group")
 		req := p.svc.CreateGroupRequest(input)
-		_, err := req.Send()
+		_, err := req.Send(ctx)
 		if err != nil {
 			checkError("create_pool_groups", err)
 			return errors.Wrap(err, "failed to create organization user pool group")
@@ -457,7 +457,7 @@ func (p *OrgProvision) createAppClient(ctx context.Context, orgData *am.Organiza
 		SupportedIdentityProviders: []string{"COGNITO"},
 	}
 	req := p.svc.CreateUserPoolClientRequest(appClient)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		appClientErr := checkError("create_app_client", err)
 		return "", appClientErr
@@ -482,7 +482,7 @@ func (p *OrgProvision) createIdentityPool(ctx context.Context, orgData *am.Organ
 	}
 
 	req := p.fedSvc.CreateIdentityPoolRequest(identityPool)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		identityErr := checkError("create_identity_pool", err)
 		return "", identityErr
@@ -512,7 +512,7 @@ func (p *OrgProvision) createIdentityPool(ctx context.Context, orgData *am.Organ
 
 	setRolesReq := p.fedSvc.SetIdentityPoolRolesRequest(input)
 
-	_, err = setRolesReq.Send()
+	_, err = setRolesReq.Send(ctx)
 	if err != nil {
 		identityErr := checkError("set_identity_roles", err)
 		return "", identityErr
@@ -565,7 +565,7 @@ func (p *OrgProvision) createOwnerUser(ctx context.Context, orgData *am.Organiza
 	}
 
 	req := p.svc.AdminCreateUserRequest(user)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		return "", checkError("create_owner_user", err)
 	}
@@ -579,7 +579,7 @@ func (p *OrgProvision) createOwnerUser(ctx context.Context, orgData *am.Organiza
 	}
 
 	groupReq := p.svc.AdminAddUserToGroupRequest(group)
-	_, err = groupReq.Send()
+	_, err = groupReq.Send(ctx)
 	if err != nil {
 		return "", checkError("add_owner_to_group", err)
 	}
@@ -634,7 +634,7 @@ func (p *OrgProvision) deleteUserPool(ctx context.Context, orgData *am.Organizat
 	}
 
 	req := p.svc.DeleteUserPoolRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 	if err != nil {
 		return err
 	}
@@ -646,7 +646,7 @@ func (p *OrgProvision) deleteIdentityPool(ctx context.Context, orgData *am.Organ
 		IdentityPoolId: aws.String(orgData.IdentityPoolID),
 	}
 	req := p.fedSvc.DeleteIdentityPoolRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 	if err != nil {
 		return err
 	}

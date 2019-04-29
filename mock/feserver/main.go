@@ -53,7 +53,7 @@ func main() {
 	webHandlers := webdata.New(webClient)
 	webHandlers.ContextExtractor = fakeContext
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
+	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
 	scanGroupHandlers.ContextExtractor = fakeContext
 	r.NotFound(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
@@ -110,6 +110,8 @@ func main() {
 
 	// testing user
 	r.Route("/user", func(r chi.Router) {
+		r.Get("/details", userHandlers.Get)
+		r.Patch("/accept", userHandlers.AcceptAgreement)
 		r.Post("/feedback", userHandlers.SubmitFeedback)
 		r.Patch("/details", userHandlers.UpdateUser)
 		r.Patch("/password", userHandlers.ChangePassword)
@@ -148,20 +150,32 @@ func fakeContext(ctx context.Context) (am.UserContext, bool) {
 
 func testUserClient() am.UserService {
 	userClient := &mock.UserService{}
-	userClient.GetFn = func(ctx context.Context, userContext am.UserContext, userEmail string) (int, *am.User, error) {
-		return userContext.GetOrgID(), &am.User{
-			OrgID:        userContext.GetOrgID(),
-			OrgCID:       "",
-			UserCID:      "",
-			UserID:       userContext.GetUserID(),
-			UserEmail:    userEmail,
-			FirstName:    "test",
-			LastName:     "test",
-			StatusID:     am.UserStatusActive,
-			CreationTime: time.Now().UnixNano(),
-			Deleted:      false,
-		}, nil
+	user := &am.User{
+		UserEmail:                  "test@test.com",
+		FirstName:                  "test",
+		LastName:                   "test",
+		StatusID:                   am.UserStatusActive,
+		CreationTime:               time.Now().UnixNano(),
+		Deleted:                    false,
+		AgreementAccepted:          false,
+		AgreementAcceptedTimestamp: 0,
 	}
+	userClient.GetFn = func(ctx context.Context, userContext am.UserContext, userEmail string) (int, *am.User, error) {
+		user.OrgID = userContext.GetOrgID()
+		user.UserCID = userContext.GetUserCID()
+		user.OrgCID = userContext.GetOrgCID()
+		user.UserID = userContext.GetUserID()
+		return userContext.GetOrgID(), user, nil
+	}
+
+	userClient.GetByCIDFn = userClient.GetFn
+
+	userClient.AcceptAgreementFn = func(ctx context.Context, userContext am.UserContext, accepted bool) (int, int, error) {
+		user.AgreementAccepted = accepted
+		user.AgreementAcceptedTimestamp = time.Now().UnixNano()
+		return userContext.GetOrgID(), userContext.GetUserID(), nil
+	}
+
 	return userClient
 }
 

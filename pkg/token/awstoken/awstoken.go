@@ -204,7 +204,7 @@ func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization
 	}
 
 	req := t.fedSvc.GetIdRequest(idInput)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("error in Cognito GetID")
 		return "", err
@@ -215,7 +215,7 @@ func (t *AWSToken) ExchangeCredentials(ctx context.Context, org *am.Organization
 		Logins:     map[string]string{loginProvider: idKey},
 	}
 	credReq := t.fedSvc.GetCredentialsForIdentityRequest(credInput)
-	cred, err := credReq.Send()
+	cred, err := credReq.Send(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("error in Cognito GetCreds")
 		return "", err
