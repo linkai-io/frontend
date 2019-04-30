@@ -37,8 +37,8 @@ func main() {
 	r.Route("/org", func(r chi.Router) {
 		r.Get("/name/{name}", orgHandlers.GetByName)
 		r.Get("/id/{id}", orgHandlers.GetByID)
-		r.Patch("/id/{id}", orgHandlers.Update)
-		r.Delete("/id/{id}", orgHandlers.Delete)
+		//r.Patch("/id/{id}", orgHandlers.Update)
+		//r.Delete("/id/{id}", orgHandlers.Delete)
 		r.Get("/cid/{cid}", orgHandlers.GetByCID)
 		r.Get("/list", orgHandlers.List)
 	})

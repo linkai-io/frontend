@@ -61,7 +61,7 @@ func (a *AWSAuthenticate) Login(ctx context.Context, orgData *am.Organization, d
 	}
 
 	req := a.svc.AdminInitiateAuthRequest(input)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		log.Error().Err(err).Str("org_name", orgData.OrgName).Str("username", details.Username).Msg("authentication failure")
 		return response, err
@@ -93,7 +93,7 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, orgData *am.Organi
 	}
 
 	req := a.svc.AdminInitiateAuthRequest(input)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		return response, err
 	}
@@ -111,7 +111,7 @@ func (a *AWSAuthenticate) SetNewPassword(ctx context.Context, orgData *am.Organi
 	}
 
 	newReq := a.svc.AdminRespondToAuthChallengeRequest(newPass)
-	challenge, err := newReq.Send()
+	challenge, err := newReq.Send(ctx)
 	if err != nil {
 		return response, err
 	}
@@ -147,7 +147,7 @@ func (a *AWSAuthenticate) Refresh(ctx context.Context, details *authz.TokenDetai
 	}
 
 	req := a.svc.AdminInitiateAuthRequest(input)
-	out, err := req.Send()
+	out, err := req.Send(ctx)
 	if err != nil {
 		return response, err
 	}
@@ -178,7 +178,7 @@ func (a *AWSAuthenticate) Forgot(ctx context.Context, orgData *am.Organization, 
 	}
 
 	req := a.svc.ForgotPasswordRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 	return err
 }
 
@@ -193,7 +193,7 @@ func (a *AWSAuthenticate) Reset(ctx context.Context, orgData *am.Organization, d
 	}
 
 	req := a.svc.ConfirmForgotPasswordRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 
 	return err
 }
@@ -205,7 +205,7 @@ func (a *AWSAuthenticate) Logout(ctx context.Context, orgData *am.Organization, 
 	}
 
 	req := a.svc.AdminUserGlobalSignOutRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 
 	return err
 }

@@ -59,7 +59,7 @@ func TestGetAddresses(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/group/{id}", addr.GetAddresses)
-		r.Put("/group/{id}/initial", addr.PutInitialAddresses)
+		r.Put("/group/{id}/add", addr.PutAddresses)
 		r.Get("/group/{id}/count", addr.GetGroupCount)
 	})
 
@@ -129,7 +129,7 @@ func TestPutInitialAddresses(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/address", func(r chi.Router) {
 		r.Get("/group/{id}", addr.GetAddresses)
-		r.Put("/group/{id}/initial", addr.PutInitialAddresses)
+		r.Put("/group/{id}/add", addr.PutAddresses)
 		r.Get("/group/{id}/count", addr.GetGroupCount)
 	})
 
@@ -178,7 +178,7 @@ func TestPutInitialAddresses(t *testing.T) {
 
 	for _, test := range tests {
 		b := strings.NewReader(test.Input)
-		rr, body := fetest.RouterTestRequest(t, ts, "PUT", "/address/group/1/initial", b)
+		rr, body := fetest.RouterTestRequest(t, ts, "PUT", "/address/group/1/add", b)
 
 		// Check the status code is what we expect.
 		if status := rr.StatusCode; status != test.Code {

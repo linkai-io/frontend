@@ -32,8 +32,9 @@ func TestProvisionHandlersOrgPOST(t *testing.T) {
 	provHandlers := admin.NewProvisionHandlers(orgClient, provisioner, roles)
 	provHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
 		return &am.UserContextData{
-			UserID: 1,
-			OrgID:  1,
+			UserID:         1,
+			OrgID:          1,
+			SubscriptionID: 9999,
 		}, true
 	}
 	r := chi.NewRouter()
@@ -74,7 +75,7 @@ func TestProvisionHandlersOrgPOST(t *testing.T) {
 
 	// Check the status code is what we expect.
 	if status := rr.StatusCode; status != http.StatusOK {
-		t.Fatalf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		t.Fatalf("handler returned wrong status code: got %v want %v %v", status, http.StatusOK, rr)
 	}
 
 	if !provisioner.AddInvoked {

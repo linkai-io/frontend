@@ -28,11 +28,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ef5b0622d834c139454148b8fd0c92bb314828900532b267ae62da9fec109866"
+  digest = "1:2210176f5644b328fb429f7d59b2944e598b22fda4b5071e09d6dcad001cdc37"
   name = "github.com/armon/go-metrics"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f0300d1749da6fa982027e449ec0c7a145510c3c"
+  revision = "2801d9688273d5b516966851b9a0863b9e6b0652"
 
 [[projects]]
   digest = "1:b28b250b648609be14e0fa4a220b9b991ccaf7b1226781fd9d6e4dd6f4e086fd"
@@ -58,7 +58,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:3697ff6dcf6d24d2b3eb43f2447eceac503e444951511def0a778938459070bd"
+  digest = "1:054c48f48acdf62c8892ad5374febe24e1b9bd428d04f9782f30c3484b68070b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,11 +100,11 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "16d619ac8c1dc1d7b620bc0c432140e22a640e55"
-  version = "v1.19.13"
+  revision = "26af3c32ec16138888e2b1c1fdc2ea66b99b0ef3"
+  version = "v1.19.20"
 
 [[projects]]
-  digest = "1:f384325228cf4f3b0c46d1c1527973551a3d54381f0782c1e9c09889272107a2"
+  digest = "1:d31234d2f5dff3058f63fc38a3994e508cb09af0501792466dd259fcd62aa678"
   name = "github.com/aws/aws-sdk-go-v2"
   packages = [
     "aws",
@@ -133,8 +133,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "c2b476bac53067cebc587747e866881b2e383625"
-  version = "v0.7.0"
+  revision = "946751c824084162af83a0084acf059385f79664"
+  version = "v0.8.0"
 
 [[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
@@ -304,8 +304,8 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5c9307acd79100519b9d47c88227a29c6cb5a5acc61d9c04617318979e44fc64"
+  branch = "beta-push"
+  digest = "1:cd786d9c32cc4c5f1db3ffa78e0c3e564d6b57bbe013197c29520967e3ab24ad"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -338,7 +338,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "65e36778374b2a360b2b994b605d99e6dfba1572"
+  revision = "58aa7fdcfd963f1e33f98ad27b0325292af3b3be"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -374,7 +374,7 @@
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:e30b5c6d83a83f1369fa92f0e279ab8046e9ee7fa2d71360956e910f44072ffb"
+  digest = "1:fb63fb6cb9cf7310c6bd83998cc430ee5af1ec52612572ecb42c7aad74bd3598"
   name = "github.com/rs/zerolog"
   packages = [
     ".",
@@ -383,8 +383,8 @@
     "log",
   ]
   pruneopts = "UT"
-  revision = "651d361cfeb9d0f5b9f1d14b162c66c82509ef6d"
-  version = "v1.13.0"
+  revision = "acf3980132bfcdc48638724e6e3d9e5749b85999"
+  version = "v1.14.3"
 
 [[projects]]
   digest = "1:f365aac208767f970976dee1197f8ef719760f4fe9c9112fef19d025555596de"
@@ -398,7 +398,7 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:ce72568389d111aa2d94b2d6b3c0213ab4699a05cbc6e203ed578f379bedef8f"
+  digest = "1:6a0fd720abef071f9c9821249e2a7ee87a2e90fe7e45cef8fe413e6b5287363a"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -419,8 +419,8 @@
     "trace/tracestate",
   ]
   pruneopts = "UT"
-  revision = "75c0cca22312e51bfd4fafdbe9197ae399e18b38"
-  version = "v0.20.2"
+  revision = "df6e2001952312404b06f5f6f03fcb4aec1648e5"
+  version = "v0.21.0"
 
 [[projects]]
   branch = "master"
@@ -431,11 +431,11 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "f416ebab96af27ca70b6e5c23d6a0747530da626"
+  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
 
 [[projects]]
   branch = "master"
-  digest = "1:501f37ba603f0925d4d9dfcce183ad9c5f66e1ad75ba9bf76a7c8be76ac7d142"
+  digest = "1:378e18b5f48f39cda3a025c9e43754cb2ed13cb31f93677ff383c00de5823b15"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -456,7 +456,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "1da14a5a36f220ea3f03470682b737b1dfd5de22"
+  revision = "4829fb13d2c62012c17688fa7f629f371014946d"
 
 [[projects]]
   branch = "master"
@@ -474,20 +474,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:28d862f4f9bf2d1976d1d320481bff661b7565eb876d4df2a981f79e7f40e4cd"
+  digest = "1:dcd2e9de31e20e01b156288ce4fc239498564295bdbb59d8aaf591af94778162"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "12500544f89f9420afe9529ba8940bf72d294972"
+  revision = "d89cdac9e8725f2aefce25fcbfef41134c9ad412"
 
 [[projects]]
-  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
+  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
     "internal/colltab",
     "internal/gen",
+    "internal/language",
+    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -500,11 +502,11 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
 
 [[projects]]
-  digest = "1:d238aee1606527815926ec20ca1fa3d1b31589c45119f4783cb8976ba65f1259"
+  digest = "1:cca91a61ebe69a7209998d50509e7a8972bb6eee405293b8a37cfe281ae99445"
   name = "google.golang.org/api"
   packages = [
     "bigquery/v2",
@@ -519,8 +521,8 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "0cbcb99a9ea0c8023c794b2693cbe1def82ed4d7"
-  version = "v0.3.2"
+  revision = "067bed655e9cbc26f4dbac8f8897b30756d90990"
+  version = "v0.4.0"
 
 [[projects]]
   digest = "1:04f2ff15fc59e1ddaf9900ad0e19e5b19586b31f9dafd4d592b617642b239d8f"
@@ -550,10 +552,10 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "d1146b9035b912113a38af3b138eb2af567b2c67"
+  revision = "357c62f0e4bbba7e6cc403ae09edcf3e2b9028fe"
 
 [[projects]]
-  digest = "1:c713dfe4945e9b372d4e881e2e6742ad361f326ecfee66b807a2c582402c3a63"
+  digest = "1:a1f1707d71a652caa4da563d6a98e1d1cf3a1500dec7059e5989753b09112e27"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -591,8 +593,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "236199dd5f8031d698fb64091194aecd1c3895b2"
-  version = "v1.20.0"
+  revision = "25c4f928eaa6d96443009bd842389fb4fa48664e"
+  version = "v1.20.1"
 
 [[projects]]
   digest = "1:7bb1ad654b21fb8f44c77c07840007d6796f70d42d1b470600f943a508ff8a72"

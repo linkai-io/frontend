@@ -3,6 +3,7 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -22,7 +23,8 @@ type AddClientIDToOpenIDConnectProviderRequest struct {
 }
 
 // Send marshals and sends the AddClientIDToOpenIDConnectProvider API request.
-func (r AddClientIDToOpenIDConnectProviderRequest) Send() (*AddClientIDToOpenIDConnectProviderOutput, error) {
+func (r AddClientIDToOpenIDConnectProviderRequest) Send(ctx context.Context) (*AddClientIDToOpenIDConnectProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -42,7 +44,7 @@ func (r AddClientIDToOpenIDConnectProviderRequest) Send() (*AddClientIDToOpenIDC
 //
 //    // Example sending a request using the AddClientIDToOpenIDConnectProviderRequest method.
 //    req := client.AddClientIDToOpenIDConnectProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -78,7 +80,8 @@ type AddRoleToInstanceProfileRequest struct {
 }
 
 // Send marshals and sends the AddRoleToInstanceProfile API request.
-func (r AddRoleToInstanceProfileRequest) Send() (*AddRoleToInstanceProfileOutput, error) {
+func (r AddRoleToInstanceProfileRequest) Send(ctx context.Context) (*AddRoleToInstanceProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -95,20 +98,20 @@ func (r AddRoleToInstanceProfileRequest) Send() (*AddRoleToInstanceProfileOutput
 // can remove the existing role and then add a different role to an instance
 // profile. You must then wait for the change to appear across all of AWS because
 // of eventual consistency (https://en.wikipedia.org/wiki/Eventual_consistency).
-// To force the change, you must disassociate the instance profile (http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateIamInstanceProfile.html)
-// and then associate the instance profile (http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateIamInstanceProfile.html),
+// To force the change, you must disassociate the instance profile (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateIamInstanceProfile.html)
+// and then associate the instance profile (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateIamInstanceProfile.html),
 // or you can stop your instance and then restart it.
 //
 // The caller of this API must be granted the PassRole permission on the IAM
 // role by a permissions policy.
 //
-// For more information about roles, go to Working with Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// For more information about roles, go to Working with Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 // For more information about instance profiles, go to About Instance Profiles
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 //    // Example sending a request using the AddRoleToInstanceProfileRequest method.
 //    req := client.AddRoleToInstanceProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -144,7 +147,8 @@ type AddUserToGroupRequest struct {
 }
 
 // Send marshals and sends the AddUserToGroup API request.
-func (r AddUserToGroupRequest) Send() (*AddUserToGroupOutput, error) {
+func (r AddUserToGroupRequest) Send(ctx context.Context) (*AddUserToGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -160,7 +164,7 @@ func (r AddUserToGroupRequest) Send() (*AddUserToGroupOutput, error) {
 //
 //    // Example sending a request using the AddUserToGroupRequest method.
 //    req := client.AddUserToGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -196,7 +200,8 @@ type AttachGroupPolicyRequest struct {
 }
 
 // Send marshals and sends the AttachGroupPolicy API request.
-func (r AttachGroupPolicyRequest) Send() (*AttachGroupPolicyOutput, error) {
+func (r AttachGroupPolicyRequest) Send(ctx context.Context) (*AttachGroupPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -214,12 +219,12 @@ func (r AttachGroupPolicyRequest) Send() (*AttachGroupPolicyOutput, error) {
 // policy in a group, use PutGroupPolicy.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the AttachGroupPolicyRequest method.
 //    req := client.AttachGroupPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -255,7 +260,8 @@ type AttachRolePolicyRequest struct {
 }
 
 // Send marshals and sends the AttachRolePolicy API request.
-func (r AttachRolePolicyRequest) Send() (*AttachRolePolicyOutput, error) {
+func (r AttachRolePolicyRequest) Send(ctx context.Context) (*AttachRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -277,12 +283,12 @@ func (r AttachRolePolicyRequest) Send() (*AttachRolePolicyOutput, error) {
 //
 // Use this API to attach a managed policy to a role. To embed an inline policy
 // in a role, use PutRolePolicy. For more information about policies, see Managed
-// Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the AttachRolePolicyRequest method.
 //    req := client.AttachRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -318,7 +324,8 @@ type AttachUserPolicyRequest struct {
 }
 
 // Send marshals and sends the AttachUserPolicy API request.
-func (r AttachUserPolicyRequest) Send() (*AttachUserPolicyOutput, error) {
+func (r AttachUserPolicyRequest) Send(ctx context.Context) (*AttachUserPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -336,12 +343,12 @@ func (r AttachUserPolicyRequest) Send() (*AttachUserPolicyOutput, error) {
 // policy in a user, use PutUserPolicy.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the AttachUserPolicyRequest method.
 //    req := client.AttachUserPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -377,7 +384,8 @@ type ChangePasswordRequest struct {
 }
 
 // Send marshals and sends the ChangePassword API request.
-func (r ChangePasswordRequest) Send() (*ChangePasswordOutput, error) {
+func (r ChangePasswordRequest) Send(ctx context.Context) (*ChangePasswordOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -393,12 +401,12 @@ func (r ChangePasswordRequest) Send() (*ChangePasswordOutput, error) {
 // account root user password is not affected by this operation.
 //
 // To change the password for a different user, see UpdateLoginProfile. For
-// more information about modifying passwords, see Managing Passwords (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
+// more information about modifying passwords, see Managing Passwords (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ChangePasswordRequest method.
 //    req := client.ChangePasswordRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -434,7 +442,8 @@ type CreateAccessKeyRequest struct {
 }
 
 // Send marshals and sends the CreateAccessKey API request.
-func (r CreateAccessKeyRequest) Send() (*CreateAccessKeyOutput, error) {
+func (r CreateAccessKeyRequest) Send(ctx context.Context) (*CreateAccessKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -456,7 +465,7 @@ func (r CreateAccessKeyRequest) Send() (*CreateAccessKeyOutput, error) {
 // account has no associated users.
 //
 // For information about limits on the number of keys you can create, see Limitations
-// on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 // To ensure the security of your AWS account, the secret access key is accessible
@@ -467,7 +476,7 @@ func (r CreateAccessKeyRequest) Send() (*CreateAccessKeyOutput, error) {
 //
 //    // Example sending a request using the CreateAccessKeyRequest method.
 //    req := client.CreateAccessKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -501,7 +510,8 @@ type CreateAccountAliasRequest struct {
 }
 
 // Send marshals and sends the CreateAccountAlias API request.
-func (r CreateAccountAliasRequest) Send() (*CreateAccountAliasOutput, error) {
+func (r CreateAccountAliasRequest) Send(ctx context.Context) (*CreateAccountAliasOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -514,12 +524,12 @@ func (r CreateAccountAliasRequest) Send() (*CreateAccountAliasOutput, error) {
 // AWS Identity and Access Management.
 //
 // Creates an alias for your AWS account. For information about using an AWS
-// account alias, see Using an Alias for Your AWS Account ID (http://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
+// account alias, see Using an Alias for Your AWS Account ID (https://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateAccountAliasRequest method.
 //    req := client.CreateAccountAliasRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -555,7 +565,8 @@ type CreateGroupRequest struct {
 }
 
 // Send marshals and sends the CreateGroup API request.
-func (r CreateGroupRequest) Send() (*CreateGroupOutput, error) {
+func (r CreateGroupRequest) Send(ctx context.Context) (*CreateGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -570,12 +581,12 @@ func (r CreateGroupRequest) Send() (*CreateGroupOutput, error) {
 // Creates a new group.
 //
 // For information about the number of groups you can create, see Limitations
-// on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateGroupRequest method.
 //    req := client.CreateGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -609,7 +620,8 @@ type CreateInstanceProfileRequest struct {
 }
 
 // Send marshals and sends the CreateInstanceProfile API request.
-func (r CreateInstanceProfileRequest) Send() (*CreateInstanceProfileOutput, error) {
+func (r CreateInstanceProfileRequest) Send(ctx context.Context) (*CreateInstanceProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -622,15 +634,15 @@ func (r CreateInstanceProfileRequest) Send() (*CreateInstanceProfileOutput, erro
 // AWS Identity and Access Management.
 //
 // Creates a new instance profile. For information about instance profiles,
-// go to About Instance Profiles (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// go to About Instance Profiles (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 // For information about the number of instance profiles you can create, see
-// Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateInstanceProfileRequest method.
 //    req := client.CreateInstanceProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -664,7 +676,8 @@ type CreateLoginProfileRequest struct {
 }
 
 // Send marshals and sends the CreateLoginProfile API request.
-func (r CreateLoginProfileRequest) Send() (*CreateLoginProfileOutput, error) {
+func (r CreateLoginProfileRequest) Send(ctx context.Context) (*CreateLoginProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -678,12 +691,12 @@ func (r CreateLoginProfileRequest) Send() (*CreateLoginProfileOutput, error) {
 //
 // Creates a password for the specified user, giving the user the ability to
 // access AWS services through the AWS Management Console. For more information
-// about managing passwords, see Managing Passwords (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
+// about managing passwords, see Managing Passwords (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateLoginProfileRequest method.
 //    req := client.CreateLoginProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -717,7 +730,8 @@ type CreateOpenIDConnectProviderRequest struct {
 }
 
 // Send marshals and sends the CreateOpenIDConnectProvider API request.
-func (r CreateOpenIDConnectProviderRequest) Send() (*CreateOpenIDConnectProviderOutput, error) {
+func (r CreateOpenIDConnectProviderRequest) Send(ctx context.Context) (*CreateOpenIDConnectProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -754,7 +768,7 @@ func (r CreateOpenIDConnectProviderRequest) Send() (*CreateOpenIDConnectProvider
 //
 //    // Example sending a request using the CreateOpenIDConnectProviderRequest method.
 //    req := client.CreateOpenIDConnectProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -788,7 +802,8 @@ type CreatePolicyRequest struct {
 }
 
 // Send marshals and sends the CreatePolicy API request.
-func (r CreatePolicyRequest) Send() (*CreatePolicyOutput, error) {
+func (r CreatePolicyRequest) Send(ctx context.Context) (*CreatePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -804,16 +819,16 @@ func (r CreatePolicyRequest) Send() (*CreatePolicyOutput, error) {
 //
 // This operation creates a policy version with a version identifier of v1 and
 // sets v1 as the policy's default version. For more information about policy
-// versions, see Versioning for Managed Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+// versions, see Versioning for Managed Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 // in the IAM User Guide.
 //
 // For more information about managed policies in general, see Managed Policies
-// and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreatePolicyRequest method.
 //    req := client.CreatePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -847,7 +862,8 @@ type CreatePolicyVersionRequest struct {
 }
 
 // Send marshals and sends the CreatePolicyVersion API request.
-func (r CreatePolicyVersionRequest) Send() (*CreatePolicyVersionOutput, error) {
+func (r CreatePolicyVersionRequest) Send(ctx context.Context) (*CreatePolicyVersionOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -869,12 +885,12 @@ func (r CreatePolicyVersionRequest) Send() (*CreatePolicyVersionOutput, error) {
 // and roles to which the policy is attached.
 //
 // For more information about managed policy versions, see Versioning for Managed
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreatePolicyVersionRequest method.
 //    req := client.CreatePolicyVersionRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -908,7 +924,8 @@ type CreateRoleRequest struct {
 }
 
 // Send marshals and sends the CreateRole API request.
-func (r CreateRoleRequest) Send() (*CreateRoleOutput, error) {
+func (r CreateRoleRequest) Send(ctx context.Context) (*CreateRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -921,14 +938,14 @@ func (r CreateRoleRequest) Send() (*CreateRoleOutput, error) {
 // AWS Identity and Access Management.
 //
 // Creates a new role for your AWS account. For more information about roles,
-// go to IAM Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// go to IAM Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 // For information about limitations on role names and the number of roles you
-// can create, go to Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// can create, go to Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateRoleRequest method.
 //    req := client.CreateRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -962,7 +979,8 @@ type CreateSAMLProviderRequest struct {
 }
 
 // Send marshals and sends the CreateSAMLProvider API request.
-func (r CreateSAMLProviderRequest) Send() (*CreateSAMLProviderOutput, error) {
+func (r CreateSAMLProviderRequest) Send(ctx context.Context) (*CreateSAMLProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -990,16 +1008,16 @@ func (r CreateSAMLProviderRequest) Send() (*CreateSAMLProviderOutput, error) {
 // document using the identity management software that is used as your organization's
 // IdP.
 //
-// This operation requires Signature Version 4 (http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+// This operation requires Signature Version 4 (https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 //
 // For more information, see Enabling SAML 2.0 Federated Users to Access the
-// AWS Management Console (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_enable-console-saml.html)
-// and About SAML 2.0-based Federation (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html)
+// AWS Management Console (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_enable-console-saml.html)
+// and About SAML 2.0-based Federation (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateSAMLProviderRequest method.
 //    req := client.CreateSAMLProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1033,7 +1051,8 @@ type CreateServiceLinkedRoleRequest struct {
 }
 
 // Send marshals and sends the CreateServiceLinkedRole API request.
-func (r CreateServiceLinkedRoleRequest) Send() (*CreateServiceLinkedRoleOutput, error) {
+func (r CreateServiceLinkedRoleRequest) Send(ctx context.Context) (*CreateServiceLinkedRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1051,7 +1070,7 @@ func (r CreateServiceLinkedRoleRequest) Send() (*CreateServiceLinkedRoleOutput, 
 // role, which could put your AWS resources into an unknown state. Allowing
 // the service to control the role helps improve service stability and proper
 // cleanup when a service and its role are no longer needed. For more information,
-// see Using Service-Linked Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html)
+// see Using Service-Linked Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html)
 // in the IAM User Guide.
 //
 // To attach a policy to this service-linked role, you must make the request
@@ -1059,7 +1078,7 @@ func (r CreateServiceLinkedRoleRequest) Send() (*CreateServiceLinkedRoleOutput, 
 //
 //    // Example sending a request using the CreateServiceLinkedRoleRequest method.
 //    req := client.CreateServiceLinkedRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1093,7 +1112,8 @@ type CreateServiceSpecificCredentialRequest struct {
 }
 
 // Send marshals and sends the CreateServiceSpecificCredential API request.
-func (r CreateServiceSpecificCredentialRequest) Send() (*CreateServiceSpecificCredentialOutput, error) {
+func (r CreateServiceSpecificCredentialRequest) Send(ctx context.Context) (*CreateServiceSpecificCredentialOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1117,12 +1137,12 @@ func (r CreateServiceSpecificCredentialRequest) Send() (*CreateServiceSpecificCr
 // You can reset the password to a new service-generated value by calling ResetServiceSpecificCredential.
 //
 // For more information about service-specific credentials, see Using IAM with
-// AWS CodeCommit: Git Credentials, SSH Keys, and AWS Access Keys (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html)
+// AWS CodeCommit: Git Credentials, SSH Keys, and AWS Access Keys (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateServiceSpecificCredentialRequest method.
 //    req := client.CreateServiceSpecificCredentialRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1156,7 +1176,8 @@ type CreateUserRequest struct {
 }
 
 // Send marshals and sends the CreateUser API request.
-func (r CreateUserRequest) Send() (*CreateUserOutput, error) {
+func (r CreateUserRequest) Send(ctx context.Context) (*CreateUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1171,12 +1192,12 @@ func (r CreateUserRequest) Send() (*CreateUserOutput, error) {
 // Creates a new IAM user for your AWS account.
 //
 // For information about limitations on the number of IAM users you can create,
-// see Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// see Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the CreateUserRequest method.
 //    req := client.CreateUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1210,7 +1231,8 @@ type CreateVirtualMFADeviceRequest struct {
 }
 
 // Send marshals and sends the CreateVirtualMFADevice API request.
-func (r CreateVirtualMFADeviceRequest) Send() (*CreateVirtualMFADeviceOutput, error) {
+func (r CreateVirtualMFADeviceRequest) Send(ctx context.Context) (*CreateVirtualMFADeviceOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1225,11 +1247,11 @@ func (r CreateVirtualMFADeviceRequest) Send() (*CreateVirtualMFADeviceOutput, er
 // Creates a new virtual MFA device for the AWS account. After creating the
 // virtual MFA, use EnableMFADevice to attach the MFA device to an IAM user.
 // For more information about creating and working with virtual MFA devices,
-// go to Using a Virtual MFA Device (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
+// go to Using a Virtual MFA Device (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
 // in the IAM User Guide.
 //
 // For information about limits on the number of MFA devices you can create,
-// see Limitations on Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// see Limitations on Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 // The seed information contained in the QR code and the Base32 string should
@@ -1239,7 +1261,7 @@ func (r CreateVirtualMFADeviceRequest) Send() (*CreateVirtualMFADeviceOutput, er
 //
 //    // Example sending a request using the CreateVirtualMFADeviceRequest method.
 //    req := client.CreateVirtualMFADeviceRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1273,7 +1295,8 @@ type DeactivateMFADeviceRequest struct {
 }
 
 // Send marshals and sends the DeactivateMFADevice API request.
-func (r DeactivateMFADeviceRequest) Send() (*DeactivateMFADeviceOutput, error) {
+func (r DeactivateMFADeviceRequest) Send(ctx context.Context) (*DeactivateMFADeviceOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1289,12 +1312,12 @@ func (r DeactivateMFADeviceRequest) Send() (*DeactivateMFADeviceOutput, error) {
 // the user name for which it was originally enabled.
 //
 // For more information about creating and working with virtual MFA devices,
-// go to Enabling a Virtual Multi-factor Authentication (MFA) Device (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
+// go to Enabling a Virtual Multi-factor Authentication (MFA) Device (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeactivateMFADeviceRequest method.
 //    req := client.DeactivateMFADeviceRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1330,7 +1353,8 @@ type DeleteAccessKeyRequest struct {
 }
 
 // Send marshals and sends the DeleteAccessKey API request.
-func (r DeleteAccessKeyRequest) Send() (*DeleteAccessKeyOutput, error) {
+func (r DeleteAccessKeyRequest) Send(ctx context.Context) (*DeleteAccessKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1352,7 +1376,7 @@ func (r DeleteAccessKeyRequest) Send() (*DeleteAccessKeyOutput, error) {
 //
 //    // Example sending a request using the DeleteAccessKeyRequest method.
 //    req := client.DeleteAccessKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1388,7 +1412,8 @@ type DeleteAccountAliasRequest struct {
 }
 
 // Send marshals and sends the DeleteAccountAlias API request.
-func (r DeleteAccountAliasRequest) Send() (*DeleteAccountAliasOutput, error) {
+func (r DeleteAccountAliasRequest) Send(ctx context.Context) (*DeleteAccountAliasOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1401,12 +1426,12 @@ func (r DeleteAccountAliasRequest) Send() (*DeleteAccountAliasOutput, error) {
 // AWS Identity and Access Management.
 //
 // Deletes the specified AWS account alias. For information about using an AWS
-// account alias, see Using an Alias for Your AWS Account ID (http://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
+// account alias, see Using an Alias for Your AWS Account ID (https://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeleteAccountAliasRequest method.
 //    req := client.DeleteAccountAliasRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1442,7 +1467,8 @@ type DeleteAccountPasswordPolicyRequest struct {
 }
 
 // Send marshals and sends the DeleteAccountPasswordPolicy API request.
-func (r DeleteAccountPasswordPolicyRequest) Send() (*DeleteAccountPasswordPolicyOutput, error) {
+func (r DeleteAccountPasswordPolicyRequest) Send(ctx context.Context) (*DeleteAccountPasswordPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1458,7 +1484,7 @@ func (r DeleteAccountPasswordPolicyRequest) Send() (*DeleteAccountPasswordPolicy
 //
 //    // Example sending a request using the DeleteAccountPasswordPolicyRequest method.
 //    req := client.DeleteAccountPasswordPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1494,7 +1520,8 @@ type DeleteGroupRequest struct {
 }
 
 // Send marshals and sends the DeleteGroup API request.
-func (r DeleteGroupRequest) Send() (*DeleteGroupOutput, error) {
+func (r DeleteGroupRequest) Send(ctx context.Context) (*DeleteGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1511,7 +1538,7 @@ func (r DeleteGroupRequest) Send() (*DeleteGroupOutput, error) {
 //
 //    // Example sending a request using the DeleteGroupRequest method.
 //    req := client.DeleteGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1547,7 +1574,8 @@ type DeleteGroupPolicyRequest struct {
 }
 
 // Send marshals and sends the DeleteGroupPolicy API request.
-func (r DeleteGroupPolicyRequest) Send() (*DeleteGroupPolicyOutput, error) {
+func (r DeleteGroupPolicyRequest) Send(ctx context.Context) (*DeleteGroupPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1564,12 +1592,12 @@ func (r DeleteGroupPolicyRequest) Send() (*DeleteGroupPolicyOutput, error) {
 //
 // A group can also have managed policies attached to it. To detach a managed
 // policy from a group, use DetachGroupPolicy. For more information about policies,
-// refer to Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// refer to Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeleteGroupPolicyRequest method.
 //    req := client.DeleteGroupPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1605,7 +1633,8 @@ type DeleteInstanceProfileRequest struct {
 }
 
 // Send marshals and sends the DeleteInstanceProfile API request.
-func (r DeleteInstanceProfileRequest) Send() (*DeleteInstanceProfileOutput, error) {
+func (r DeleteInstanceProfileRequest) Send(ctx context.Context) (*DeleteInstanceProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1626,11 +1655,11 @@ func (r DeleteInstanceProfileRequest) Send() (*DeleteInstanceProfileOutput, erro
 // on the instance.
 //
 // For more information about instance profiles, go to About Instance Profiles
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 //    // Example sending a request using the DeleteInstanceProfileRequest method.
 //    req := client.DeleteInstanceProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1666,7 +1695,8 @@ type DeleteLoginProfileRequest struct {
 }
 
 // Send marshals and sends the DeleteLoginProfile API request.
-func (r DeleteLoginProfileRequest) Send() (*DeleteLoginProfileOutput, error) {
+func (r DeleteLoginProfileRequest) Send(ctx context.Context) (*DeleteLoginProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1688,7 +1718,7 @@ func (r DeleteLoginProfileRequest) Send() (*DeleteLoginProfileOutput, error) {
 //
 //    // Example sending a request using the DeleteLoginProfileRequest method.
 //    req := client.DeleteLoginProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1724,7 +1754,8 @@ type DeleteOpenIDConnectProviderRequest struct {
 }
 
 // Send marshals and sends the DeleteOpenIDConnectProvider API request.
-func (r DeleteOpenIDConnectProviderRequest) Send() (*DeleteOpenIDConnectProviderOutput, error) {
+func (r DeleteOpenIDConnectProviderRequest) Send(ctx context.Context) (*DeleteOpenIDConnectProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1747,7 +1778,7 @@ func (r DeleteOpenIDConnectProviderRequest) Send() (*DeleteOpenIDConnectProvider
 //
 //    // Example sending a request using the DeleteOpenIDConnectProviderRequest method.
 //    req := client.DeleteOpenIDConnectProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1783,7 +1814,8 @@ type DeletePolicyRequest struct {
 }
 
 // Send marshals and sends the DeletePolicy API request.
-func (r DeletePolicyRequest) Send() (*DeletePolicyOutput, error) {
+func (r DeletePolicyRequest) Send(ctx context.Context) (*DeletePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1816,12 +1848,12 @@ func (r DeletePolicyRequest) Send() (*DeletePolicyOutput, error) {
 //    using this API.
 //
 // For information about managed policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeletePolicyRequest method.
 //    req := client.DeletePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1857,7 +1889,8 @@ type DeletePolicyVersionRequest struct {
 }
 
 // Send marshals and sends the DeletePolicyVersion API request.
-func (r DeletePolicyVersionRequest) Send() (*DeletePolicyVersionOutput, error) {
+func (r DeletePolicyVersionRequest) Send(ctx context.Context) (*DeletePolicyVersionOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1876,12 +1909,12 @@ func (r DeletePolicyVersionRequest) Send() (*DeletePolicyVersionOutput, error) {
 // of a policy is marked as the default version, use ListPolicyVersions.
 //
 // For information about versions for managed policies, see Versioning for Managed
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeletePolicyVersionRequest method.
 //    req := client.DeletePolicyVersionRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1917,7 +1950,8 @@ type DeleteRoleRequest struct {
 }
 
 // Send marshals and sends the DeleteRole API request.
-func (r DeleteRoleRequest) Send() (*DeleteRoleOutput, error) {
+func (r DeleteRoleRequest) Send(ctx context.Context) (*DeleteRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1930,7 +1964,7 @@ func (r DeleteRoleRequest) Send() (*DeleteRoleOutput, error) {
 // AWS Identity and Access Management.
 //
 // Deletes the specified role. The role must not have any policies attached.
-// For more information about roles, go to Working with Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// For more information about roles, go to Working with Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 //
 // Make sure that you do not have any Amazon EC2 instances running with the
 // role you are about to delete. Deleting a role or instance profile that is
@@ -1939,7 +1973,7 @@ func (r DeleteRoleRequest) Send() (*DeleteRoleOutput, error) {
 //
 //    // Example sending a request using the DeleteRoleRequest method.
 //    req := client.DeleteRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -1975,7 +2009,8 @@ type DeleteRolePermissionsBoundaryRequest struct {
 }
 
 // Send marshals and sends the DeleteRolePermissionsBoundary API request.
-func (r DeleteRolePermissionsBoundaryRequest) Send() (*DeleteRolePermissionsBoundaryOutput, error) {
+func (r DeleteRolePermissionsBoundaryRequest) Send(ctx context.Context) (*DeleteRolePermissionsBoundaryOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -1995,7 +2030,7 @@ func (r DeleteRolePermissionsBoundaryRequest) Send() (*DeleteRolePermissionsBoun
 //
 //    // Example sending a request using the DeleteRolePermissionsBoundaryRequest method.
 //    req := client.DeleteRolePermissionsBoundaryRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2031,7 +2066,8 @@ type DeleteRolePolicyRequest struct {
 }
 
 // Send marshals and sends the DeleteRolePolicy API request.
-func (r DeleteRolePolicyRequest) Send() (*DeleteRolePolicyOutput, error) {
+func (r DeleteRolePolicyRequest) Send(ctx context.Context) (*DeleteRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2048,12 +2084,12 @@ func (r DeleteRolePolicyRequest) Send() (*DeleteRolePolicyOutput, error) {
 //
 // A role can also have managed policies attached to it. To detach a managed
 // policy from a role, use DetachRolePolicy. For more information about policies,
-// refer to Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// refer to Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeleteRolePolicyRequest method.
 //    req := client.DeleteRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2089,7 +2125,8 @@ type DeleteSAMLProviderRequest struct {
 }
 
 // Send marshals and sends the DeleteSAMLProvider API request.
-func (r DeleteSAMLProviderRequest) Send() (*DeleteSAMLProviderOutput, error) {
+func (r DeleteSAMLProviderRequest) Send(ctx context.Context) (*DeleteSAMLProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2108,11 +2145,11 @@ func (r DeleteSAMLProviderRequest) Send() (*DeleteSAMLProviderOutput, error) {
 // Any attempt to assume a role that references a non-existent provider resource
 // ARN fails.
 //
-// This operation requires Signature Version 4 (http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+// This operation requires Signature Version 4 (https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 //
 //    // Example sending a request using the DeleteSAMLProviderRequest method.
 //    req := client.DeleteSAMLProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2148,7 +2185,8 @@ type DeleteSSHPublicKeyRequest struct {
 }
 
 // Send marshals and sends the DeleteSSHPublicKey API request.
-func (r DeleteSSHPublicKeyRequest) Send() (*DeleteSSHPublicKeyOutput, error) {
+func (r DeleteSSHPublicKeyRequest) Send(ctx context.Context) (*DeleteSSHPublicKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2165,12 +2203,12 @@ func (r DeleteSSHPublicKeyRequest) Send() (*DeleteSSHPublicKeyOutput, error) {
 // The SSH public key deleted by this operation is used only for authenticating
 // the associated IAM user to an AWS CodeCommit repository. For more information
 // about using SSH keys to authenticate to an AWS CodeCommit repository, see
-// Set up AWS CodeCommit for SSH Connections (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
+// Set up AWS CodeCommit for SSH Connections (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
 // in the AWS CodeCommit User Guide.
 //
 //    // Example sending a request using the DeleteSSHPublicKeyRequest method.
 //    req := client.DeleteSSHPublicKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2206,7 +2244,8 @@ type DeleteServerCertificateRequest struct {
 }
 
 // Send marshals and sends the DeleteServerCertificate API request.
-func (r DeleteServerCertificateRequest) Send() (*DeleteServerCertificateOutput, error) {
+func (r DeleteServerCertificateRequest) Send(ctx context.Context) (*DeleteServerCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2221,7 +2260,7 @@ func (r DeleteServerCertificateRequest) Send() (*DeleteServerCertificateOutput, 
 // Deletes the specified server certificate.
 //
 // For more information about working with server certificates, see Working
-// with Server Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
+// with Server Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
 // in the IAM User Guide. This topic also includes a list of AWS services that
 // can use the server certificates that you manage with IAM.
 //
@@ -2232,12 +2271,12 @@ func (r DeleteServerCertificateRequest) Send() (*DeleteServerCertificateOutput, 
 // to stop accepting traffic. We recommend that you remove the reference to
 // the certificate from Elastic Load Balancing before using this command to
 // delete the certificate. For more information, go to DeleteLoadBalancerListeners
-// (http://docs.aws.amazon.com/ElasticLoadBalancing/latest/APIReference/API_DeleteLoadBalancerListeners.html)
+// (https://docs.aws.amazon.com/ElasticLoadBalancing/latest/APIReference/API_DeleteLoadBalancerListeners.html)
 // in the Elastic Load Balancing API Reference.
 //
 //    // Example sending a request using the DeleteServerCertificateRequest method.
 //    req := client.DeleteServerCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2273,7 +2312,8 @@ type DeleteServiceLinkedRoleRequest struct {
 }
 
 // Send marshals and sends the DeleteServiceLinkedRole API request.
-func (r DeleteServiceLinkedRoleRequest) Send() (*DeleteServiceLinkedRoleOutput, error) {
+func (r DeleteServiceLinkedRoleRequest) Send(ctx context.Context) (*DeleteServiceLinkedRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2303,12 +2343,12 @@ func (r DeleteServiceLinkedRoleRequest) Send() (*DeleteServiceLinkedRoleOutput, 
 // for your service.
 //
 // For more information about service-linked roles, see Roles Terms and Concepts:
-// AWS Service-Linked Role (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html#iam-term-service-linked-role)
+// AWS Service-Linked Role (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html#iam-term-service-linked-role)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeleteServiceLinkedRoleRequest method.
 //    req := client.DeleteServiceLinkedRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2342,7 +2382,8 @@ type DeleteServiceSpecificCredentialRequest struct {
 }
 
 // Send marshals and sends the DeleteServiceSpecificCredential API request.
-func (r DeleteServiceSpecificCredentialRequest) Send() (*DeleteServiceSpecificCredentialOutput, error) {
+func (r DeleteServiceSpecificCredentialRequest) Send(ctx context.Context) (*DeleteServiceSpecificCredentialOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2358,7 +2399,7 @@ func (r DeleteServiceSpecificCredentialRequest) Send() (*DeleteServiceSpecificCr
 //
 //    // Example sending a request using the DeleteServiceSpecificCredentialRequest method.
 //    req := client.DeleteServiceSpecificCredentialRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2394,7 +2435,8 @@ type DeleteSigningCertificateRequest struct {
 }
 
 // Send marshals and sends the DeleteSigningCertificate API request.
-func (r DeleteSigningCertificateRequest) Send() (*DeleteSigningCertificateOutput, error) {
+func (r DeleteSigningCertificateRequest) Send(ctx context.Context) (*DeleteSigningCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2416,7 +2458,7 @@ func (r DeleteSigningCertificateRequest) Send() (*DeleteSigningCertificateOutput
 //
 //    // Example sending a request using the DeleteSigningCertificateRequest method.
 //    req := client.DeleteSigningCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2452,7 +2494,8 @@ type DeleteUserRequest struct {
 }
 
 // Send marshals and sends the DeleteUser API request.
-func (r DeleteUserRequest) Send() (*DeleteUserOutput, error) {
+func (r DeleteUserRequest) Send(ctx context.Context) (*DeleteUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2470,7 +2513,7 @@ func (r DeleteUserRequest) Send() (*DeleteUserOutput, error) {
 //
 //    // Example sending a request using the DeleteUserRequest method.
 //    req := client.DeleteUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2506,7 +2549,8 @@ type DeleteUserPermissionsBoundaryRequest struct {
 }
 
 // Send marshals and sends the DeleteUserPermissionsBoundary API request.
-func (r DeleteUserPermissionsBoundaryRequest) Send() (*DeleteUserPermissionsBoundaryOutput, error) {
+func (r DeleteUserPermissionsBoundaryRequest) Send(ctx context.Context) (*DeleteUserPermissionsBoundaryOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2526,7 +2570,7 @@ func (r DeleteUserPermissionsBoundaryRequest) Send() (*DeleteUserPermissionsBoun
 //
 //    // Example sending a request using the DeleteUserPermissionsBoundaryRequest method.
 //    req := client.DeleteUserPermissionsBoundaryRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2562,7 +2606,8 @@ type DeleteUserPolicyRequest struct {
 }
 
 // Send marshals and sends the DeleteUserPolicy API request.
-func (r DeleteUserPolicyRequest) Send() (*DeleteUserPolicyOutput, error) {
+func (r DeleteUserPolicyRequest) Send(ctx context.Context) (*DeleteUserPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2579,12 +2624,12 @@ func (r DeleteUserPolicyRequest) Send() (*DeleteUserPolicyOutput, error) {
 //
 // A user can also have managed policies attached to it. To detach a managed
 // policy from a user, use DetachUserPolicy. For more information about policies,
-// refer to Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// refer to Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DeleteUserPolicyRequest method.
 //    req := client.DeleteUserPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2620,7 +2665,8 @@ type DeleteVirtualMFADeviceRequest struct {
 }
 
 // Send marshals and sends the DeleteVirtualMFADevice API request.
-func (r DeleteVirtualMFADeviceRequest) Send() (*DeleteVirtualMFADeviceOutput, error) {
+func (r DeleteVirtualMFADeviceRequest) Send(ctx context.Context) (*DeleteVirtualMFADeviceOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2639,7 +2685,7 @@ func (r DeleteVirtualMFADeviceRequest) Send() (*DeleteVirtualMFADeviceOutput, er
 //
 //    // Example sending a request using the DeleteVirtualMFADeviceRequest method.
 //    req := client.DeleteVirtualMFADeviceRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2675,7 +2721,8 @@ type DetachGroupPolicyRequest struct {
 }
 
 // Send marshals and sends the DetachGroupPolicy API request.
-func (r DetachGroupPolicyRequest) Send() (*DetachGroupPolicyOutput, error) {
+func (r DetachGroupPolicyRequest) Send(ctx context.Context) (*DetachGroupPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2691,12 +2738,12 @@ func (r DetachGroupPolicyRequest) Send() (*DetachGroupPolicyOutput, error) {
 //
 // A group can also have inline policies embedded with it. To delete an inline
 // policy, use the DeleteGroupPolicy API. For information about policies, see
-// Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DetachGroupPolicyRequest method.
 //    req := client.DetachGroupPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2732,7 +2779,8 @@ type DetachRolePolicyRequest struct {
 }
 
 // Send marshals and sends the DetachRolePolicy API request.
-func (r DetachRolePolicyRequest) Send() (*DetachRolePolicyOutput, error) {
+func (r DetachRolePolicyRequest) Send(ctx context.Context) (*DetachRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2748,12 +2796,12 @@ func (r DetachRolePolicyRequest) Send() (*DetachRolePolicyOutput, error) {
 //
 // A role can also have inline policies embedded with it. To delete an inline
 // policy, use the DeleteRolePolicy API. For information about policies, see
-// Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DetachRolePolicyRequest method.
 //    req := client.DetachRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2789,7 +2837,8 @@ type DetachUserPolicyRequest struct {
 }
 
 // Send marshals and sends the DetachUserPolicy API request.
-func (r DetachUserPolicyRequest) Send() (*DetachUserPolicyOutput, error) {
+func (r DetachUserPolicyRequest) Send(ctx context.Context) (*DetachUserPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2805,12 +2854,12 @@ func (r DetachUserPolicyRequest) Send() (*DetachUserPolicyOutput, error) {
 //
 // A user can also have inline policies embedded with it. To delete an inline
 // policy, use the DeleteUserPolicy API. For information about policies, see
-// Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the DetachUserPolicyRequest method.
 //    req := client.DetachUserPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2846,7 +2895,8 @@ type EnableMFADeviceRequest struct {
 }
 
 // Send marshals and sends the EnableMFADevice API request.
-func (r EnableMFADeviceRequest) Send() (*EnableMFADeviceOutput, error) {
+func (r EnableMFADeviceRequest) Send(ctx context.Context) (*EnableMFADeviceOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2864,7 +2914,7 @@ func (r EnableMFADeviceRequest) Send() (*EnableMFADeviceOutput, error) {
 //
 //    // Example sending a request using the EnableMFADeviceRequest method.
 //    req := client.EnableMFADeviceRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2900,7 +2950,8 @@ type GenerateCredentialReportRequest struct {
 }
 
 // Send marshals and sends the GenerateCredentialReport API request.
-func (r GenerateCredentialReportRequest) Send() (*GenerateCredentialReportOutput, error) {
+func (r GenerateCredentialReportRequest) Send(ctx context.Context) (*GenerateCredentialReportOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2913,12 +2964,12 @@ func (r GenerateCredentialReportRequest) Send() (*GenerateCredentialReportOutput
 // AWS Identity and Access Management.
 //
 // Generates a credential report for the AWS account. For more information about
-// the credential report, see Getting Credential Reports (http://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
+// the credential report, see Getting Credential Reports (https://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GenerateCredentialReportRequest method.
 //    req := client.GenerateCredentialReportRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -2952,7 +3003,8 @@ type GenerateServiceLastAccessedDetailsRequest struct {
 }
 
 // Send marshals and sends the GenerateServiceLastAccessedDetails API request.
-func (r GenerateServiceLastAccessedDetailsRequest) Send() (*GenerateServiceLastAccessedDetailsOutput, error) {
+func (r GenerateServiceLastAccessedDetailsRequest) Send(ctx context.Context) (*GenerateServiceLastAccessedDetailsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -2969,7 +3021,7 @@ func (r GenerateServiceLastAccessedDetailsRequest) Send() (*GenerateServiceLastA
 // AWS services. Recent activity usually appears within four hours. IAM reports
 // activity for the last 365 days, or less if your region began supporting this
 // feature within the last year. For more information, see Regions Where Data
-// Is Tracked (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#access-advisor_tracking-period).
+// Is Tracked (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#access-advisor_tracking-period).
 //
 // The service last accessed data includes all attempts to access an AWS API,
 // not just the successful ones. This includes all attempts that were made using
@@ -2979,7 +3031,7 @@ func (r GenerateServiceLastAccessedDetailsRequest) Send() (*GenerateServiceLastA
 // might have been denied. Refer to your CloudTrail logs as the authoritative
 // source for information about all API calls and whether they were successful
 // or denied access. For more information, see Logging IAM Events with CloudTrail
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/cloudtrail-integration.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/cloudtrail-integration.html)
 // in the IAM User Guide.
 //
 // The GenerateServiceLastAccessedDetails operation returns a JobId. Use this
@@ -3008,16 +3060,16 @@ func (r GenerateServiceLastAccessedDetailsRequest) Send() (*GenerateServiceLastA
 // resource-based policies, access control lists, AWS Organizations policies,
 // IAM permissions boundaries, and AWS STS assume role policies. It only applies
 // permissions policy logic. For more about the evaluation of policy types,
-// see Evaluating Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
+// see Evaluating Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
 // in the IAM User Guide.
 //
 // For more information about service last accessed data, see Reducing Policy
-// Scope by Viewing User Activity (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html)
+// Scope by Viewing User Activity (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GenerateServiceLastAccessedDetailsRequest method.
 //    req := client.GenerateServiceLastAccessedDetailsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3051,7 +3103,8 @@ type GetAccessKeyLastUsedRequest struct {
 }
 
 // Send marshals and sends the GetAccessKeyLastUsed API request.
-func (r GetAccessKeyLastUsedRequest) Send() (*GetAccessKeyLastUsedOutput, error) {
+func (r GetAccessKeyLastUsedRequest) Send(ctx context.Context) (*GetAccessKeyLastUsedOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3070,7 +3123,7 @@ func (r GetAccessKeyLastUsedRequest) Send() (*GetAccessKeyLastUsedOutput, error)
 //
 //    // Example sending a request using the GetAccessKeyLastUsedRequest method.
 //    req := client.GetAccessKeyLastUsedRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3104,7 +3157,8 @@ type GetAccountAuthorizationDetailsRequest struct {
 }
 
 // Send marshals and sends the GetAccountAuthorizationDetails API request.
-func (r GetAccountAuthorizationDetailsRequest) Send() (*GetAccountAuthorizationDetailsOutput, error) {
+func (r GetAccountAuthorizationDetailsRequest) Send(ctx context.Context) (*GetAccountAuthorizationDetailsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3132,7 +3186,7 @@ func (r GetAccountAuthorizationDetailsRequest) Send() (*GetAccountAuthorizationD
 //
 //    // Example sending a request using the GetAccountAuthorizationDetailsRequest method.
 //    req := client.GetAccountAuthorizationDetailsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3182,7 +3236,7 @@ func (c *IAM) GetAccountAuthorizationDetailsRequest(input *GetAccountAuthorizati
 func (p *GetAccountAuthorizationDetailsRequest) Paginate(opts ...aws.Option) GetAccountAuthorizationDetailsPager {
 	return GetAccountAuthorizationDetailsPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *GetAccountAuthorizationDetailsInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -3191,6 +3245,7 @@ func (p *GetAccountAuthorizationDetailsRequest) Paginate(opts ...aws.Option) Get
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -3218,7 +3273,8 @@ type GetAccountPasswordPolicyRequest struct {
 }
 
 // Send marshals and sends the GetAccountPasswordPolicy API request.
-func (r GetAccountPasswordPolicyRequest) Send() (*GetAccountPasswordPolicyOutput, error) {
+func (r GetAccountPasswordPolicyRequest) Send(ctx context.Context) (*GetAccountPasswordPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3231,11 +3287,11 @@ func (r GetAccountPasswordPolicyRequest) Send() (*GetAccountPasswordPolicyOutput
 // AWS Identity and Access Management.
 //
 // Retrieves the password policy for the AWS account. For more information about
-// using a password policy, go to Managing an IAM Password Policy (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingPasswordPolicies.html).
+// using a password policy, go to Managing an IAM Password Policy (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingPasswordPolicies.html).
 //
 //    // Example sending a request using the GetAccountPasswordPolicyRequest method.
 //    req := client.GetAccountPasswordPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3269,7 +3325,8 @@ type GetAccountSummaryRequest struct {
 }
 
 // Send marshals and sends the GetAccountSummary API request.
-func (r GetAccountSummaryRequest) Send() (*GetAccountSummaryOutput, error) {
+func (r GetAccountSummaryRequest) Send(ctx context.Context) (*GetAccountSummaryOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3284,12 +3341,12 @@ func (r GetAccountSummaryRequest) Send() (*GetAccountSummaryOutput, error) {
 // Retrieves information about IAM entity usage and IAM quotas in the AWS account.
 //
 // For information about limitations on IAM entities, see Limitations on IAM
-// Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetAccountSummaryRequest method.
 //    req := client.GetAccountSummaryRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3323,7 +3380,8 @@ type GetContextKeysForCustomPolicyRequest struct {
 }
 
 // Send marshals and sends the GetContextKeysForCustomPolicy API request.
-func (r GetContextKeysForCustomPolicyRequest) Send() (*GetContextKeysForPrincipalPolicyOutput, error) {
+func (r GetContextKeysForCustomPolicyRequest) Send(ctx context.Context) (*GetContextKeysForPrincipalPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3348,7 +3406,7 @@ func (r GetContextKeysForCustomPolicyRequest) Send() (*GetContextKeysForPrincipa
 //
 //    // Example sending a request using the GetContextKeysForCustomPolicyRequest method.
 //    req := client.GetContextKeysForCustomPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3382,7 +3440,8 @@ type GetContextKeysForPrincipalPolicyRequest struct {
 }
 
 // Send marshals and sends the GetContextKeysForPrincipalPolicy API request.
-func (r GetContextKeysForPrincipalPolicyRequest) Send() (*GetContextKeysForPrincipalPolicyOutput, error) {
+func (r GetContextKeysForPrincipalPolicyRequest) Send(ctx context.Context) (*GetContextKeysForPrincipalPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3414,7 +3473,7 @@ func (r GetContextKeysForPrincipalPolicyRequest) Send() (*GetContextKeysForPrinc
 //
 //    // Example sending a request using the GetContextKeysForPrincipalPolicyRequest method.
 //    req := client.GetContextKeysForPrincipalPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3448,7 +3507,8 @@ type GetCredentialReportRequest struct {
 }
 
 // Send marshals and sends the GetCredentialReport API request.
-func (r GetCredentialReportRequest) Send() (*GetCredentialReportOutput, error) {
+func (r GetCredentialReportRequest) Send(ctx context.Context) (*GetCredentialReportOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3461,12 +3521,12 @@ func (r GetCredentialReportRequest) Send() (*GetCredentialReportOutput, error) {
 // AWS Identity and Access Management.
 //
 // Retrieves a credential report for the AWS account. For more information about
-// the credential report, see Getting Credential Reports (http://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
+// the credential report, see Getting Credential Reports (https://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetCredentialReportRequest method.
 //    req := client.GetCredentialReportRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3500,7 +3560,8 @@ type GetGroupRequest struct {
 }
 
 // Send marshals and sends the GetGroup API request.
-func (r GetGroupRequest) Send() (*GetGroupOutput, error) {
+func (r GetGroupRequest) Send(ctx context.Context) (*GetGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3517,7 +3578,7 @@ func (r GetGroupRequest) Send() (*GetGroupOutput, error) {
 //
 //    // Example sending a request using the GetGroupRequest method.
 //    req := client.GetGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3567,7 +3628,7 @@ func (c *IAM) GetGroupRequest(input *GetGroupInput) GetGroupRequest {
 func (p *GetGroupRequest) Paginate(opts ...aws.Option) GetGroupPager {
 	return GetGroupPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *GetGroupInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -3576,6 +3637,7 @@ func (p *GetGroupRequest) Paginate(opts ...aws.Option) GetGroupPager {
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -3603,7 +3665,8 @@ type GetGroupPolicyRequest struct {
 }
 
 // Send marshals and sends the GetGroupPolicy API request.
-func (r GetGroupPolicyRequest) Send() (*GetGroupPolicyOutput, error) {
+func (r GetGroupPolicyRequest) Send(ctx context.Context) (*GetGroupPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3630,12 +3693,12 @@ func (r GetGroupPolicyRequest) Send() (*GetGroupPolicyOutput, error) {
 // document.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetGroupPolicyRequest method.
 //    req := client.GetGroupPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3669,7 +3732,8 @@ type GetInstanceProfileRequest struct {
 }
 
 // Send marshals and sends the GetInstanceProfile API request.
-func (r GetInstanceProfileRequest) Send() (*GetInstanceProfileOutput, error) {
+func (r GetInstanceProfileRequest) Send(ctx context.Context) (*GetInstanceProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3683,12 +3747,12 @@ func (r GetInstanceProfileRequest) Send() (*GetInstanceProfileOutput, error) {
 //
 // Retrieves information about the specified instance profile, including the
 // instance profile's path, GUID, ARN, and role. For more information about
-// instance profiles, see About Instance Profiles (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html)
+// instance profiles, see About Instance Profiles (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetInstanceProfileRequest method.
 //    req := client.GetInstanceProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3722,7 +3786,8 @@ type GetLoginProfileRequest struct {
 }
 
 // Send marshals and sends the GetLoginProfile API request.
-func (r GetLoginProfileRequest) Send() (*GetLoginProfileOutput, error) {
+func (r GetLoginProfileRequest) Send(ctx context.Context) (*GetLoginProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3740,7 +3805,7 @@ func (r GetLoginProfileRequest) Send() (*GetLoginProfileOutput, error) {
 //
 //    // Example sending a request using the GetLoginProfileRequest method.
 //    req := client.GetLoginProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3774,7 +3839,8 @@ type GetOpenIDConnectProviderRequest struct {
 }
 
 // Send marshals and sends the GetOpenIDConnectProvider API request.
-func (r GetOpenIDConnectProviderRequest) Send() (*GetOpenIDConnectProviderOutput, error) {
+func (r GetOpenIDConnectProviderRequest) Send(ctx context.Context) (*GetOpenIDConnectProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3791,7 +3857,7 @@ func (r GetOpenIDConnectProviderRequest) Send() (*GetOpenIDConnectProviderOutput
 //
 //    // Example sending a request using the GetOpenIDConnectProviderRequest method.
 //    req := client.GetOpenIDConnectProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3825,7 +3891,8 @@ type GetPolicyRequest struct {
 }
 
 // Send marshals and sends the GetPolicy API request.
-func (r GetPolicyRequest) Send() (*GetPolicyOutput, error) {
+func (r GetPolicyRequest) Send(ctx context.Context) (*GetPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3849,12 +3916,12 @@ func (r GetPolicyRequest) Send() (*GetPolicyOutput, error) {
 // use the GetUserPolicy, GetGroupPolicy, or GetRolePolicy API.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetPolicyRequest method.
 //    req := client.GetPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3888,7 +3955,8 @@ type GetPolicyVersionRequest struct {
 }
 
 // Send marshals and sends the GetPolicyVersion API request.
-func (r GetPolicyVersionRequest) Send() (*GetPolicyVersionOutput, error) {
+func (r GetPolicyVersionRequest) Send(ctx context.Context) (*GetPolicyVersionOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3916,16 +3984,16 @@ func (r GetPolicyVersionRequest) Send() (*GetPolicyVersionOutput, error) {
 // GetUserPolicy, GetGroupPolicy, or GetRolePolicy API.
 //
 // For more information about the types of policies, see Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // For more information about managed policy versions, see Versioning for Managed
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetPolicyVersionRequest method.
 //    req := client.GetPolicyVersionRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -3959,7 +4027,8 @@ type GetRoleRequest struct {
 }
 
 // Send marshals and sends the GetRole API request.
-func (r GetRoleRequest) Send() (*GetRoleOutput, error) {
+func (r GetRoleRequest) Send(ctx context.Context) (*GetRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -3973,7 +4042,7 @@ func (r GetRoleRequest) Send() (*GetRoleOutput, error) {
 //
 // Retrieves information about the specified role, including the role's path,
 // GUID, ARN, and the role's trust policy that grants permission to assume the
-// role. For more information about roles, see Working with Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// role. For more information about roles, see Working with Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 //
 // Policies returned by this API are URL-encoded compliant with RFC 3986 (https://tools.ietf.org/html/rfc3986).
 // You can use a URL decoding method to convert the policy back to plain JSON
@@ -3983,7 +4052,7 @@ func (r GetRoleRequest) Send() (*GetRoleOutput, error) {
 //
 //    // Example sending a request using the GetRoleRequest method.
 //    req := client.GetRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4017,7 +4086,8 @@ type GetRolePolicyRequest struct {
 }
 
 // Send marshals and sends the GetRolePolicy API request.
-func (r GetRolePolicyRequest) Send() (*GetRolePolicyOutput, error) {
+func (r GetRolePolicyRequest) Send(ctx context.Context) (*GetRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4044,15 +4114,15 @@ func (r GetRolePolicyRequest) Send() (*GetRolePolicyOutput, error) {
 // document.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // For more information about roles, see Using Roles to Delegate Permissions
-// and Federate Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
+// and Federate Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
 //
 //    // Example sending a request using the GetRolePolicyRequest method.
 //    req := client.GetRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4086,7 +4156,8 @@ type GetSAMLProviderRequest struct {
 }
 
 // Send marshals and sends the GetSAMLProvider API request.
-func (r GetSAMLProviderRequest) Send() (*GetSAMLProviderOutput, error) {
+func (r GetSAMLProviderRequest) Send(ctx context.Context) (*GetSAMLProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4101,11 +4172,11 @@ func (r GetSAMLProviderRequest) Send() (*GetSAMLProviderOutput, error) {
 // Returns the SAML provider metadocument that was uploaded when the IAM SAML
 // provider resource object was created or updated.
 //
-// This operation requires Signature Version 4 (http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+// This operation requires Signature Version 4 (https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 //
 //    // Example sending a request using the GetSAMLProviderRequest method.
 //    req := client.GetSAMLProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4139,7 +4210,8 @@ type GetSSHPublicKeyRequest struct {
 }
 
 // Send marshals and sends the GetSSHPublicKey API request.
-func (r GetSSHPublicKeyRequest) Send() (*GetSSHPublicKeyOutput, error) {
+func (r GetSSHPublicKeyRequest) Send(ctx context.Context) (*GetSSHPublicKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4156,12 +4228,12 @@ func (r GetSSHPublicKeyRequest) Send() (*GetSSHPublicKeyOutput, error) {
 // The SSH public key retrieved by this operation is used only for authenticating
 // the associated IAM user to an AWS CodeCommit repository. For more information
 // about using SSH keys to authenticate to an AWS CodeCommit repository, see
-// Set up AWS CodeCommit for SSH Connections (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
+// Set up AWS CodeCommit for SSH Connections (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
 // in the AWS CodeCommit User Guide.
 //
 //    // Example sending a request using the GetSSHPublicKeyRequest method.
 //    req := client.GetSSHPublicKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4195,7 +4267,8 @@ type GetServerCertificateRequest struct {
 }
 
 // Send marshals and sends the GetServerCertificate API request.
-func (r GetServerCertificateRequest) Send() (*GetServerCertificateOutput, error) {
+func (r GetServerCertificateRequest) Send(ctx context.Context) (*GetServerCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4210,13 +4283,13 @@ func (r GetServerCertificateRequest) Send() (*GetServerCertificateOutput, error)
 // Retrieves information about the specified server certificate stored in IAM.
 //
 // For more information about working with server certificates, see Working
-// with Server Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
+// with Server Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
 // in the IAM User Guide. This topic includes a list of AWS services that can
 // use the server certificates that you manage with IAM.
 //
 //    // Example sending a request using the GetServerCertificateRequest method.
 //    req := client.GetServerCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4250,7 +4323,8 @@ type GetServiceLastAccessedDetailsRequest struct {
 }
 
 // Send marshals and sends the GetServiceLastAccessedDetails API request.
-func (r GetServiceLastAccessedDetailsRequest) Send() (*GetServiceLastAccessedDetailsOutput, error) {
+func (r GetServiceLastAccessedDetailsRequest) Send(ctx context.Context) (*GetServiceLastAccessedDetailsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4272,7 +4346,7 @@ func (r GetServiceLastAccessedDetailsRequest) Send() (*GetServiceLastAccessedDet
 // resource-based policies, access control lists, AWS Organizations policies,
 // IAM permissions boundaries, and AWS STS assume role policies. It only applies
 // permissions policy logic. For more about the evaluation of policy types,
-// see Evaluating Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
+// see Evaluating Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
 // in the IAM User Guide.
 //
 // For each service that the resource could access using permissions policies,
@@ -4301,7 +4375,7 @@ func (r GetServiceLastAccessedDetailsRequest) Send() (*GetServiceLastAccessedDet
 //
 //    // Example sending a request using the GetServiceLastAccessedDetailsRequest method.
 //    req := client.GetServiceLastAccessedDetailsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4335,7 +4409,8 @@ type GetServiceLastAccessedDetailsWithEntitiesRequest struct {
 }
 
 // Send marshals and sends the GetServiceLastAccessedDetailsWithEntities API request.
-func (r GetServiceLastAccessedDetailsWithEntitiesRequest) Send() (*GetServiceLastAccessedDetailsWithEntitiesOutput, error) {
+func (r GetServiceLastAccessedDetailsWithEntitiesRequest) Send(ctx context.Context) (*GetServiceLastAccessedDetailsWithEntitiesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4372,7 +4447,7 @@ func (r GetServiceLastAccessedDetailsWithEntitiesRequest) Send() (*GetServiceLas
 //
 //    // Example sending a request using the GetServiceLastAccessedDetailsWithEntitiesRequest method.
 //    req := client.GetServiceLastAccessedDetailsWithEntitiesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4406,7 +4481,8 @@ type GetServiceLinkedRoleDeletionStatusRequest struct {
 }
 
 // Send marshals and sends the GetServiceLinkedRoleDeletionStatus API request.
-func (r GetServiceLinkedRoleDeletionStatusRequest) Send() (*GetServiceLinkedRoleDeletionStatusOutput, error) {
+func (r GetServiceLinkedRoleDeletionStatusRequest) Send(ctx context.Context) (*GetServiceLinkedRoleDeletionStatusOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4427,7 +4503,7 @@ func (r GetServiceLinkedRoleDeletionStatusRequest) Send() (*GetServiceLinkedRole
 //
 //    // Example sending a request using the GetServiceLinkedRoleDeletionStatusRequest method.
 //    req := client.GetServiceLinkedRoleDeletionStatusRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4461,7 +4537,8 @@ type GetUserRequest struct {
 }
 
 // Send marshals and sends the GetUser API request.
-func (r GetUserRequest) Send() (*GetUserOutput, error) {
+func (r GetUserRequest) Send(ctx context.Context) (*GetUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4481,7 +4558,7 @@ func (r GetUserRequest) Send() (*GetUserOutput, error) {
 //
 //    // Example sending a request using the GetUserRequest method.
 //    req := client.GetUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4515,7 +4592,8 @@ type GetUserPolicyRequest struct {
 }
 
 // Send marshals and sends the GetUserPolicy API request.
-func (r GetUserPolicyRequest) Send() (*GetUserPolicyOutput, error) {
+func (r GetUserPolicyRequest) Send(ctx context.Context) (*GetUserPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4542,12 +4620,12 @@ func (r GetUserPolicyRequest) Send() (*GetUserPolicyOutput, error) {
 // document.
 //
 // For more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the GetUserPolicyRequest method.
 //    req := client.GetUserPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4581,7 +4659,8 @@ type ListAccessKeysRequest struct {
 }
 
 // Send marshals and sends the ListAccessKeys API request.
-func (r ListAccessKeysRequest) Send() (*ListAccessKeysOutput, error) {
+func (r ListAccessKeysRequest) Send(ctx context.Context) (*ListAccessKeysOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4610,7 +4689,7 @@ func (r ListAccessKeysRequest) Send() (*ListAccessKeysOutput, error) {
 //
 //    // Example sending a request using the ListAccessKeysRequest method.
 //    req := client.ListAccessKeysRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4660,7 +4739,7 @@ func (c *IAM) ListAccessKeysRequest(input *ListAccessKeysInput) ListAccessKeysRe
 func (p *ListAccessKeysRequest) Paginate(opts ...aws.Option) ListAccessKeysPager {
 	return ListAccessKeysPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListAccessKeysInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -4669,6 +4748,7 @@ func (p *ListAccessKeysRequest) Paginate(opts ...aws.Option) ListAccessKeysPager
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -4696,7 +4776,8 @@ type ListAccountAliasesRequest struct {
 }
 
 // Send marshals and sends the ListAccountAliases API request.
-func (r ListAccountAliasesRequest) Send() (*ListAccountAliasesOutput, error) {
+func (r ListAccountAliasesRequest) Send(ctx context.Context) (*ListAccountAliasesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4710,12 +4791,12 @@ func (r ListAccountAliasesRequest) Send() (*ListAccountAliasesOutput, error) {
 //
 // Lists the account alias associated with the AWS account (Note: you can have
 // only one). For information about using an AWS account alias, see Using an
-// Alias for Your AWS Account ID (http://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
+// Alias for Your AWS Account ID (https://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ListAccountAliasesRequest method.
 //    req := client.ListAccountAliasesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4765,7 +4846,7 @@ func (c *IAM) ListAccountAliasesRequest(input *ListAccountAliasesInput) ListAcco
 func (p *ListAccountAliasesRequest) Paginate(opts ...aws.Option) ListAccountAliasesPager {
 	return ListAccountAliasesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListAccountAliasesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -4774,6 +4855,7 @@ func (p *ListAccountAliasesRequest) Paginate(opts ...aws.Option) ListAccountAlia
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -4801,7 +4883,8 @@ type ListAttachedGroupPoliciesRequest struct {
 }
 
 // Send marshals and sends the ListAttachedGroupPolicies API request.
-func (r ListAttachedGroupPoliciesRequest) Send() (*ListAttachedGroupPoliciesOutput, error) {
+func (r ListAttachedGroupPoliciesRequest) Send(ctx context.Context) (*ListAttachedGroupPoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4817,7 +4900,7 @@ func (r ListAttachedGroupPoliciesRequest) Send() (*ListAttachedGroupPoliciesOutp
 //
 // An IAM group can also have inline policies embedded with it. To list the
 // inline policies for a group, use the ListGroupPolicies API. For information
-// about policies, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// about policies, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. You
@@ -4828,7 +4911,7 @@ func (r ListAttachedGroupPoliciesRequest) Send() (*ListAttachedGroupPoliciesOutp
 //
 //    // Example sending a request using the ListAttachedGroupPoliciesRequest method.
 //    req := client.ListAttachedGroupPoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4878,7 +4961,7 @@ func (c *IAM) ListAttachedGroupPoliciesRequest(input *ListAttachedGroupPoliciesI
 func (p *ListAttachedGroupPoliciesRequest) Paginate(opts ...aws.Option) ListAttachedGroupPoliciesPager {
 	return ListAttachedGroupPoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListAttachedGroupPoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -4887,6 +4970,7 @@ func (p *ListAttachedGroupPoliciesRequest) Paginate(opts ...aws.Option) ListAtta
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -4914,7 +4998,8 @@ type ListAttachedRolePoliciesRequest struct {
 }
 
 // Send marshals and sends the ListAttachedRolePolicies API request.
-func (r ListAttachedRolePoliciesRequest) Send() (*ListAttachedRolePoliciesOutput, error) {
+func (r ListAttachedRolePoliciesRequest) Send(ctx context.Context) (*ListAttachedRolePoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -4930,7 +5015,7 @@ func (r ListAttachedRolePoliciesRequest) Send() (*ListAttachedRolePoliciesOutput
 //
 // An IAM role can also have inline policies embedded with it. To list the inline
 // policies for a role, use the ListRolePolicies API. For information about
-// policies, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// policies, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. You
@@ -4941,7 +5026,7 @@ func (r ListAttachedRolePoliciesRequest) Send() (*ListAttachedRolePoliciesOutput
 //
 //    // Example sending a request using the ListAttachedRolePoliciesRequest method.
 //    req := client.ListAttachedRolePoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -4991,7 +5076,7 @@ func (c *IAM) ListAttachedRolePoliciesRequest(input *ListAttachedRolePoliciesInp
 func (p *ListAttachedRolePoliciesRequest) Paginate(opts ...aws.Option) ListAttachedRolePoliciesPager {
 	return ListAttachedRolePoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListAttachedRolePoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5000,6 +5085,7 @@ func (p *ListAttachedRolePoliciesRequest) Paginate(opts ...aws.Option) ListAttac
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5027,7 +5113,8 @@ type ListAttachedUserPoliciesRequest struct {
 }
 
 // Send marshals and sends the ListAttachedUserPolicies API request.
-func (r ListAttachedUserPoliciesRequest) Send() (*ListAttachedUserPoliciesOutput, error) {
+func (r ListAttachedUserPoliciesRequest) Send(ctx context.Context) (*ListAttachedUserPoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5043,7 +5130,7 @@ func (r ListAttachedUserPoliciesRequest) Send() (*ListAttachedUserPoliciesOutput
 //
 // An IAM user can also have inline policies embedded with it. To list the inline
 // policies for a user, use the ListUserPolicies API. For information about
-// policies, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// policies, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. You
@@ -5054,7 +5141,7 @@ func (r ListAttachedUserPoliciesRequest) Send() (*ListAttachedUserPoliciesOutput
 //
 //    // Example sending a request using the ListAttachedUserPoliciesRequest method.
 //    req := client.ListAttachedUserPoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5104,7 +5191,7 @@ func (c *IAM) ListAttachedUserPoliciesRequest(input *ListAttachedUserPoliciesInp
 func (p *ListAttachedUserPoliciesRequest) Paginate(opts ...aws.Option) ListAttachedUserPoliciesPager {
 	return ListAttachedUserPoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListAttachedUserPoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5113,6 +5200,7 @@ func (p *ListAttachedUserPoliciesRequest) Paginate(opts ...aws.Option) ListAttac
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5140,7 +5228,8 @@ type ListEntitiesForPolicyRequest struct {
 }
 
 // Send marshals and sends the ListEntitiesForPolicy API request.
-func (r ListEntitiesForPolicyRequest) Send() (*ListEntitiesForPolicyOutput, error) {
+func (r ListEntitiesForPolicyRequest) Send(ctx context.Context) (*ListEntitiesForPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5164,7 +5253,7 @@ func (r ListEntitiesForPolicyRequest) Send() (*ListEntitiesForPolicyOutput, erro
 //
 //    // Example sending a request using the ListEntitiesForPolicyRequest method.
 //    req := client.ListEntitiesForPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5214,7 +5303,7 @@ func (c *IAM) ListEntitiesForPolicyRequest(input *ListEntitiesForPolicyInput) Li
 func (p *ListEntitiesForPolicyRequest) Paginate(opts ...aws.Option) ListEntitiesForPolicyPager {
 	return ListEntitiesForPolicyPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListEntitiesForPolicyInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5223,6 +5312,7 @@ func (p *ListEntitiesForPolicyRequest) Paginate(opts ...aws.Option) ListEntities
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5250,7 +5340,8 @@ type ListGroupPoliciesRequest struct {
 }
 
 // Send marshals and sends the ListGroupPolicies API request.
-func (r ListGroupPoliciesRequest) Send() (*ListGroupPoliciesOutput, error) {
+func (r ListGroupPoliciesRequest) Send(ctx context.Context) (*ListGroupPoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5268,7 +5359,7 @@ func (r ListGroupPoliciesRequest) Send() (*ListGroupPoliciesOutput, error) {
 // An IAM group can also have managed policies attached to it. To list the managed
 // policies that are attached to a group, use ListAttachedGroupPolicies. For
 // more information about policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. If
@@ -5277,7 +5368,7 @@ func (r ListGroupPoliciesRequest) Send() (*ListGroupPoliciesOutput, error) {
 //
 //    // Example sending a request using the ListGroupPoliciesRequest method.
 //    req := client.ListGroupPoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5327,7 +5418,7 @@ func (c *IAM) ListGroupPoliciesRequest(input *ListGroupPoliciesInput) ListGroupP
 func (p *ListGroupPoliciesRequest) Paginate(opts ...aws.Option) ListGroupPoliciesPager {
 	return ListGroupPoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListGroupPoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5336,6 +5427,7 @@ func (p *ListGroupPoliciesRequest) Paginate(opts ...aws.Option) ListGroupPolicie
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5363,7 +5455,8 @@ type ListGroupsRequest struct {
 }
 
 // Send marshals and sends the ListGroups API request.
-func (r ListGroupsRequest) Send() (*ListGroupsOutput, error) {
+func (r ListGroupsRequest) Send(ctx context.Context) (*ListGroupsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5381,7 +5474,7 @@ func (r ListGroupsRequest) Send() (*ListGroupsOutput, error) {
 //
 //    // Example sending a request using the ListGroupsRequest method.
 //    req := client.ListGroupsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5431,7 +5524,7 @@ func (c *IAM) ListGroupsRequest(input *ListGroupsInput) ListGroupsRequest {
 func (p *ListGroupsRequest) Paginate(opts ...aws.Option) ListGroupsPager {
 	return ListGroupsPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListGroupsInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5440,6 +5533,7 @@ func (p *ListGroupsRequest) Paginate(opts ...aws.Option) ListGroupsPager {
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5467,7 +5561,8 @@ type ListGroupsForUserRequest struct {
 }
 
 // Send marshals and sends the ListGroupsForUser API request.
-func (r ListGroupsForUserRequest) Send() (*ListGroupsForUserOutput, error) {
+func (r ListGroupsForUserRequest) Send(ctx context.Context) (*ListGroupsForUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5485,7 +5580,7 @@ func (r ListGroupsForUserRequest) Send() (*ListGroupsForUserOutput, error) {
 //
 //    // Example sending a request using the ListGroupsForUserRequest method.
 //    req := client.ListGroupsForUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5535,7 +5630,7 @@ func (c *IAM) ListGroupsForUserRequest(input *ListGroupsForUserInput) ListGroups
 func (p *ListGroupsForUserRequest) Paginate(opts ...aws.Option) ListGroupsForUserPager {
 	return ListGroupsForUserPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListGroupsForUserInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5544,6 +5639,7 @@ func (p *ListGroupsForUserRequest) Paginate(opts ...aws.Option) ListGroupsForUse
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5571,7 +5667,8 @@ type ListInstanceProfilesRequest struct {
 }
 
 // Send marshals and sends the ListInstanceProfiles API request.
-func (r ListInstanceProfilesRequest) Send() (*ListInstanceProfilesOutput, error) {
+func (r ListInstanceProfilesRequest) Send(ctx context.Context) (*ListInstanceProfilesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5585,13 +5682,13 @@ func (r ListInstanceProfilesRequest) Send() (*ListInstanceProfilesOutput, error)
 //
 // Lists the instance profiles that have the specified path prefix. If there
 // are none, the operation returns an empty list. For more information about
-// instance profiles, go to About Instance Profiles (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// instance profiles, go to About Instance Profiles (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 // You can paginate the results using the MaxItems and Marker parameters.
 //
 //    // Example sending a request using the ListInstanceProfilesRequest method.
 //    req := client.ListInstanceProfilesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5641,7 +5738,7 @@ func (c *IAM) ListInstanceProfilesRequest(input *ListInstanceProfilesInput) List
 func (p *ListInstanceProfilesRequest) Paginate(opts ...aws.Option) ListInstanceProfilesPager {
 	return ListInstanceProfilesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListInstanceProfilesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5650,6 +5747,7 @@ func (p *ListInstanceProfilesRequest) Paginate(opts ...aws.Option) ListInstanceP
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5677,7 +5775,8 @@ type ListInstanceProfilesForRoleRequest struct {
 }
 
 // Send marshals and sends the ListInstanceProfilesForRole API request.
-func (r ListInstanceProfilesForRoleRequest) Send() (*ListInstanceProfilesForRoleOutput, error) {
+func (r ListInstanceProfilesForRoleRequest) Send(ctx context.Context) (*ListInstanceProfilesForRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5691,13 +5790,13 @@ func (r ListInstanceProfilesForRoleRequest) Send() (*ListInstanceProfilesForRole
 //
 // Lists the instance profiles that have the specified associated IAM role.
 // If there are none, the operation returns an empty list. For more information
-// about instance profiles, go to About Instance Profiles (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// about instance profiles, go to About Instance Profiles (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 // You can paginate the results using the MaxItems and Marker parameters.
 //
 //    // Example sending a request using the ListInstanceProfilesForRoleRequest method.
 //    req := client.ListInstanceProfilesForRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5747,7 +5846,7 @@ func (c *IAM) ListInstanceProfilesForRoleRequest(input *ListInstanceProfilesForR
 func (p *ListInstanceProfilesForRoleRequest) Paginate(opts ...aws.Option) ListInstanceProfilesForRolePager {
 	return ListInstanceProfilesForRolePager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListInstanceProfilesForRoleInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5756,6 +5855,7 @@ func (p *ListInstanceProfilesForRoleRequest) Paginate(opts ...aws.Option) ListIn
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5783,7 +5883,8 @@ type ListMFADevicesRequest struct {
 }
 
 // Send marshals and sends the ListMFADevices API request.
-func (r ListMFADevicesRequest) Send() (*ListMFADevicesOutput, error) {
+func (r ListMFADevicesRequest) Send(ctx context.Context) (*ListMFADevicesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5804,7 +5905,7 @@ func (r ListMFADevicesRequest) Send() (*ListMFADevicesOutput, error) {
 //
 //    // Example sending a request using the ListMFADevicesRequest method.
 //    req := client.ListMFADevicesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5854,7 +5955,7 @@ func (c *IAM) ListMFADevicesRequest(input *ListMFADevicesInput) ListMFADevicesRe
 func (p *ListMFADevicesRequest) Paginate(opts ...aws.Option) ListMFADevicesPager {
 	return ListMFADevicesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListMFADevicesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -5863,6 +5964,7 @@ func (p *ListMFADevicesRequest) Paginate(opts ...aws.Option) ListMFADevicesPager
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -5890,7 +5992,8 @@ type ListOpenIDConnectProvidersRequest struct {
 }
 
 // Send marshals and sends the ListOpenIDConnectProviders API request.
-func (r ListOpenIDConnectProvidersRequest) Send() (*ListOpenIDConnectProvidersOutput, error) {
+func (r ListOpenIDConnectProvidersRequest) Send(ctx context.Context) (*ListOpenIDConnectProvidersOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5907,7 +6010,7 @@ func (r ListOpenIDConnectProvidersRequest) Send() (*ListOpenIDConnectProvidersOu
 //
 //    // Example sending a request using the ListOpenIDConnectProvidersRequest method.
 //    req := client.ListOpenIDConnectProvidersRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -5941,7 +6044,8 @@ type ListPoliciesRequest struct {
 }
 
 // Send marshals and sends the ListPolicies API request.
-func (r ListPoliciesRequest) Send() (*ListPoliciesOutput, error) {
+func (r ListPoliciesRequest) Send(ctx context.Context) (*ListPoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -5964,12 +6068,12 @@ func (r ListPoliciesRequest) Send() (*ListPoliciesOutput, error) {
 // You can paginate the results using the MaxItems and Marker parameters.
 //
 // For more information about managed policies, see Managed Policies and Inline
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ListPoliciesRequest method.
 //    req := client.ListPoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6019,7 +6123,7 @@ func (c *IAM) ListPoliciesRequest(input *ListPoliciesInput) ListPoliciesRequest 
 func (p *ListPoliciesRequest) Paginate(opts ...aws.Option) ListPoliciesPager {
 	return ListPoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListPoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6028,6 +6132,7 @@ func (p *ListPoliciesRequest) Paginate(opts ...aws.Option) ListPoliciesPager {
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6055,7 +6160,8 @@ type ListPoliciesGrantingServiceAccessRequest struct {
 }
 
 // Send marshals and sends the ListPoliciesGrantingServiceAccess API request.
-func (r ListPoliciesGrantingServiceAccessRequest) Send() (*ListPoliciesGrantingServiceAccessOutput, error) {
+func (r ListPoliciesGrantingServiceAccessRequest) Send(ctx context.Context) (*ListPoliciesGrantingServiceAccessOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6075,7 +6181,7 @@ func (r ListPoliciesGrantingServiceAccessRequest) Send() (*ListPoliciesGrantingS
 // policies, access control lists, AWS Organizations policies, IAM permissions
 // boundaries, and AWS STS assume role policies. It only applies permissions
 // policy logic. For more about the evaluation of policy types, see Evaluating
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-basics)
 // in the IAM User Guide.
 //
 // The list of policies returned by the operation depends on the ARN of the
@@ -6096,7 +6202,7 @@ func (r ListPoliciesGrantingServiceAccessRequest) Send() (*ListPoliciesGrantingS
 // For each managed policy, this operation returns the ARN and policy name.
 // For each inline policy, it returns the policy name and the entity to which
 // it is attached. Inline policies do not have an ARN. For more information
-// about these policy types, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
+// about these policy types, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // Policies that are attached to users and roles as permissions boundaries are
@@ -6105,7 +6211,7 @@ func (r ListPoliciesGrantingServiceAccessRequest) Send() (*ListPoliciesGrantingS
 //
 //    // Example sending a request using the ListPoliciesGrantingServiceAccessRequest method.
 //    req := client.ListPoliciesGrantingServiceAccessRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6139,7 +6245,8 @@ type ListPolicyVersionsRequest struct {
 }
 
 // Send marshals and sends the ListPolicyVersions API request.
-func (r ListPolicyVersionsRequest) Send() (*ListPolicyVersionsOutput, error) {
+func (r ListPolicyVersionsRequest) Send(ctx context.Context) (*ListPolicyVersionsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6155,12 +6262,12 @@ func (r ListPolicyVersionsRequest) Send() (*ListPolicyVersionsOutput, error) {
 // the version that is currently set as the policy's default version.
 //
 // For more information about managed policies, see Managed Policies and Inline
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ListPolicyVersionsRequest method.
 //    req := client.ListPolicyVersionsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6210,7 +6317,7 @@ func (c *IAM) ListPolicyVersionsRequest(input *ListPolicyVersionsInput) ListPoli
 func (p *ListPolicyVersionsRequest) Paginate(opts ...aws.Option) ListPolicyVersionsPager {
 	return ListPolicyVersionsPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListPolicyVersionsInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6219,6 +6326,7 @@ func (p *ListPolicyVersionsRequest) Paginate(opts ...aws.Option) ListPolicyVersi
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6246,7 +6354,8 @@ type ListRolePoliciesRequest struct {
 }
 
 // Send marshals and sends the ListRolePolicies API request.
-func (r ListRolePoliciesRequest) Send() (*ListRolePoliciesOutput, error) {
+func (r ListRolePoliciesRequest) Send(ctx context.Context) (*ListRolePoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6263,7 +6372,7 @@ func (r ListRolePoliciesRequest) Send() (*ListRolePoliciesOutput, error) {
 //
 // An IAM role can also have managed policies attached to it. To list the managed
 // policies that are attached to a role, use ListAttachedRolePolicies. For more
-// information about policies, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// information about policies, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. If
@@ -6272,7 +6381,7 @@ func (r ListRolePoliciesRequest) Send() (*ListRolePoliciesOutput, error) {
 //
 //    // Example sending a request using the ListRolePoliciesRequest method.
 //    req := client.ListRolePoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6322,7 +6431,7 @@ func (c *IAM) ListRolePoliciesRequest(input *ListRolePoliciesInput) ListRolePoli
 func (p *ListRolePoliciesRequest) Paginate(opts ...aws.Option) ListRolePoliciesPager {
 	return ListRolePoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListRolePoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6331,6 +6440,7 @@ func (p *ListRolePoliciesRequest) Paginate(opts ...aws.Option) ListRolePoliciesP
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6358,7 +6468,8 @@ type ListRoleTagsRequest struct {
 }
 
 // Send marshals and sends the ListRoleTags API request.
-func (r ListRoleTagsRequest) Send() (*ListRoleTagsOutput, error) {
+func (r ListRoleTagsRequest) Send(ctx context.Context) (*ListRoleTagsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6372,12 +6483,12 @@ func (r ListRoleTagsRequest) Send() (*ListRoleTagsOutput, error) {
 //
 // Lists the tags that are attached to the specified role. The returned list
 // of tags is sorted by tag key. For more information about tagging, see Tagging
-// IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ListRoleTagsRequest method.
 //    req := client.ListRoleTagsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6411,7 +6522,8 @@ type ListRolesRequest struct {
 }
 
 // Send marshals and sends the ListRoles API request.
-func (r ListRolesRequest) Send() (*ListRolesOutput, error) {
+func (r ListRolesRequest) Send(ctx context.Context) (*ListRolesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6425,13 +6537,13 @@ func (r ListRolesRequest) Send() (*ListRolesOutput, error) {
 //
 // Lists the IAM roles that have the specified path prefix. If there are none,
 // the operation returns an empty list. For more information about roles, go
-// to Working with Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// to Working with Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 //
 // You can paginate the results using the MaxItems and Marker parameters.
 //
 //    // Example sending a request using the ListRolesRequest method.
 //    req := client.ListRolesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6481,7 +6593,7 @@ func (c *IAM) ListRolesRequest(input *ListRolesInput) ListRolesRequest {
 func (p *ListRolesRequest) Paginate(opts ...aws.Option) ListRolesPager {
 	return ListRolesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListRolesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6490,6 +6602,7 @@ func (p *ListRolesRequest) Paginate(opts ...aws.Option) ListRolesPager {
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6517,7 +6630,8 @@ type ListSAMLProvidersRequest struct {
 }
 
 // Send marshals and sends the ListSAMLProviders API request.
-func (r ListSAMLProvidersRequest) Send() (*ListSAMLProvidersOutput, error) {
+func (r ListSAMLProvidersRequest) Send(ctx context.Context) (*ListSAMLProvidersOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6531,11 +6645,11 @@ func (r ListSAMLProvidersRequest) Send() (*ListSAMLProvidersOutput, error) {
 //
 // Lists the SAML provider resource objects defined in IAM in the account.
 //
-// This operation requires Signature Version 4 (http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+// This operation requires Signature Version 4 (https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 //
 //    // Example sending a request using the ListSAMLProvidersRequest method.
 //    req := client.ListSAMLProvidersRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6569,7 +6683,8 @@ type ListSSHPublicKeysRequest struct {
 }
 
 // Send marshals and sends the ListSSHPublicKeys API request.
-func (r ListSSHPublicKeysRequest) Send() (*ListSSHPublicKeysOutput, error) {
+func (r ListSSHPublicKeysRequest) Send(ctx context.Context) (*ListSSHPublicKeysOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6587,7 +6702,7 @@ func (r ListSSHPublicKeysRequest) Send() (*ListSSHPublicKeysOutput, error) {
 // The SSH public keys returned by this operation are used only for authenticating
 // the IAM user to an AWS CodeCommit repository. For more information about
 // using SSH keys to authenticate to an AWS CodeCommit repository, see Set up
-// AWS CodeCommit for SSH Connections (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
+// AWS CodeCommit for SSH Connections (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
 // in the AWS CodeCommit User Guide.
 //
 // Although each user is limited to a small number of keys, you can still paginate
@@ -6595,7 +6710,7 @@ func (r ListSSHPublicKeysRequest) Send() (*ListSSHPublicKeysOutput, error) {
 //
 //    // Example sending a request using the ListSSHPublicKeysRequest method.
 //    req := client.ListSSHPublicKeysRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6645,7 +6760,7 @@ func (c *IAM) ListSSHPublicKeysRequest(input *ListSSHPublicKeysInput) ListSSHPub
 func (p *ListSSHPublicKeysRequest) Paginate(opts ...aws.Option) ListSSHPublicKeysPager {
 	return ListSSHPublicKeysPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListSSHPublicKeysInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6654,6 +6769,7 @@ func (p *ListSSHPublicKeysRequest) Paginate(opts ...aws.Option) ListSSHPublicKey
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6681,7 +6797,8 @@ type ListServerCertificatesRequest struct {
 }
 
 // Send marshals and sends the ListServerCertificates API request.
-func (r ListServerCertificatesRequest) Send() (*ListServerCertificatesOutput, error) {
+func (r ListServerCertificatesRequest) Send(ctx context.Context) (*ListServerCertificatesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6699,13 +6816,13 @@ func (r ListServerCertificatesRequest) Send() (*ListServerCertificatesOutput, er
 // You can paginate the results using the MaxItems and Marker parameters.
 //
 // For more information about working with server certificates, see Working
-// with Server Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
+// with Server Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
 // in the IAM User Guide. This topic also includes a list of AWS services that
 // can use the server certificates that you manage with IAM.
 //
 //    // Example sending a request using the ListServerCertificatesRequest method.
 //    req := client.ListServerCertificatesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6755,7 +6872,7 @@ func (c *IAM) ListServerCertificatesRequest(input *ListServerCertificatesInput) 
 func (p *ListServerCertificatesRequest) Paginate(opts ...aws.Option) ListServerCertificatesPager {
 	return ListServerCertificatesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListServerCertificatesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6764,6 +6881,7 @@ func (p *ListServerCertificatesRequest) Paginate(opts ...aws.Option) ListServerC
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6791,7 +6909,8 @@ type ListServiceSpecificCredentialsRequest struct {
 }
 
 // Send marshals and sends the ListServiceSpecificCredentials API request.
-func (r ListServiceSpecificCredentialsRequest) Send() (*ListServiceSpecificCredentialsOutput, error) {
+func (r ListServiceSpecificCredentialsRequest) Send(ctx context.Context) (*ListServiceSpecificCredentialsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6808,12 +6927,12 @@ func (r ListServiceSpecificCredentialsRequest) Send() (*ListServiceSpecificCrede
 // The service-specific credentials returned by this operation are used only
 // for authenticating the IAM user to a specific service. For more information
 // about using service-specific credentials to authenticate to an AWS service,
-// see Set Up service-specific credentials (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html)
+// see Set Up service-specific credentials (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html)
 // in the AWS CodeCommit User Guide.
 //
 //    // Example sending a request using the ListServiceSpecificCredentialsRequest method.
 //    req := client.ListServiceSpecificCredentialsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6847,7 +6966,8 @@ type ListSigningCertificatesRequest struct {
 }
 
 // Send marshals and sends the ListSigningCertificates API request.
-func (r ListSigningCertificatesRequest) Send() (*ListSigningCertificatesOutput, error) {
+func (r ListSigningCertificatesRequest) Send(ctx context.Context) (*ListSigningCertificatesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6873,7 +6993,7 @@ func (r ListSigningCertificatesRequest) Send() (*ListSigningCertificatesOutput, 
 //
 //    // Example sending a request using the ListSigningCertificatesRequest method.
 //    req := client.ListSigningCertificatesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -6923,7 +7043,7 @@ func (c *IAM) ListSigningCertificatesRequest(input *ListSigningCertificatesInput
 func (p *ListSigningCertificatesRequest) Paginate(opts ...aws.Option) ListSigningCertificatesPager {
 	return ListSigningCertificatesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListSigningCertificatesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -6932,6 +7052,7 @@ func (p *ListSigningCertificatesRequest) Paginate(opts ...aws.Option) ListSignin
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -6959,7 +7080,8 @@ type ListUserPoliciesRequest struct {
 }
 
 // Send marshals and sends the ListUserPolicies API request.
-func (r ListUserPoliciesRequest) Send() (*ListUserPoliciesOutput, error) {
+func (r ListUserPoliciesRequest) Send(ctx context.Context) (*ListUserPoliciesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -6975,7 +7097,7 @@ func (r ListUserPoliciesRequest) Send() (*ListUserPoliciesOutput, error) {
 //
 // An IAM user can also have managed policies attached to it. To list the managed
 // policies that are attached to a user, use ListAttachedUserPolicies. For more
-// information about policies, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// information about policies, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // You can paginate the results using the MaxItems and Marker parameters. If
@@ -6984,7 +7106,7 @@ func (r ListUserPoliciesRequest) Send() (*ListUserPoliciesOutput, error) {
 //
 //    // Example sending a request using the ListUserPoliciesRequest method.
 //    req := client.ListUserPoliciesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7034,7 +7156,7 @@ func (c *IAM) ListUserPoliciesRequest(input *ListUserPoliciesInput) ListUserPoli
 func (p *ListUserPoliciesRequest) Paginate(opts ...aws.Option) ListUserPoliciesPager {
 	return ListUserPoliciesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListUserPoliciesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -7043,6 +7165,7 @@ func (p *ListUserPoliciesRequest) Paginate(opts ...aws.Option) ListUserPoliciesP
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -7070,7 +7193,8 @@ type ListUserTagsRequest struct {
 }
 
 // Send marshals and sends the ListUserTags API request.
-func (r ListUserTagsRequest) Send() (*ListUserTagsOutput, error) {
+func (r ListUserTagsRequest) Send(ctx context.Context) (*ListUserTagsOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7084,12 +7208,12 @@ func (r ListUserTagsRequest) Send() (*ListUserTagsOutput, error) {
 //
 // Lists the tags that are attached to the specified user. The returned list
 // of tags is sorted by tag key. For more information about tagging, see Tagging
-// IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ListUserTagsRequest method.
 //    req := client.ListUserTagsRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7123,7 +7247,8 @@ type ListUsersRequest struct {
 }
 
 // Send marshals and sends the ListUsers API request.
-func (r ListUsersRequest) Send() (*ListUsersOutput, error) {
+func (r ListUsersRequest) Send(ctx context.Context) (*ListUsersOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7143,7 +7268,7 @@ func (r ListUsersRequest) Send() (*ListUsersOutput, error) {
 //
 //    // Example sending a request using the ListUsersRequest method.
 //    req := client.ListUsersRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7193,7 +7318,7 @@ func (c *IAM) ListUsersRequest(input *ListUsersInput) ListUsersRequest {
 func (p *ListUsersRequest) Paginate(opts ...aws.Option) ListUsersPager {
 	return ListUsersPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListUsersInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -7202,6 +7327,7 @@ func (p *ListUsersRequest) Paginate(opts ...aws.Option) ListUsersPager {
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -7229,7 +7355,8 @@ type ListVirtualMFADevicesRequest struct {
 }
 
 // Send marshals and sends the ListVirtualMFADevices API request.
-func (r ListVirtualMFADevicesRequest) Send() (*ListVirtualMFADevicesOutput, error) {
+func (r ListVirtualMFADevicesRequest) Send(ctx context.Context) (*ListVirtualMFADevicesOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7250,7 +7377,7 @@ func (r ListVirtualMFADevicesRequest) Send() (*ListVirtualMFADevicesOutput, erro
 //
 //    // Example sending a request using the ListVirtualMFADevicesRequest method.
 //    req := client.ListVirtualMFADevicesRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7300,7 +7427,7 @@ func (c *IAM) ListVirtualMFADevicesRequest(input *ListVirtualMFADevicesInput) Li
 func (p *ListVirtualMFADevicesRequest) Paginate(opts ...aws.Option) ListVirtualMFADevicesPager {
 	return ListVirtualMFADevicesPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *ListVirtualMFADevicesInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -7309,6 +7436,7 @@ func (p *ListVirtualMFADevicesRequest) Paginate(opts ...aws.Option) ListVirtualM
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -7336,7 +7464,8 @@ type PutGroupPolicyRequest struct {
 }
 
 // Send marshals and sends the PutGroupPolicy API request.
-func (r PutGroupPolicyRequest) Send() (*PutGroupPolicyOutput, error) {
+func (r PutGroupPolicyRequest) Send(ctx context.Context) (*PutGroupPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7354,21 +7483,21 @@ func (r PutGroupPolicyRequest) Send() (*PutGroupPolicyOutput, error) {
 // A user can also have managed policies attached to it. To attach a managed
 // policy to a group, use AttachGroupPolicy. To create a new managed policy,
 // use CreatePolicy. For information about policies, see Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // For information about limits on the number of inline policies that you can
-// embed in a group, see Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// embed in a group, see Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 // Because policy documents can be large, you should use POST rather than GET
 // when calling PutGroupPolicy. For general information about using the Query
-// API with IAM, go to Making Query Requests (http://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
+// API with IAM, go to Making Query Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the PutGroupPolicyRequest method.
 //    req := client.PutGroupPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7404,7 +7533,8 @@ type PutRolePermissionsBoundaryRequest struct {
 }
 
 // Send marshals and sends the PutRolePermissionsBoundary API request.
-func (r PutRolePermissionsBoundaryRequest) Send() (*PutRolePermissionsBoundaryOutput, error) {
+func (r PutRolePermissionsBoundaryRequest) Send(ctx context.Context) (*PutRolePermissionsBoundaryOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7427,12 +7557,12 @@ func (r PutRolePermissionsBoundaryRequest) Send() (*PutRolePermissionsBoundaryOu
 // Policies used as permissions boundaries do not provide permissions. You must
 // also attach a permissions policy to the role. To learn how the effective
 // permissions for a role are evaluated, see IAM JSON Policy Evaluation Logic
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the PutRolePermissionsBoundaryRequest method.
 //    req := client.PutRolePermissionsBoundaryRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7468,7 +7598,8 @@ type PutRolePolicyRequest struct {
 }
 
 // Send marshals and sends the PutRolePolicy API request.
-func (r PutRolePolicyRequest) Send() (*PutRolePolicyOutput, error) {
+func (r PutRolePolicyRequest) Send(ctx context.Context) (*PutRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7487,26 +7618,26 @@ func (r PutRolePolicyRequest) Send() (*PutRolePolicyOutput, error) {
 // of the role's access (permissions) policy. The role's trust policy is created
 // at the same time as the role, using CreateRole. You can update a role's trust
 // policy using UpdateAssumeRolePolicy. For more information about IAM roles,
-// go to Using Roles to Delegate Permissions and Federate Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
+// go to Using Roles to Delegate Permissions and Federate Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
 //
 // A role can also have a managed policy attached to it. To attach a managed
 // policy to a role, use AttachRolePolicy. To create a new managed policy, use
 // CreatePolicy. For information about policies, see Managed Policies and Inline
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // For information about limits on the number of inline policies that you can
-// embed with a role, see Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// embed with a role, see Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 // Because policy documents can be large, you should use POST rather than GET
 // when calling PutRolePolicy. For general information about using the Query
-// API with IAM, go to Making Query Requests (http://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
+// API with IAM, go to Making Query Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the PutRolePolicyRequest method.
 //    req := client.PutRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7542,7 +7673,8 @@ type PutUserPermissionsBoundaryRequest struct {
 }
 
 // Send marshals and sends the PutUserPermissionsBoundary API request.
-func (r PutUserPermissionsBoundaryRequest) Send() (*PutUserPermissionsBoundaryOutput, error) {
+func (r PutUserPermissionsBoundaryRequest) Send(ctx context.Context) (*PutUserPermissionsBoundaryOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7563,12 +7695,12 @@ func (r PutUserPermissionsBoundaryRequest) Send() (*PutUserPermissionsBoundaryOu
 // Policies that are used as permissions boundaries do not provide permissions.
 // You must also attach a permissions policy to the user. To learn how the effective
 // permissions for a user are evaluated, see IAM JSON Policy Evaluation Logic
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the PutUserPermissionsBoundaryRequest method.
 //    req := client.PutUserPermissionsBoundaryRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7604,7 +7736,8 @@ type PutUserPolicyRequest struct {
 }
 
 // Send marshals and sends the PutUserPolicy API request.
-func (r PutUserPolicyRequest) Send() (*PutUserPolicyOutput, error) {
+func (r PutUserPolicyRequest) Send(ctx context.Context) (*PutUserPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7622,21 +7755,21 @@ func (r PutUserPolicyRequest) Send() (*PutUserPolicyOutput, error) {
 // An IAM user can also have a managed policy attached to it. To attach a managed
 // policy to a user, use AttachUserPolicy. To create a new managed policy, use
 // CreatePolicy. For information about policies, see Managed Policies and Inline
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 // For information about limits on the number of inline policies that you can
-// embed in a user, see Limitations on IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
+// embed in a user, see Limitations on IAM Entities (https://docs.aws.amazon.com/IAM/latest/UserGuide/LimitationsOnEntities.html)
 // in the IAM User Guide.
 //
 // Because policy documents can be large, you should use POST rather than GET
 // when calling PutUserPolicy. For general information about using the Query
-// API with IAM, go to Making Query Requests (http://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
+// API with IAM, go to Making Query Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the PutUserPolicyRequest method.
 //    req := client.PutUserPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7672,7 +7805,8 @@ type RemoveClientIDFromOpenIDConnectProviderRequest struct {
 }
 
 // Send marshals and sends the RemoveClientIDFromOpenIDConnectProvider API request.
-func (r RemoveClientIDFromOpenIDConnectProviderRequest) Send() (*RemoveClientIDFromOpenIDConnectProviderOutput, error) {
+func (r RemoveClientIDFromOpenIDConnectProviderRequest) Send(ctx context.Context) (*RemoveClientIDFromOpenIDConnectProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7693,7 +7827,7 @@ func (r RemoveClientIDFromOpenIDConnectProviderRequest) Send() (*RemoveClientIDF
 //
 //    // Example sending a request using the RemoveClientIDFromOpenIDConnectProviderRequest method.
 //    req := client.RemoveClientIDFromOpenIDConnectProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7729,7 +7863,8 @@ type RemoveRoleFromInstanceProfileRequest struct {
 }
 
 // Send marshals and sends the RemoveRoleFromInstanceProfile API request.
-func (r RemoveRoleFromInstanceProfileRequest) Send() (*RemoveRoleFromInstanceProfileOutput, error) {
+func (r RemoveRoleFromInstanceProfileRequest) Send(ctx context.Context) (*RemoveRoleFromInstanceProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7748,13 +7883,13 @@ func (r RemoveRoleFromInstanceProfileRequest) Send() (*RemoveRoleFromInstancePro
 // an instance profile that is associated with a running instance might break
 // any applications running on the instance.
 //
-// For more information about IAM roles, go to Working with Roles (http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
+// For more information about IAM roles, go to Working with Roles (https://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html).
 // For more information about instance profiles, go to About Instance Profiles
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/AboutInstanceProfiles.html).
 //
 //    // Example sending a request using the RemoveRoleFromInstanceProfileRequest method.
 //    req := client.RemoveRoleFromInstanceProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7790,7 +7925,8 @@ type RemoveUserFromGroupRequest struct {
 }
 
 // Send marshals and sends the RemoveUserFromGroup API request.
-func (r RemoveUserFromGroupRequest) Send() (*RemoveUserFromGroupOutput, error) {
+func (r RemoveUserFromGroupRequest) Send(ctx context.Context) (*RemoveUserFromGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7806,7 +7942,7 @@ func (r RemoveUserFromGroupRequest) Send() (*RemoveUserFromGroupOutput, error) {
 //
 //    // Example sending a request using the RemoveUserFromGroupRequest method.
 //    req := client.RemoveUserFromGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7842,7 +7978,8 @@ type ResetServiceSpecificCredentialRequest struct {
 }
 
 // Send marshals and sends the ResetServiceSpecificCredential API request.
-func (r ResetServiceSpecificCredentialRequest) Send() (*ResetServiceSpecificCredentialOutput, error) {
+func (r ResetServiceSpecificCredentialRequest) Send(ctx context.Context) (*ResetServiceSpecificCredentialOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7861,7 +7998,7 @@ func (r ResetServiceSpecificCredentialRequest) Send() (*ResetServiceSpecificCred
 //
 //    // Example sending a request using the ResetServiceSpecificCredentialRequest method.
 //    req := client.ResetServiceSpecificCredentialRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7895,7 +8032,8 @@ type ResyncMFADeviceRequest struct {
 }
 
 // Send marshals and sends the ResyncMFADevice API request.
-func (r ResyncMFADeviceRequest) Send() (*ResyncMFADeviceOutput, error) {
+func (r ResyncMFADeviceRequest) Send(ctx context.Context) (*ResyncMFADeviceOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7911,12 +8049,12 @@ func (r ResyncMFADeviceRequest) Send() (*ResyncMFADeviceOutput, error) {
 // AWS servers.
 //
 // For more information about creating and working with virtual MFA devices,
-// go to Using a Virtual MFA Device (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
+// go to Using a Virtual MFA Device (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_VirtualMFA.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the ResyncMFADeviceRequest method.
 //    req := client.ResyncMFADeviceRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -7952,7 +8090,8 @@ type SetDefaultPolicyVersionRequest struct {
 }
 
 // Send marshals and sends the SetDefaultPolicyVersion API request.
-func (r SetDefaultPolicyVersionRequest) Send() (*SetDefaultPolicyVersionOutput, error) {
+func (r SetDefaultPolicyVersionRequest) Send(ctx context.Context) (*SetDefaultPolicyVersionOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -7972,12 +8111,12 @@ func (r SetDefaultPolicyVersionRequest) Send() (*SetDefaultPolicyVersionOutput, 
 // use the ListEntitiesForPolicy API.
 //
 // For information about managed policies, see Managed Policies and Inline Policies
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the SetDefaultPolicyVersionRequest method.
 //    req := client.SetDefaultPolicyVersionRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8013,7 +8152,8 @@ type SimulateCustomPolicyRequest struct {
 }
 
 // Send marshals and sends the SimulateCustomPolicy API request.
-func (r SimulateCustomPolicyRequest) Send() (*SimulatePrincipalPolicyOutput, error) {
+func (r SimulateCustomPolicyRequest) Send(ctx context.Context) (*SimulatePrincipalPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8045,7 +8185,7 @@ func (r SimulateCustomPolicyRequest) Send() (*SimulatePrincipalPolicyOutput, err
 //
 //    // Example sending a request using the SimulateCustomPolicyRequest method.
 //    req := client.SimulateCustomPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8095,7 +8235,7 @@ func (c *IAM) SimulateCustomPolicyRequest(input *SimulateCustomPolicyInput) Simu
 func (p *SimulateCustomPolicyRequest) Paginate(opts ...aws.Option) SimulateCustomPolicyPager {
 	return SimulateCustomPolicyPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *SimulateCustomPolicyInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -8104,6 +8244,7 @@ func (p *SimulateCustomPolicyRequest) Paginate(opts ...aws.Option) SimulateCusto
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -8131,7 +8272,8 @@ type SimulatePrincipalPolicyRequest struct {
 }
 
 // Send marshals and sends the SimulatePrincipalPolicy API request.
-func (r SimulatePrincipalPolicyRequest) Send() (*SimulatePrincipalPolicyOutput, error) {
+func (r SimulatePrincipalPolicyRequest) Send(ctx context.Context) (*SimulatePrincipalPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8173,7 +8315,7 @@ func (r SimulatePrincipalPolicyRequest) Send() (*SimulatePrincipalPolicyOutput, 
 //
 //    // Example sending a request using the SimulatePrincipalPolicyRequest method.
 //    req := client.SimulatePrincipalPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8223,7 +8365,7 @@ func (c *IAM) SimulatePrincipalPolicyRequest(input *SimulatePrincipalPolicyInput
 func (p *SimulatePrincipalPolicyRequest) Paginate(opts ...aws.Option) SimulatePrincipalPolicyPager {
 	return SimulatePrincipalPolicyPager{
 		Pager: aws.Pager{
-			NewRequest: func() (*aws.Request, error) {
+			NewRequest: func(ctx context.Context) (*aws.Request, error) {
 				var inCpy *SimulatePrincipalPolicyInput
 				if p.Input != nil {
 					tmp := *p.Input
@@ -8232,6 +8374,7 @@ func (p *SimulatePrincipalPolicyRequest) Paginate(opts ...aws.Option) SimulatePr
 
 				req := p.Copy(inCpy)
 				req.ApplyOptions(opts...)
+				req.SetContext(ctx)
 
 				return req.Request, nil
 			},
@@ -8259,7 +8402,8 @@ type TagRoleRequest struct {
 }
 
 // Send marshals and sends the TagRole API request.
-func (r TagRoleRequest) Send() (*TagRoleOutput, error) {
+func (r TagRoleRequest) Send(ctx context.Context) (*TagRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8289,7 +8433,7 @@ func (r TagRoleRequest) Send() (*TagRoleOutput, error) {
 //    that has a specified tag attached. You can also restrict access to only
 //    those resources that have a certain tag attached. For examples of policies
 //    that show how to use tags to control access, see Control Access Using
-//    IAM Tags (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_tags.html)
+//    IAM Tags (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_tags.html)
 //    in the IAM User Guide.
 //
 //    * Cost allocation - Use tags to help track which individuals and teams
@@ -8303,12 +8447,12 @@ func (r TagRoleRequest) Send() (*TagRoleOutput, error) {
 // an array, you can store comma-separated values in the string. However, you
 // must interpret the value in your code.
 //
-// For more information about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// For more information about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the TagRoleRequest method.
 //    req := client.TagRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8344,7 +8488,8 @@ type TagUserRequest struct {
 }
 
 // Send marshals and sends the TagUser API request.
-func (r TagUserRequest) Send() (*TagUserOutput, error) {
+func (r TagUserRequest) Send(ctx context.Context) (*TagUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8373,7 +8518,7 @@ func (r TagUserRequest) Send() (*TagUserOutput, error) {
 //    user or to a role that has a specified tag attached. You can also restrict
 //    access to only those resources that have a certain tag attached. For examples
 //    of policies that show how to use tags to control access, see Control Access
-//    Using IAM Tags (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_tags.html)
+//    Using IAM Tags (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_tags.html)
 //    in the IAM User Guide.
 //
 //    * Cost allocation - Use tags to help track which individuals and teams
@@ -8387,12 +8532,12 @@ func (r TagUserRequest) Send() (*TagUserOutput, error) {
 // an array, you can store comma-separated values in the string. However, you
 // must interpret the value in your code.
 //
-// For more information about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// For more information about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the TagUserRequest method.
 //    req := client.TagUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8428,7 +8573,8 @@ type UntagRoleRequest struct {
 }
 
 // Send marshals and sends the UntagRole API request.
-func (r UntagRoleRequest) Send() (*UntagRoleOutput, error) {
+func (r UntagRoleRequest) Send(ctx context.Context) (*UntagRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8441,12 +8587,12 @@ func (r UntagRoleRequest) Send() (*UntagRoleOutput, error) {
 // AWS Identity and Access Management.
 //
 // Removes the specified tags from the role. For more information about tagging,
-// see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UntagRoleRequest method.
 //    req := client.UntagRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8482,7 +8628,8 @@ type UntagUserRequest struct {
 }
 
 // Send marshals and sends the UntagUser API request.
-func (r UntagUserRequest) Send() (*UntagUserOutput, error) {
+func (r UntagUserRequest) Send(ctx context.Context) (*UntagUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8495,12 +8642,12 @@ func (r UntagUserRequest) Send() (*UntagUserOutput, error) {
 // AWS Identity and Access Management.
 //
 // Removes the specified tags from the user. For more information about tagging,
-// see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UntagUserRequest method.
 //    req := client.UntagUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8536,7 +8683,8 @@ type UpdateAccessKeyRequest struct {
 }
 
 // Send marshals and sends the UpdateAccessKey API request.
-func (r UpdateAccessKeyRequest) Send() (*UpdateAccessKeyOutput, error) {
+func (r UpdateAccessKeyRequest) Send(ctx context.Context) (*UpdateAccessKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8558,12 +8706,12 @@ func (r UpdateAccessKeyRequest) Send() (*UpdateAccessKeyOutput, error) {
 // to manage AWS account root user credentials even if the AWS account has no
 // associated users.
 //
-// For information about rotating keys, see Managing Keys and Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/ManagingCredentials.html)
+// For information about rotating keys, see Managing Keys and Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/ManagingCredentials.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UpdateAccessKeyRequest method.
 //    req := client.UpdateAccessKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8599,7 +8747,8 @@ type UpdateAccountPasswordPolicyRequest struct {
 }
 
 // Send marshals and sends the UpdateAccountPasswordPolicy API request.
-func (r UpdateAccountPasswordPolicyRequest) Send() (*UpdateAccountPasswordPolicyOutput, error) {
+func (r UpdateAccountPasswordPolicyRequest) Send(ctx context.Context) (*UpdateAccountPasswordPolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8621,12 +8770,12 @@ func (r UpdateAccountPasswordPolicyRequest) Send() (*UpdateAccountPasswordPolicy
 // that parameter when you invoke the operation.
 //
 // For more information about using a password policy, see Managing an IAM Password
-// Policy (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingPasswordPolicies.html)
+// Policy (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingPasswordPolicies.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UpdateAccountPasswordPolicyRequest method.
 //    req := client.UpdateAccountPasswordPolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8662,7 +8811,8 @@ type UpdateAssumeRolePolicyRequest struct {
 }
 
 // Send marshals and sends the UpdateAssumeRolePolicy API request.
-func (r UpdateAssumeRolePolicyRequest) Send() (*UpdateAssumeRolePolicyOutput, error) {
+func (r UpdateAssumeRolePolicyRequest) Send(ctx context.Context) (*UpdateAssumeRolePolicyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8677,11 +8827,11 @@ func (r UpdateAssumeRolePolicyRequest) Send() (*UpdateAssumeRolePolicyOutput, er
 // Updates the policy that grants an IAM entity permission to assume a role.
 // This is typically referred to as the "role trust policy". For more information
 // about roles, go to Using Roles to Delegate Permissions and Federate Identities
-// (http://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
+// (https://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html).
 //
 //    // Example sending a request using the UpdateAssumeRolePolicyRequest method.
 //    req := client.UpdateAssumeRolePolicyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8717,7 +8867,8 @@ type UpdateGroupRequest struct {
 }
 
 // Send marshals and sends the UpdateGroup API request.
-func (r UpdateGroupRequest) Send() (*UpdateGroupOutput, error) {
+func (r UpdateGroupRequest) Send(ctx context.Context) (*UpdateGroupOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8732,7 +8883,7 @@ func (r UpdateGroupRequest) Send() (*UpdateGroupOutput, error) {
 // Updates the name and/or the path of the specified IAM group.
 //
 // You should understand the implications of changing a group's path or name.
-// For more information, see Renaming Users and Groups (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_WorkingWithGroupsAndUsers.html)
+// For more information, see Renaming Users and Groups (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_WorkingWithGroupsAndUsers.html)
 // in the IAM User Guide.
 //
 // The person making the request (the principal), must have permission to change
@@ -8740,11 +8891,11 @@ func (r UpdateGroupRequest) Send() (*UpdateGroupOutput, error) {
 // the group named Managers to MGRs, the principal must have a policy that allows
 // them to update both groups. If the principal has permission to update the
 // Managers group, but not the MGRs group, then the update fails. For more information
-// about permissions, see Access Management (http://docs.aws.amazon.com/IAM/latest/UserGuide/access.html).
+// about permissions, see Access Management (https://docs.aws.amazon.com/IAM/latest/UserGuide/access.html).
 //
 //    // Example sending a request using the UpdateGroupRequest method.
 //    req := client.UpdateGroupRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8780,7 +8931,8 @@ type UpdateLoginProfileRequest struct {
 }
 
 // Send marshals and sends the UpdateLoginProfile API request.
-func (r UpdateLoginProfileRequest) Send() (*UpdateLoginProfileOutput, error) {
+func (r UpdateLoginProfileRequest) Send(ctx context.Context) (*UpdateLoginProfileOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8795,12 +8947,12 @@ func (r UpdateLoginProfileRequest) Send() (*UpdateLoginProfileOutput, error) {
 // Changes the password for the specified IAM user.
 //
 // IAM users can change their own passwords by calling ChangePassword. For more
-// information about modifying passwords, see Managing Passwords (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
+// information about modifying passwords, see Managing Passwords (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_ManagingLogins.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UpdateLoginProfileRequest method.
 //    req := client.UpdateLoginProfileRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8836,7 +8988,8 @@ type UpdateOpenIDConnectProviderThumbprintRequest struct {
 }
 
 // Send marshals and sends the UpdateOpenIDConnectProviderThumbprint API request.
-func (r UpdateOpenIDConnectProviderThumbprintRequest) Send() (*UpdateOpenIDConnectProviderThumbprintOutput, error) {
+func (r UpdateOpenIDConnectProviderThumbprintRequest) Send(ctx context.Context) (*UpdateOpenIDConnectProviderThumbprintOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8866,7 +9019,7 @@ func (r UpdateOpenIDConnectProviderThumbprintRequest) Send() (*UpdateOpenIDConne
 //
 //    // Example sending a request using the UpdateOpenIDConnectProviderThumbprintRequest method.
 //    req := client.UpdateOpenIDConnectProviderThumbprintRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8902,7 +9055,8 @@ type UpdateRoleRequest struct {
 }
 
 // Send marshals and sends the UpdateRole API request.
-func (r UpdateRoleRequest) Send() (*UpdateRoleOutput, error) {
+func (r UpdateRoleRequest) Send(ctx context.Context) (*UpdateRoleOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8918,7 +9072,7 @@ func (r UpdateRoleRequest) Send() (*UpdateRoleOutput, error) {
 //
 //    // Example sending a request using the UpdateRoleRequest method.
 //    req := client.UpdateRoleRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -8952,7 +9106,8 @@ type UpdateRoleDescriptionRequest struct {
 }
 
 // Send marshals and sends the UpdateRoleDescription API request.
-func (r UpdateRoleDescriptionRequest) Send() (*UpdateRoleDescriptionOutput, error) {
+func (r UpdateRoleDescriptionRequest) Send(ctx context.Context) (*UpdateRoleDescriptionOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -8971,7 +9126,7 @@ func (r UpdateRoleDescriptionRequest) Send() (*UpdateRoleDescriptionOutput, erro
 //
 //    // Example sending a request using the UpdateRoleDescriptionRequest method.
 //    req := client.UpdateRoleDescriptionRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9005,7 +9160,8 @@ type UpdateSAMLProviderRequest struct {
 }
 
 // Send marshals and sends the UpdateSAMLProvider API request.
-func (r UpdateSAMLProviderRequest) Send() (*UpdateSAMLProviderOutput, error) {
+func (r UpdateSAMLProviderRequest) Send(ctx context.Context) (*UpdateSAMLProviderOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9019,11 +9175,11 @@ func (r UpdateSAMLProviderRequest) Send() (*UpdateSAMLProviderOutput, error) {
 //
 // Updates the metadata document for an existing SAML provider resource object.
 //
-// This operation requires Signature Version 4 (http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+// This operation requires Signature Version 4 (https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 //
 //    // Example sending a request using the UpdateSAMLProviderRequest method.
 //    req := client.UpdateSAMLProviderRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9057,7 +9213,8 @@ type UpdateSSHPublicKeyRequest struct {
 }
 
 // Send marshals and sends the UpdateSSHPublicKey API request.
-func (r UpdateSSHPublicKeyRequest) Send() (*UpdateSSHPublicKeyOutput, error) {
+func (r UpdateSSHPublicKeyRequest) Send(ctx context.Context) (*UpdateSSHPublicKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9077,12 +9234,12 @@ func (r UpdateSSHPublicKeyRequest) Send() (*UpdateSSHPublicKeyOutput, error) {
 // The SSH public key affected by this operation is used only for authenticating
 // the associated IAM user to an AWS CodeCommit repository. For more information
 // about using SSH keys to authenticate to an AWS CodeCommit repository, see
-// Set up AWS CodeCommit for SSH Connections (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
+// Set up AWS CodeCommit for SSH Connections (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
 // in the AWS CodeCommit User Guide.
 //
 //    // Example sending a request using the UpdateSSHPublicKeyRequest method.
 //    req := client.UpdateSSHPublicKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9118,7 +9275,8 @@ type UpdateServerCertificateRequest struct {
 }
 
 // Send marshals and sends the UpdateServerCertificate API request.
-func (r UpdateServerCertificateRequest) Send() (*UpdateServerCertificateOutput, error) {
+func (r UpdateServerCertificateRequest) Send(ctx context.Context) (*UpdateServerCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9134,12 +9292,12 @@ func (r UpdateServerCertificateRequest) Send() (*UpdateServerCertificateOutput, 
 // in IAM.
 //
 // For more information about working with server certificates, see Working
-// with Server Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
+// with Server Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
 // in the IAM User Guide. This topic also includes a list of AWS services that
 // can use the server certificates that you manage with IAM.
 //
 // You should understand the implications of changing a server certificate's
-// path or name. For more information, see Renaming a Server Certificate (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs_manage.html#RenamingServerCerts)
+// path or name. For more information, see Renaming a Server Certificate (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs_manage.html#RenamingServerCerts)
 // in the IAM User Guide.
 //
 // The person making the request (the principal), must have permission to change
@@ -9148,12 +9306,12 @@ func (r UpdateServerCertificateRequest) Send() (*UpdateServerCertificateOutput, 
 // have a policy that allows them to update both certificates. If the principal
 // has permission to update the ProductionCert group, but not the ProdCert certificate,
 // then the update fails. For more information about permissions, see Access
-// Management (http://docs.aws.amazon.com/IAM/latest/UserGuide/access.html)
+// Management (https://docs.aws.amazon.com/IAM/latest/UserGuide/access.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UpdateServerCertificateRequest method.
 //    req := client.UpdateServerCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9189,7 +9347,8 @@ type UpdateServiceSpecificCredentialRequest struct {
 }
 
 // Send marshals and sends the UpdateServiceSpecificCredential API request.
-func (r UpdateServiceSpecificCredentialRequest) Send() (*UpdateServiceSpecificCredentialOutput, error) {
+func (r UpdateServiceSpecificCredentialRequest) Send(ctx context.Context) (*UpdateServiceSpecificCredentialOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9208,7 +9367,7 @@ func (r UpdateServiceSpecificCredentialRequest) Send() (*UpdateServiceSpecificCr
 //
 //    // Example sending a request using the UpdateServiceSpecificCredentialRequest method.
 //    req := client.UpdateServiceSpecificCredentialRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9244,7 +9403,8 @@ type UpdateSigningCertificateRequest struct {
 }
 
 // Send marshals and sends the UpdateSigningCertificate API request.
-func (r UpdateSigningCertificateRequest) Send() (*UpdateSigningCertificateOutput, error) {
+func (r UpdateSigningCertificateRequest) Send(ctx context.Context) (*UpdateSigningCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9268,7 +9428,7 @@ func (r UpdateSigningCertificateRequest) Send() (*UpdateSigningCertificateOutput
 //
 //    // Example sending a request using the UpdateSigningCertificateRequest method.
 //    req := client.UpdateSigningCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9304,7 +9464,8 @@ type UpdateUserRequest struct {
 }
 
 // Send marshals and sends the UpdateUser API request.
-func (r UpdateUserRequest) Send() (*UpdateUserOutput, error) {
+func (r UpdateUserRequest) Send(ctx context.Context) (*UpdateUserOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9319,19 +9480,19 @@ func (r UpdateUserRequest) Send() (*UpdateUserOutput, error) {
 // Updates the name and/or the path of the specified IAM user.
 //
 // You should understand the implications of changing an IAM user's path or
-// name. For more information, see Renaming an IAM User (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_manage.html#id_users_renaming)
-// and Renaming an IAM Group (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups_manage_rename.html)
+// name. For more information, see Renaming an IAM User (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_manage.html#id_users_renaming)
+// and Renaming an IAM Group (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups_manage_rename.html)
 // in the IAM User Guide.
 //
 // To change a user name, the requester must have appropriate permissions on
 // both the source object and the target object. For example, to change Bob
 // to Robert, the entity making the request must have permission on Bob and
 // Robert, or must have permission on all (*). For more information about permissions,
-// see Permissions and Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/PermissionsAndPolicies.html).
+// see Permissions and Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/PermissionsAndPolicies.html).
 //
 //    // Example sending a request using the UpdateUserRequest method.
 //    req := client.UpdateUserRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9367,7 +9528,8 @@ type UploadSSHPublicKeyRequest struct {
 }
 
 // Send marshals and sends the UploadSSHPublicKey API request.
-func (r UploadSSHPublicKeyRequest) Send() (*UploadSSHPublicKeyOutput, error) {
+func (r UploadSSHPublicKeyRequest) Send(ctx context.Context) (*UploadSSHPublicKeyOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9384,12 +9546,12 @@ func (r UploadSSHPublicKeyRequest) Send() (*UploadSSHPublicKeyOutput, error) {
 // The SSH public key uploaded by this operation can be used only for authenticating
 // the associated IAM user to an AWS CodeCommit repository. For more information
 // about using SSH keys to authenticate to an AWS CodeCommit repository, see
-// Set up AWS CodeCommit for SSH Connections (http://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
+// Set up AWS CodeCommit for SSH Connections (https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-credentials-ssh.html)
 // in the AWS CodeCommit User Guide.
 //
 //    // Example sending a request using the UploadSSHPublicKeyRequest method.
 //    req := client.UploadSSHPublicKeyRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9423,7 +9585,8 @@ type UploadServerCertificateRequest struct {
 }
 
 // Send marshals and sends the UploadServerCertificate API request.
-func (r UploadServerCertificateRequest) Send() (*UploadServerCertificateOutput, error) {
+func (r UploadServerCertificateRequest) Send(ctx context.Context) (*UploadServerCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9439,32 +9602,32 @@ func (r UploadServerCertificateRequest) Send() (*UploadServerCertificateOutput, 
 // entity includes a public key certificate, a private key, and an optional
 // certificate chain, which should all be PEM-encoded.
 //
-// We recommend that you use AWS Certificate Manager (http://docs.aws.amazon.com/certificate-manager/)
+// We recommend that you use AWS Certificate Manager (https://docs.aws.amazon.com/certificate-manager/)
 // to provision, manage, and deploy your server certificates. With ACM you can
 // request a certificate, deploy it to AWS resources, and let ACM handle certificate
 // renewals for you. Certificates provided by ACM are free. For more information
-// about using ACM, see the AWS Certificate Manager User Guide (http://docs.aws.amazon.com/acm/latest/userguide/).
+// about using ACM, see the AWS Certificate Manager User Guide (https://docs.aws.amazon.com/acm/latest/userguide/).
 //
 // For more information about working with server certificates, see Working
-// with Server Certificates (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
+// with Server Certificates (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html)
 // in the IAM User Guide. This topic includes a list of AWS services that can
 // use the server certificates that you manage with IAM.
 //
 // For information about the number of server certificates you can upload, see
-// Limitations on IAM Entities and Objects (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html)
+// Limitations on IAM Entities and Objects (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html)
 // in the IAM User Guide.
 //
 // Because the body of the public key certificate, private key, and the certificate
 // chain can be large, you should use POST rather than GET when calling UploadServerCertificate.
 // For information about setting up signatures and authorization through the
-// API, go to Signing AWS API Requests (http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)
+// API, go to Signing AWS API Requests (https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)
 // in the AWS General Reference. For general information about using the Query
-// API with IAM, go to Calling the API by Making HTTP Query Requests (http://docs.aws.amazon.com/IAM/latest/UserGuide/programming.html)
+// API with IAM, go to Calling the API by Making HTTP Query Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/programming.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UploadServerCertificateRequest method.
 //    req := client.UploadServerCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9498,7 +9661,8 @@ type UploadSigningCertificateRequest struct {
 }
 
 // Send marshals and sends the UploadSigningCertificate API request.
-func (r UploadSigningCertificateRequest) Send() (*UploadSigningCertificateOutput, error) {
+func (r UploadSigningCertificateRequest) Send(ctx context.Context) (*UploadSigningCertificateOutput, error) {
+	r.Request.SetContext(ctx)
 	err := r.Request.Send()
 	if err != nil {
 		return nil, err
@@ -9524,14 +9688,14 @@ func (r UploadSigningCertificateRequest) Send() (*UploadSigningCertificateOutput
 // Because the body of an X.509 certificate can be large, you should use POST
 // rather than GET when calling UploadSigningCertificate. For information about
 // setting up signatures and authorization through the API, go to Signing AWS
-// API Requests (http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)
+// API Requests (https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)
 // in the AWS General Reference. For general information about using the Query
-// API with IAM, go to Making Query Requests (http://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
+// API with IAM, go to Making Query Requests (https://docs.aws.amazon.com/IAM/latest/UserGuide/IAM_UsingQueryAPI.html)
 // in the IAM User Guide.
 //
 //    // Example sending a request using the UploadSigningCertificateRequest method.
 //    req := client.UploadSigningCertificateRequest(params)
-//    resp, err := req.Send()
+//    resp, err := req.Send(context.TODO())
 //    if err == nil {
 //        fmt.Println(resp)
 //    }
@@ -9636,7 +9800,7 @@ type AccessKeyLastUsed struct {
 	//
 	//    * There is no sign-in data associated with the user
 	//
-	// For more information about AWS regions, see Regions and Endpoints (http://docs.aws.amazon.com/general/latest/gr/rande.html)
+	// For more information about AWS regions, see Regions and Endpoints (https://docs.aws.amazon.com/general/latest/gr/rande.html)
 	// in the Amazon Web Services General Reference.
 	//
 	// Region is a required field
@@ -9945,7 +10109,7 @@ type AttachGroupPolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to attach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -10015,7 +10179,7 @@ type AttachRolePolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to attach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -10094,7 +10258,7 @@ type AttachUserPolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to attach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -10172,7 +10336,7 @@ func (s AttachUserPolicyOutput) SDKResponseMetadata() aws.Response {
 // to a user or role to set the permissions boundary.
 //
 // For more information about permissions boundaries, see Permissions Boundaries
-// for IAM Identities  (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+// for IAM Identities  (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
 // in the IAM User Guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/AttachedPermissionsBoundary
 type AttachedPermissionsBoundary struct {
@@ -10206,7 +10370,7 @@ func (s AttachedPermissionsBoundary) GoString() string {
 // operations.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/AttachedPolicy
 type AttachedPolicy struct {
@@ -10215,7 +10379,7 @@ type AttachedPolicy struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	PolicyArn *string `min:"20" type:"string"`
 
@@ -10505,7 +10669,7 @@ type CreateGroupInput struct {
 	GroupName *string `min:"1" type:"string" required:"true"`
 
 	// The path to the group. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -10592,7 +10756,7 @@ type CreateInstanceProfileInput struct {
 	InstanceProfileName *string `min:"1" type:"string" required:"true"`
 
 	// The path to the instance profile. For more information about paths, see IAM
-	// Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -10793,7 +10957,7 @@ type CreateOpenIDConnectProviderInput struct {
 	// of the certificate used by https://keys.server.example.com.
 	//
 	// For more information about obtaining the OIDC provider's thumbprint, see
-	// Obtaining the Thumbprint for an OpenID Connect Provider (http://docs.aws.amazon.com/IAM/latest/UserGuide/identity-providers-oidc-obtain-thumbprint.html)
+	// Obtaining the Thumbprint for an OpenID Connect Provider (https://docs.aws.amazon.com/IAM/latest/UserGuide/identity-providers-oidc-obtain-thumbprint.html)
 	// in the IAM User Guide.
 	//
 	// ThumbprintList is a required field
@@ -10886,7 +11050,7 @@ type CreatePolicyInput struct {
 
 	// The path for the policy.
 	//
-	// For more information about paths, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// For more information about paths, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -10996,7 +11160,7 @@ type CreatePolicyVersionInput struct {
 	// a new version.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -11027,7 +11191,7 @@ type CreatePolicyVersionInput struct {
 	// groups, and roles that the policy is attached to.
 	//
 	// For more information about managed policy versions, see Versioning for Managed
-	// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+	// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 	// in the IAM User Guide.
 	SetAsDefault *bool `type:"boolean"`
 }
@@ -11129,12 +11293,12 @@ type CreateRoleInput struct {
 	// one hour by default. This applies when you use the AssumeRole* API operations
 	// or the assume-role* CLI operations but does not apply when you use those
 	// operations to create a console URL. For more information, see Using IAM Roles
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html) in the
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html) in the
 	// IAM User Guide.
 	MaxSessionDuration *int64 `min:"3600" type:"integer"`
 
 	// The path to the role. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -11166,7 +11330,7 @@ type CreateRoleInput struct {
 
 	// A list of tags that you want to attach to the newly created role. Each tag
 	// consists of a key name and an associated value. For more information about
-	// tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	//
 	// If any one of the tags is invalid or if you exceed the allowed number of
@@ -11271,7 +11435,7 @@ type CreateSAMLProviderInput struct {
 	// that are received from the IdP. You must generate the metadata document using
 	// the identity management software that is used as your organization's IdP.
 	//
-	// For more information, see About SAML 2.0-based Federation (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html)
+	// For more information, see About SAML 2.0-based Federation (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html)
 	// in the IAM User Guide
 	//
 	// SAMLMetadataDocument is a required field
@@ -11348,7 +11512,7 @@ type CreateServiceLinkedRoleInput struct {
 	//
 	// Service principals are unique and case-sensitive. To find the exact service
 	// principal for your service-linked role, see AWS Services That Work with IAM
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-services-that-work-with-iam.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-services-that-work-with-iam.html)
 	// in the IAM User Guide and look for the services that have Yes in the Service-Linked
 	// Role column. Choose the Yes link to view the service-linked role documentation
 	// for that service.
@@ -11512,7 +11676,7 @@ type CreateUserInput struct {
 	_ struct{} `type:"structure"`
 
 	// The path for the user name. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -11532,7 +11696,7 @@ type CreateUserInput struct {
 
 	// A list of tags that you want to attach to the newly created user. Each tag
 	// consists of a key name and an associated value. For more information about
-	// tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	//
 	// If any one of the tags is invalid or if you exceed the allowed number of
@@ -11622,7 +11786,7 @@ type CreateVirtualMFADeviceInput struct {
 	_ struct{} `type:"structure"`
 
 	// The path for the virtual MFA device. For more information about paths, see
-	// IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -12297,7 +12461,7 @@ type DeletePolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to delete.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -12361,7 +12525,7 @@ type DeletePolicyVersionInput struct {
 	// a version.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -12375,7 +12539,7 @@ type DeletePolicyVersionInput struct {
 	// of letters and digits.
 	//
 	// For more information about managed policy versions, see Versioning for Managed
-	// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+	// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 	// in the IAM User Guide.
 	//
 	// VersionId is a required field
@@ -13366,7 +13530,7 @@ type DetachGroupPolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to detach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -13436,7 +13600,7 @@ type DetachRolePolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to detach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -13515,7 +13679,7 @@ type DetachUserPolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy you want to detach.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -13600,7 +13764,7 @@ type EnableMFADeviceInput struct {
 	// MFA device successfully associates with the user but the MFA device becomes
 	// out of sync. This happens because time-based one-time passwords (TOTP) expire
 	// after a short period of time. If this happens, you can resync the device
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sync.html).
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sync.html).
 	//
 	// AuthenticationCode1 is a required field
 	AuthenticationCode1 *string `min:"6" type:"string" required:"true"`
@@ -13614,7 +13778,7 @@ type EnableMFADeviceInput struct {
 	// MFA device successfully associates with the user but the MFA device becomes
 	// out of sync. This happens because time-based one-time passwords (TOTP) expire
 	// after a short period of time. If this happens, you can resync the device
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sync.html).
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sync.html).
 	//
 	// AuthenticationCode2 is a required field
 	AuthenticationCode2 *string `min:"6" type:"string" required:"true"`
@@ -13728,7 +13892,7 @@ type EntityDetails struct {
 	// report unauthenticated requests.
 	//
 	// This field is null if no IAM entities attempted to access the service within
-	// the reporting period (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
+	// the reporting period (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
 	LastAuthenticated *time.Time `type:"timestamp" timestampFormat:"iso8601"`
 }
 
@@ -13752,7 +13916,7 @@ type EntityInfo struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// Arn is a required field
@@ -13769,7 +13933,7 @@ type EntityInfo struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// The path to the entity (user or role). For more information about paths,
-	// see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `min:"1" type:"string"`
 
@@ -13841,7 +14005,7 @@ type EvaluationResult struct {
 	// each set of policies contributes to the final evaluation decision. When simulating
 	// cross-account access to a resource, both the resource-based policy and the
 	// caller's IAM policy must grant access. See How IAM Roles Differ from Resource-based
-	// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_compare-resource-policies.html)
+	// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_compare-resource-policies.html)
 	EvalDecisionDetails map[string]PolicyEvaluationDecisionType `type:"map"`
 
 	// The ARN of the resource that the indicated API operation was tested on.
@@ -14331,7 +14495,7 @@ type GetContextKeysForPrincipalPolicyInput struct {
 	// a real HTML request.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicySourceArn is a required field
@@ -14793,7 +14957,7 @@ type GetOpenIDConnectProviderInput struct {
 	// by using the ListOpenIDConnectProviders operation.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// OpenIDConnectProviderArn is a required field
@@ -14874,7 +15038,7 @@ type GetPolicyInput struct {
 	// about.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -14942,7 +15106,7 @@ type GetPolicyVersionInput struct {
 	// about.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -15188,7 +15352,7 @@ type GetSAMLProviderInput struct {
 	// to get information about.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// SAMLProviderArn is a required field
@@ -15569,11 +15733,11 @@ type GetServiceLastAccessedDetailsWithEntitiesInput struct {
 	// learn when the IAM entity last attempted to access the specified service.
 	//
 	// To learn the service namespace for a service, go to Actions, Resources, and
-	// Condition Keys for AWS Services (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
+	// Condition Keys for AWS Services (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
 	// in the IAM User Guide and choose the name of the service to view details
 	// for that service. In the first paragraph, find the service prefix. For example,
 	// (service prefix: a4b). For more information about service namespaces, see
-	// AWS Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
+	// AWS Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
 	// in the AWS General Reference.
 	//
 	// ServiceNamespace is a required field
@@ -15796,9 +15960,9 @@ type GetUserOutput struct {
 	//
 	// Due to a service issue, password last used data does not include password
 	// use from May 3, 2018 22:50 PDT to May 23, 2018 14:08 PDT. This affects last
-	// sign-in (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_finding-unused.html)
+	// sign-in (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_finding-unused.html)
 	// dates shown in the IAM console and password last used dates in the IAM credential
-	// report (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html),
+	// report (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html),
 	// and returned by this GetUser API. If users signed in during the affected
 	// time, the password last used date that is returned is the date the user last
 	// signed in before May 3, 2018. For users that signed in after May 23, 2018
@@ -15939,7 +16103,7 @@ type Group struct {
 	_ struct{} `type:"structure"`
 
 	// The Amazon Resource Name (ARN) specifying the group. For more information
-	// about ARNs and how to use them in policies, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about ARNs and how to use them in policies, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Arn is a required field
@@ -15952,7 +16116,7 @@ type Group struct {
 	CreateDate *time.Time `type:"timestamp" timestampFormat:"iso8601" required:"true"`
 
 	// The stable and unique string identifying the group. For more information
-	// about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// GroupId is a required field
@@ -15964,7 +16128,7 @@ type Group struct {
 	GroupName *string `min:"1" type:"string" required:"true"`
 
 	// The path to the group. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Path is a required field
@@ -15992,7 +16156,7 @@ type GroupDetail struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 
@@ -16004,7 +16168,7 @@ type GroupDetail struct {
 	CreateDate *time.Time `type:"timestamp" timestampFormat:"iso8601"`
 
 	// The stable and unique string identifying the group. For more information
-	// about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	GroupId *string `min:"16" type:"string"`
 
@@ -16015,7 +16179,7 @@ type GroupDetail struct {
 	GroupPolicyList []PolicyDetail `type:"list"`
 
 	// The path to the group. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `min:"1" type:"string"`
 }
@@ -16047,7 +16211,7 @@ type InstanceProfile struct {
 
 	// The Amazon Resource Name (ARN) specifying the instance profile. For more
 	// information about ARNs and how to use them in policies, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Arn is a required field
@@ -16059,7 +16223,7 @@ type InstanceProfile struct {
 	CreateDate *time.Time `type:"timestamp" timestampFormat:"iso8601" required:"true"`
 
 	// The stable and unique string identifying the instance profile. For more information
-	// about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// InstanceProfileId is a required field
@@ -16071,7 +16235,7 @@ type InstanceProfile struct {
 	InstanceProfileName *string `min:"1" type:"string" required:"true"`
 
 	// The path to the instance profile. For more information about paths, see IAM
-	// Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Path is a required field
@@ -16663,7 +16827,7 @@ type ListEntitiesForPolicyInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy for which you want the versions.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -17436,11 +17600,11 @@ type ListPoliciesGrantingServiceAccessEntry struct {
 	// The namespace of the service that was accessed.
 	//
 	// To learn the service namespace of a service, go to Actions, Resources, and
-	// Condition Keys for AWS Services (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
+	// Condition Keys for AWS Services (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
 	// in the IAM User Guide. Choose the name of the service to view details for
 	// that service. In the first paragraph, find the service prefix. For example,
 	// (service prefix: a4b). For more information about service namespaces, see
-	// AWS Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
+	// AWS Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
 	// in the AWS General Reference.
 	ServiceNamespace *string `min:"1" type:"string"`
 }
@@ -17474,11 +17638,11 @@ type ListPoliciesGrantingServiceAccessInput struct {
 	// The service namespace for the AWS services whose policies you want to list.
 	//
 	// To learn the service namespace for a service, go to Actions, Resources, and
-	// Condition Keys for AWS Services (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
+	// Condition Keys for AWS Services (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
 	// in the IAM User Guide. Choose the name of the service to view details for
 	// that service. In the first paragraph, find the service prefix. For example,
 	// (service prefix: a4b). For more information about service namespaces, see
-	// AWS Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
+	// AWS Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
 	// in the AWS General Reference.
 	//
 	// ServiceNamespaces is a required field
@@ -17706,7 +17870,7 @@ type ListPolicyVersionsInput struct {
 	// The Amazon Resource Name (ARN) of the IAM policy for which you want the versions.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -17768,7 +17932,7 @@ type ListPolicyVersionsOutput struct {
 	// A list of policy versions.
 	//
 	// For more information about managed policy versions, see Versioning for Managed
-	// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+	// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 	// in the IAM User Guide.
 	Versions []PolicyVersion `type:"list"`
 }
@@ -18989,7 +19153,7 @@ func (s MFADevice) GoString() string {
 // operation.
 //
 // For more information about managed policies, see Managed Policies and Inline
-// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/ManagedPolicyDetail
 type ManagedPolicyDetail struct {
@@ -18998,7 +19162,7 @@ type ManagedPolicyDetail struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 
@@ -19014,7 +19178,7 @@ type ManagedPolicyDetail struct {
 	// version.
 	//
 	// For more information about policy versions, see Versioning for Managed Policies
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 	// in the Using IAM guide.
 	DefaultVersionId *string `type:"string"`
 
@@ -19026,7 +19190,7 @@ type ManagedPolicyDetail struct {
 
 	// The path to the policy.
 	//
-	// For more information about paths, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// For more information about paths, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `type:"string"`
 
@@ -19034,13 +19198,13 @@ type ManagedPolicyDetail struct {
 	// the permissions boundary.
 	//
 	// For more information about permissions boundaries, see Permissions Boundaries
-	// for IAM Identities  (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+	// for IAM Identities  (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
 	// in the IAM User Guide.
 	PermissionsBoundaryUsageCount *int64 `type:"integer"`
 
 	// The stable and unique string identifying the policy.
 	//
-	// For more information about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// For more information about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	PolicyId *string `min:"16" type:"string"`
 
@@ -19078,7 +19242,7 @@ type OpenIDConnectProviderListEntry struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 }
@@ -19172,7 +19336,7 @@ func (s PasswordPolicy) GoString() string {
 // and ListPolicies operations.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/Policy
 type Policy struct {
@@ -19181,7 +19345,7 @@ type Policy struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 
@@ -19207,7 +19371,7 @@ type Policy struct {
 
 	// The path to the policy.
 	//
-	// For more information about paths, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// For more information about paths, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `type:"string"`
 
@@ -19215,13 +19379,13 @@ type Policy struct {
 	// set the permissions boundary.
 	//
 	// For more information about permissions boundaries, see Permissions Boundaries
-	// for IAM Identities  (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+	// for IAM Identities  (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
 	// in the IAM User Guide.
 	PermissionsBoundaryUsageCount *int64 `type:"integer"`
 
 	// The stable and unique string identifying the policy.
 	//
-	// For more information about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// For more information about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	PolicyId *string `min:"16" type:"string"`
 
@@ -19285,7 +19449,7 @@ type PolicyGrantingServiceAccess struct {
 	// The name of the entity (user or role) to which the inline policy is attached.
 	//
 	// This field is null for managed policies. For more information about these
-	// policy types, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
+	// policy types, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 	// in the IAM User Guide.
 	EntityName *string `min:"1" type:"string"`
 
@@ -19293,14 +19457,14 @@ type PolicyGrantingServiceAccess struct {
 	// to which the inline policy is attached.
 	//
 	// This field is null for managed policies. For more information about these
-	// policy types, see Managed Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
+	// policy types, see Managed Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 	// in the IAM User Guide.
 	EntityType PolicyOwnerEntityType `type:"string" enum:"true"`
 
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	PolicyArn *string `min:"20" type:"string"`
 
@@ -19310,7 +19474,7 @@ type PolicyGrantingServiceAccess struct {
 	PolicyName *string `min:"1" type:"string" required:"true"`
 
 	// The policy type. For more information about these policy types, see Managed
-	// Policies and Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
+	// Policies and Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 	// in the IAM User Guide.
 	//
 	// PolicyType is a required field
@@ -19333,14 +19497,14 @@ func (s PolicyGrantingServiceAccess) GoString() string {
 // operation.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/PolicyGroup
 type PolicyGroup struct {
 	_ struct{} `type:"structure"`
 
 	// The stable and unique string identifying the group. For more information
-	// about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
+	// about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
 	// in the IAM User Guide.
 	GroupId *string `min:"16" type:"string"`
 
@@ -19364,14 +19528,14 @@ func (s PolicyGroup) GoString() string {
 // operation.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/PolicyRole
 type PolicyRole struct {
 	_ struct{} `type:"structure"`
 
 	// The stable and unique string identifying the role. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
 	// in the IAM User Guide.
 	RoleId *string `min:"16" type:"string"`
 
@@ -19395,14 +19559,14 @@ func (s PolicyRole) GoString() string {
 // operation.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/PolicyUser
 type PolicyUser struct {
 	_ struct{} `type:"structure"`
 
 	// The stable and unique string identifying the user. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
 	// in the IAM User Guide.
 	UserId *string `min:"16" type:"string"`
 
@@ -19427,7 +19591,7 @@ func (s PolicyUser) GoString() string {
 // operations.
 //
 // For more information about managed policies, refer to Managed Policies and
-// Inline Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
+// Inline Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-vs-inline.html)
 // in the Using IAM guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/PolicyVersion
 type PolicyVersion struct {
@@ -19965,7 +20129,7 @@ type RemoveClientIDFromOpenIDConnectProviderInput struct {
 	// ListOpenIDConnectProviders operation.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// OpenIDConnectProviderArn is a required field
@@ -20436,7 +20600,7 @@ type Role struct {
 	_ struct{} `type:"structure"`
 
 	// The Amazon Resource Name (ARN) specifying the role. For more information
-	// about ARNs and how to use them in policies, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about ARNs and how to use them in policies, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide guide.
 	//
 	// Arn is a required field
@@ -20461,7 +20625,7 @@ type Role struct {
 	MaxSessionDuration *int64 `min:"3600" type:"integer"`
 
 	// The path to the role. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Path is a required field
@@ -20475,7 +20639,7 @@ type Role struct {
 	PermissionsBoundary *AttachedPermissionsBoundary `type:"structure"`
 
 	// The stable and unique string identifying the role. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// RoleId is a required field
@@ -20487,7 +20651,7 @@ type Role struct {
 	RoleName *string `min:"1" type:"string" required:"true"`
 
 	// A list of tags that are attached to the specified role. For more information
-	// about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	Tags []Tag `type:"list"`
 }
@@ -20513,7 +20677,7 @@ type RoleDetail struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 
@@ -20532,7 +20696,7 @@ type RoleDetail struct {
 	InstanceProfileList []InstanceProfile `type:"list"`
 
 	// The path to the role. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `min:"1" type:"string"`
 
@@ -20544,7 +20708,7 @@ type RoleDetail struct {
 	PermissionsBoundary *AttachedPermissionsBoundary `type:"structure"`
 
 	// The stable and unique string identifying the role. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	RoleId *string `min:"16" type:"string"`
 
@@ -20556,7 +20720,7 @@ type RoleDetail struct {
 	RolePolicyList []PolicyDetail `type:"list"`
 
 	// A list of tags that are attached to the specified role. For more information
-	// about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	Tags []Tag `type:"list"`
 }
@@ -20757,7 +20921,7 @@ type ServerCertificateMetadata struct {
 
 	// The Amazon Resource Name (ARN) specifying the server certificate. For more
 	// information about ARNs and how to use them in policies, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Arn is a required field
@@ -20767,14 +20931,14 @@ type ServerCertificateMetadata struct {
 	Expiration *time.Time `type:"timestamp" timestampFormat:"iso8601"`
 
 	// The path to the server certificate. For more information about paths, see
-	// IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Path is a required field
 	Path *string `min:"1" type:"string" required:"true"`
 
 	// The stable and unique string identifying the server certificate. For more
-	// information about IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// information about IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// ServerCertificateId is a required field
@@ -20812,14 +20976,14 @@ type ServiceLastAccessed struct {
 	// AWS does not report unauthenticated requests.
 	//
 	// This field is null if no IAM entities attempted to access the service within
-	// the reporting period (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
+	// the reporting period (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
 	LastAuthenticated *time.Time `type:"timestamp" timestampFormat:"iso8601"`
 
 	// The ARN of the authenticated entity (user or role) that last attempted to
 	// access the service. AWS does not report unauthenticated requests.
 	//
 	// This field is null if no IAM entities attempted to access the service within
-	// the reporting period (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
+	// the reporting period (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
 	LastAuthenticatedEntity *string `min:"20" type:"string"`
 
 	// The name of the service in which access was attempted.
@@ -20830,11 +20994,11 @@ type ServiceLastAccessed struct {
 	// The namespace of the service in which access was attempted.
 	//
 	// To learn the service namespace of a service, go to Actions, Resources, and
-	// Condition Keys for AWS Services (http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
+	// Condition Keys for AWS Services (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html)
 	// in the IAM User Guide. Choose the name of the service to view details for
 	// that service. In the first paragraph, find the service prefix. For example,
 	// (service prefix: a4b). For more information about service namespaces, see
-	// AWS Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
+	// AWS Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
 	// in the AWS General Reference.
 	//
 	// ServiceNamespace is a required field
@@ -20844,7 +21008,7 @@ type ServiceLastAccessed struct {
 	// the service.
 	//
 	// This field is null if no IAM entities attempted to access the service within
-	// the reporting period (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
+	// the reporting period (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html#service-last-accessed-reporting-period).
 	TotalAuthenticatedEntities *int64 `type:"integer"`
 }
 
@@ -20970,7 +21134,7 @@ type SetDefaultPolicyVersionInput struct {
 	// want to set.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicyArn is a required field
@@ -20979,7 +21143,7 @@ type SetDefaultPolicyVersionInput struct {
 	// The version of the policy to set as the default (operative) version.
 	//
 	// For more information about managed policy versions, see Versioning for Managed
-	// Policies (http://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
+	// Policies (https://docs.aws.amazon.com/IAM/latest/UserGuide/policies-managed-versions.html)
 	// in the IAM User Guide.
 	//
 	// VersionId is a required field
@@ -21129,8 +21293,8 @@ type SimulateCustomPolicyInput struct {
 	// policy. Do not include any resource-based policies in this parameter. Any
 	// resource-based policy must be submitted with the ResourcePolicy parameter.
 	// The policies cannot be "scope-down" policies, such as you could include in
-	// a call to GetFederationToken (http://docs.aws.amazon.com/IAM/latest/APIReference/API_GetFederationToken.html)
-	// or one of the AssumeRole (http://docs.aws.amazon.com/IAM/latest/APIReference/API_AssumeRole.html)
+	// a call to GetFederationToken (https://docs.aws.amazon.com/IAM/latest/APIReference/API_GetFederationToken.html)
+	// or one of the AssumeRole (https://docs.aws.amazon.com/IAM/latest/APIReference/API_AssumeRole.html)
 	// API operations. In other words, do not use policies designed to restrict
 	// what a user can do while using the temporary credentials.
 	//
@@ -21163,7 +21327,7 @@ type SimulateCustomPolicyInput struct {
 	// resources included in the simulation or you receive an invalid input error.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	ResourceArns []string `type:"list"`
 
@@ -21180,7 +21344,7 @@ type SimulateCustomPolicyInput struct {
 	// must specify that volume as a resource. If the EC2 scenario includes VPC,
 	// then you must supply the network-interface resource. If it includes an IP
 	// subnet, then you must specify the subnet resource. For more information on
-	// the EC2 scenario options, see Supported Platforms (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-platforms.html)
+	// the EC2 scenario options, see Supported Platforms (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-platforms.html)
 	// in the Amazon EC2 User Guide.
 	//
 	//    * EC2-Classic-InstanceStore
@@ -21321,7 +21485,7 @@ type SimulatePrincipalPolicyInput struct {
 	// policy's Principal element has a value to use in evaluating the policy.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	CallerArn *string `min:"1" type:"string"`
 
@@ -21371,7 +21535,7 @@ type SimulatePrincipalPolicyInput struct {
 	// attached to any groups the user belongs to.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// PolicySourceArn is a required field
@@ -21388,7 +21552,7 @@ type SimulatePrincipalPolicyInput struct {
 	// you must include the policy as a string in the ResourcePolicy parameter.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	ResourceArns []string `type:"list"`
 
@@ -21405,7 +21569,7 @@ type SimulatePrincipalPolicyInput struct {
 	// must specify that volume as a resource. If the EC2 scenario includes VPC,
 	// then you must supply the network interface resource. If it includes an IP
 	// subnet, then you must specify the subnet resource. For more information on
-	// the EC2 scenario options, see Supported Platforms (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-platforms.html)
+	// the EC2 scenario options, see Supported Platforms (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-platforms.html)
 	// in the Amazon EC2 User Guide.
 	//
 	//    * EC2-Classic-InstanceStore
@@ -21591,7 +21755,7 @@ func (s Statement) GoString() string {
 
 // A structure that represents user-provided metadata that can be associated
 // with a resource such as an IAM user or role. For more information about tagging,
-// see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+// see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 // in the IAM User Guide.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/iam-2010-05-08/Tag
 type Tag struct {
@@ -22043,7 +22207,7 @@ type UpdateAccountPasswordPolicyInput struct {
 
 	// Allows all IAM users in your account to use the AWS Management Console to
 	// change their own passwords. For more information, see Letting IAM Users Change
-	// Their Own Passwords (http://docs.aws.amazon.com/IAM/latest/UserGuide/HowToPwdIAMUser.html)
+	// Their Own Passwords (https://docs.aws.amazon.com/IAM/latest/UserGuide/HowToPwdIAMUser.html)
 	// in the IAM User Guide.
 	//
 	// If you do not specify a value for this parameter, then the operation uses
@@ -22437,7 +22601,7 @@ type UpdateOpenIDConnectProviderThumbprintInput struct {
 	// ARNs by using the ListOpenIDConnectProviders operation.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// OpenIDConnectProviderArn is a required field
@@ -22593,7 +22757,7 @@ type UpdateRoleInput struct {
 	// one hour by default. This applies when you use the AssumeRole* API operations
 	// or the assume-role* CLI operations but does not apply when you use those
 	// operations to create a console URL. For more information, see Using IAM Roles
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html) in the
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html) in the
 	// IAM User Guide.
 	MaxSessionDuration *int64 `min:"3600" type:"integer"`
 
@@ -22671,7 +22835,7 @@ type UpdateSAMLProviderInput struct {
 	// The Amazon Resource Name (ARN) of the SAML provider to update.
 	//
 	// For more information about ARNs, see Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	//
 	// SAMLProviderArn is a required field
@@ -23303,7 +23467,7 @@ type UploadServerCertificateInput struct {
 	CertificateChain *string `min:"1" type:"string"`
 
 	// The path for the server certificate. For more information about paths, see
-	// IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the IAM User Guide.
 	//
 	// This parameter is optional. If it is not included, it defaults to a slash
@@ -23523,7 +23687,7 @@ type User struct {
 	_ struct{} `type:"structure"`
 
 	// The Amazon Resource Name (ARN) that identifies the user. For more information
-	// about ARNs and how to use ARNs in policies, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// about ARNs and how to use ARNs in policies, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Arn is a required field
@@ -23538,7 +23702,7 @@ type User struct {
 	// The date and time, in ISO 8601 date-time format (http://www.iso.org/iso/iso8601),
 	// when the user's password was last used to sign in to an AWS website. For
 	// a list of AWS websites that capture a user's last sign-in time, see the Credential
-	// Reports (http://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
+	// Reports (https://docs.aws.amazon.com/IAM/latest/UserGuide/credential-reports.html)
 	// topic in the Using IAM guide. If a password is used more than once in a five-minute
 	// span, only the first use is returned in this field. If the field is null
 	// (no value), then it indicates that they never signed in with a password.
@@ -23557,7 +23721,7 @@ type User struct {
 	PasswordLastUsed *time.Time `type:"timestamp" timestampFormat:"iso8601"`
 
 	// The path to the user. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// Path is a required field
@@ -23571,12 +23735,12 @@ type User struct {
 	PermissionsBoundary *AttachedPermissionsBoundary `type:"structure"`
 
 	// A list of tags that are associated with the specified user. For more information
-	// about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	Tags []Tag `type:"list"`
 
 	// The stable and unique string identifying the user. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	//
 	// UserId is a required field
@@ -23610,7 +23774,7 @@ type UserDetail struct {
 	// The Amazon Resource Name (ARN). ARNs are unique identifiers for AWS resources.
 	//
 	// For more information about ARNs, go to Amazon Resource Names (ARNs) and AWS
-	// Service Namespaces (http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+	// Service Namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
 	// in the AWS General Reference.
 	Arn *string `min:"20" type:"string"`
 
@@ -23625,7 +23789,7 @@ type UserDetail struct {
 	GroupList []string `type:"list"`
 
 	// The path to the user. For more information about paths, see IAM Identifiers
-	// (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	Path *string `min:"1" type:"string"`
 
@@ -23637,12 +23801,12 @@ type UserDetail struct {
 	PermissionsBoundary *AttachedPermissionsBoundary `type:"structure"`
 
 	// A list of tags that are associated with the specified user. For more information
-	// about tagging, see Tagging IAM Identities (http://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
+	// about tagging, see Tagging IAM Identities (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_tags.html)
 	// in the IAM User Guide.
 	Tags []Tag `type:"list"`
 
 	// The stable and unique string identifying the user. For more information about
-	// IDs, see IAM Identifiers (http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
+	// IDs, see IAM Identifiers (https://docs.aws.amazon.com/IAM/latest/UserGuide/Using_Identifiers.html)
 	// in the Using IAM guide.
 	UserId *string `min:"16" type:"string"`
 
@@ -23830,7 +23994,7 @@ func (enum PolicySourceType) MarshalValueBuf(b []byte) ([]byte, error) {
 // policy or as the permissions boundary for an entity.
 //
 // For more information about permissions boundaries, see Permissions Boundaries
-// for IAM Identities  (http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+// for IAM Identities  (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
 // in the IAM User Guide.
 type PolicyUsageType string
 

@@ -24,7 +24,7 @@ func TestOrgProvisionPoolExists(t *testing.T) {
 
 	provisioner := NewOrgProvision("dev", "us-east-1", userClient, orgClient)
 	poolName := aws.String("org-linkai-" + "support-linkai")
-	ret := provisioner.checkUserPoolExists(*poolName, "")
+	ret := provisioner.checkUserPoolExists(context.Background(), *poolName, "")
 	if ret == true {
 		t.Fatal("error should not exist")
 	}

@@ -35,6 +35,6 @@ func (u *Updater) Update(ctx context.Context, userContext am.UserContext, user a
 		Username:       nil,
 	}
 	req := u.svc.AdminUpdateUserAttributesRequest(input)
-	_, err := req.Send()
+	_, err := req.Send(ctx)
 	return err
 }
