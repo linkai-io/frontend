@@ -428,7 +428,7 @@ type TechDetails struct {
 }
 
 func (t *TechDataEntry) Hash(techName string) string {
-	return fmt.Sprintf("%s%s%s%s%s%d", techName, t.Version, t.Host, t.URL, t.IP, t.Port)
+	return fmt.Sprintf("%s%s%s%d", techName, t.Version, t.URL, t.Port)
 }
 
 type TechDataResponse struct {
@@ -445,7 +445,7 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	logger := middleware.UserContextLogger(userContext)
-
+	logger.Info().Msg("Getting TechData")
 	id, err := groupIDFromRequest(req)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed getting group id")
@@ -469,14 +469,14 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 			Limit:   1000,
 			Filters: &am.FilterType{},
 		}
-		filter.Filters.AddInt64("after_response_time", time.Now().Add(time.Hour-24*7).UnixNano()) // only search past 7 days
+		filter.Filters.AddInt64("after_response_time", time.Now().Add(time.Hour*(-24*7)).UnixNano()) // only search past 7 days
 		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting snapshots for tech data")
 			middleware.ReturnError(w, "internal error", 500)
 			return
 		}
-
+		logger.Info().Int("snapshots_length", len(snapshots)).Msg("got records")
 		if len(snapshots) == 0 {
 			break
 		}
@@ -500,6 +500,10 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 			}
 
 			for i, tech := range snapshot.TechNames {
+				// TODO: figure out how this is empty... (different apps.jsons?)
+				if tech == "" {
+					continue
+				}
 				if _, ok := techData.Technologies[tech]; !ok {
 					techData.Technologies[tech] = make([]*TechDataEntry, 0)
 					techData.TechDetails[tech] = &TechDetails{}
