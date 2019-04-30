@@ -127,6 +127,7 @@ func main() {
 		r.Get("/group/{id}/responses", webHandlers.GetResponses)
 		r.Post("/group/{id}/responses/download", webHandlers.ExportResponses)
 		r.Get("/group/{id}/urls", webHandlers.GetURLList)
+		r.Get("/group/{id}/techdata", webHandlers.GetTechData)
 	})
 
 	// events

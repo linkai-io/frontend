@@ -414,6 +414,127 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 	w.Write(data)
 }
 
+type TechDataEntry struct {
+	Version string `json:"version"`
+	URL     string `json:"url"`
+	Host    string `json:"host"`
+	IP      string `json:"ip"`
+	Port    int    `json:"port"`
+}
+
+type TechDetails struct {
+	Website string `json:"website"`
+	Icon    string `json:"icon"`
+}
+
+func (t *TechDataEntry) Hash(techName string) string {
+	return fmt.Sprintf("%s%s%s%s%s%d", techName, t.Version, t.Host, t.URL, t.IP, t.Port)
+}
+
+type TechDataResponse struct {
+	Technologies map[string][]*TechDataEntry `json:"technologies"`
+	TechDetails  map[string]*TechDetails     `json:"tech_details"`
+}
+
+func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
+	var err error
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed getting group id")
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	techData := &TechDataResponse{}
+	techData.Technologies = make(map[string][]*TechDataEntry, 0)
+	techData.TechDetails = make(map[string]*TechDetails, 0)
+
+	// ugh i know
+	hashes := make(map[string]struct{})
+
+	var lastIndex int64
+	for {
+		filter := &am.WebSnapshotFilter{
+			OrgID:   userContext.GetOrgID(),
+			GroupID: id,
+			Start:   lastIndex,
+			Limit:   1000,
+			Filters: &am.FilterType{},
+		}
+		filter.Filters.AddInt64("after_response_time", time.Now().Add(time.Hour-24*7).UnixNano()) // only search past 7 days
+		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
+		if err != nil {
+			logger.Error().Err(err).Msg("error getting snapshots for tech data")
+			middleware.ReturnError(w, "internal error", 500)
+			return
+		}
+
+		if len(snapshots) == 0 {
+			break
+		}
+
+		var lastID int64
+		lastID = math.MaxInt64
+		for _, snapshot := range snapshots {
+			if snapshot.URLRequestTimestamp < lastID {
+				lastID = snapshot.URLRequestTimestamp
+			}
+
+			if oid != snapshot.OrgID {
+				logger.Error().Err(err).Msg("authorization failure")
+				middleware.ReturnError(w, "failed to get tech data", 500)
+				return
+			}
+
+			if len(snapshot.TechNames) != len(snapshot.TechIcons) && len(snapshot.TechVersions) != len(snapshot.TechNames) {
+				logger.Warn().Str("host", snapshot.HostAddress).Msg("tech slice sizes were not the same, skipping")
+				continue
+			}
+
+			for i, tech := range snapshot.TechNames {
+				if _, ok := techData.Technologies[tech]; !ok {
+					techData.Technologies[tech] = make([]*TechDataEntry, 0)
+					techData.TechDetails[tech] = &TechDetails{}
+				}
+
+				entry := &TechDataEntry{
+					Host:    snapshot.HostAddress,
+					URL:     snapshot.LoadURL,
+					IP:      snapshot.IPAddress,
+					Port:    snapshot.ResponsePort,
+					Version: snapshot.TechVersions[i],
+				}
+				// skip if we already have this entry
+				if _, ok := hashes[entry.Hash(tech)]; ok {
+					continue
+				}
+				techData.TechDetails[tech].Icon = snapshot.TechIcons[i]
+				techData.TechDetails[tech].Website = snapshot.TechWebsites[i]
+				hashes[entry.Hash(tech)] = struct{}{}
+				techData.Technologies[tech] = append(techData.Technologies[tech], entry)
+			}
+		}
+		lastIndex = lastID
+	}
+
+	data, err := json.Marshal(techData)
+	if err != nil {
+		logger.Error().Err(err).Msg("error during marshal")
+		middleware.ReturnError(w, "internal error during processing", 500)
+		return
+	}
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
 type webCertificates struct {
 	Certificates []*am.WebCertificate `json:"certificates"`
 	LastIndex    int64                `json:"last_index"`
@@ -768,6 +889,11 @@ func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupI
 	hostAddress := values.Get("host_address")
 	if hostAddress != "" {
 		filter.Filters.AddString("host_address", hostAddress)
+	}
+
+	techType := values.Get("tech_type")
+	if techType != "" {
+		filter.Filters.AddString("tech_type", techType)
 	}
 
 	port := values.Get("port")

@@ -95,3 +95,6 @@ buildevent:
 
 deployevent: buildevent upload 
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/event_handler.zip --function-name ${APP_ENV}-console-handler-eventservice
+
+# ALL
+deployall: deployauth deployauthorizer deploystaticauthorizer deployadmin deployorg deployscangroup deployaddress deploywebdata deployuser deployevent
