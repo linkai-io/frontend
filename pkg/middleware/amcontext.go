@@ -53,7 +53,7 @@ func UserCtx(next http.Handler) http.Handler {
 			return
 		}
 
-		userContext.UserCID = stringField("UserID", requestContext.Authorizer)
+		userContext.UserCID = stringField("UserCID", requestContext.Authorizer)
 		if userContext.UserCID == "" {
 			ReturnError(w, "invalid user cid", 401)
 			return

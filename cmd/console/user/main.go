@@ -51,7 +51,6 @@ func main() {
 	userHandlers := user.New(userClient, tokener, authenticator, orgClient, userEnv)
 
 	r.Route("/user", func(r chi.Router) {
-		//r.Get("/", GetUser)
 		r.Get("/details", userHandlers.Get)
 		r.Get("/logout", userHandlers.Logout)
 		r.Patch("/accept", userHandlers.AcceptAgreement)
