@@ -29,7 +29,7 @@ type ScanGroupDetails struct {
 	GroupName          string   `json:"group_name" validate:"required,gte=1,lte=128,excludesall=/"`
 	CustomSubNames     []string `json:"custom_sub_names" validate:"omitempty,max=100,dive,gte=1,lte=128,subdomain"`
 	CustomPorts        []int32  `json:"custom_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
-	ConcurrentRequests int32    `json:"concurrent_requests" validate:"required,gte=1,lte=5"` // lte 25, alpha is limited to 5
+	ConcurrentRequests int32    `json:"concurrent_requests" validate:"required,gte=1,lte=10"` // lte 25, beta is limited to 10
 }
 
 type ScanGroupEnv struct {
