@@ -40,7 +40,7 @@ func (o *OrgDetails) ToOrganization() (*am.Organization, error) {
 		limitCustomWebFlows = 1
 	case am.SubscriptionMonthlyMedium:
 		limitTLD = 3
-		limitHosts = 200
+		limitHosts = 260
 		limitCustomWebFlows = 3
 	case am.SubscriptionEnterprise:
 		limitTLD = 50

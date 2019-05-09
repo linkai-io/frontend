@@ -184,17 +184,18 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "validation failure "+err.Error(), 500)
 		return
 	}
+	log.Info().Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("login attempt")
 
 	orgData, err := h.getOrgByName(req.Context(), systemContext, loginDetails.OrgName)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get organization from name")
+		log.Error().Err(err).Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("failed to get organization from name")
 		middleware.ReturnError(w, "login failed", 403)
 		return
 	}
 
 	results, err := h.authenticator.Login(req.Context(), orgData, loginDetails)
 	if err != nil {
-		log.Error().Err(err).Msg("login failed")
+		log.Error().Err(err).Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("login failed")
 		if req.Context().Err() != nil {
 			middleware.ReturnError(w, "internal server error", 500)
 			return
@@ -211,7 +212,7 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Info().Str("OrgCID", orgData.OrgCID).Msg("setting orgCID in cookie")
+	log.Info().Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Str("OrgCID", orgData.OrgCID).Msg("setting orgCID in cookie")
 	if err := h.secureCookie.SetAuthCookie(w, results["access_token"], orgData.OrgCID, orgData.SubscriptionID); err != nil {
 		middleware.ReturnError(w, "internal cookie failure", 500)
 		return
@@ -251,6 +252,7 @@ func (h *AuthHandlers) Forgot(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.Info().Str("user", forgotDetails.Username).Str("org", forgotDetails.OrgName).Msg("failed to get organization from name")
 	orgData, err := h.getOrgByName(req.Context(), systemContext, forgotDetails.OrgName)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get organization from name")
@@ -351,7 +353,7 @@ func (h *AuthHandlers) ChangePwd(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "error reading changepwd data", 500)
 		return
 	}
-
+	log.Info().Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("changepwd called")
 	if err := h.validate.Struct(loginDetails); err != nil {
 		middleware.ReturnError(w, "validation failure "+err.Error(), 500)
 		return
@@ -359,12 +361,13 @@ func (h *AuthHandlers) ChangePwd(w http.ResponseWriter, req *http.Request) {
 
 	orgData, err := h.getOrgByName(req.Context(), systemContext, loginDetails.OrgName)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get organization from name")
+		log.Error().Err(err).Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("failed to get organization from name")
 		middleware.ReturnError(w, "forgot password confirm failed", 403)
 		return
 	}
 
 	if _, err := h.authenticator.SetNewPassword(req.Context(), orgData, loginDetails); err != nil {
+		log.Error().Err(err).Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("set new password failed")
 		middleware.ReturnError(w, "set new password failed", 403)
 		return
 	}

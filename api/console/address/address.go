@@ -533,7 +533,7 @@ func (h *AddressHandlers) getSubscriptionDetails(userContext am.UserContext, org
 		case am.SubscriptionMonthlySmall:
 			return 1, 25
 		case am.SubscriptionMonthlyMedium:
-			return 3, 200
+			return 3, 260
 		case am.SubscriptionEnterprise:
 			return 200, 10000
 		}
