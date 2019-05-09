@@ -721,6 +721,11 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 		filter.Filters.AddString("header_pair_values", headerValue)
 	}
 
+	responseURL := values.Get("url")
+	if responseURL != "" {
+		filter.Filters.AddString("url", responseURL)
+	}
+
 	ipAddress := values.Get("ip_address")
 	if ipAddress != "" {
 		filter.Filters.AddString("ip_address", ipAddress)
@@ -759,6 +764,29 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 	startLoadHostAddress := values.Get("starts_original_host_address")
 	if startLoadHostAddress != "" {
 		filter.Filters.AddString("starts_load_host_address", startLoadHostAddress)
+	}
+
+	serverType := values.Get("server_type")
+	if serverType != "" {
+		filter.Filters.AddString("server_type", serverType)
+	}
+
+	urlRequestTime := values.Get("url_request_timestamp")
+	if urlRequestTime != "" {
+		urlRequestTimestamp, err := strconv.ParseInt(urlRequestTime, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("url_request_timestamp", urlRequestTimestamp)
+	}
+
+	responseTime := values.Get("response_timestamp")
+	if responseTime != "" {
+		responseTimestamp, err := strconv.ParseInt(responseTime, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddInt64("response_timestamp", responseTimestamp)
 	}
 
 	limit := values.Get("limit")
