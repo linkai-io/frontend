@@ -146,7 +146,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 1000}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 100}, true
 }
 
 func testUserClient() am.UserService {
@@ -333,6 +333,6 @@ func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organiz
 		Deleted:                 false,
 		SubscriptionID:          am.SubscriptionEnterprise,
 		LimitHosts:              10000,
-		LimitTLD:                100,
+		LimitTLD:                3,
 	}
 }
