@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync/atomic"
 	"time"
 
@@ -54,7 +55,7 @@ func testWebClient() am.WebDataService {
 	}
 
 	webClient.GetURLListFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebResponseFilter) (int, []*am.URLListResponse, error) {
-		if filter.Start > 4 {
+		if filter.Start != math.MaxInt64 {
 			return userContext.GetOrgID(), make([]*am.URLListResponse, 0), nil
 		}
 
