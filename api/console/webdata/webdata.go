@@ -182,14 +182,14 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 	lastIndex = math.MaxInt64
 	for {
 		filters := &am.FilterType{}
-		filters.AddInt64("after_request_time", time.Now().Add(time.Hour*-(7*24)).UnixNano())
+		filters.AddInt64("after_request_time", time.Now().Add(time.Hour*-(2*24)).UnixNano())
 		filters.AddBool("is_domain_dependency", true)
 		filter := &am.WebResponseFilter{
 			OrgID:   userContext.GetOrgID(),
 			GroupID: groupID,
 			Start:   lastIndex,
 			Filters: filters,
-			Limit:   1000,
+			Limit:   500,
 		}
 		logger.Info().Msg("Retrieving urls for domain dependencies...")
 		oid, responses, err := h.webClient.GetURLList(req.Context(), userContext, filter)
