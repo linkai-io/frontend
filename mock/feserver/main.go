@@ -147,7 +147,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 100}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 103}, true
 }
 
 func testUserClient() am.UserService {
