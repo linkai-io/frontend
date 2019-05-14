@@ -138,23 +138,6 @@ func (h *WebHandlers) GetURLList(w http.ResponseWriter, req *http.Request) {
 
 }
 
-type domainNode struct {
-	ID     string `json:"id"`
-	Origin int    `json:"origin"`
-}
-
-type domainLink struct {
-	Source string `json:"source"`
-	Target string `json:"target"`
-}
-
-type domainDependencyResponse struct {
-	Status  string       `json:"status"`
-	GroupID int          `json:"group_id"`
-	Nodes   []domainNode `json:"nodes"`
-	Links   []domainLink `json:"links"`
-}
-
 func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -172,14 +155,16 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 
 	uniqueNodes := make(map[string]struct{}, 0)
 	uniqueLinks := make(map[string]struct{}, 0)
-	dependencies := &domainDependencyResponse{
-		Nodes:   make([]domainNode, 0),
-		Links:   make([]domainLink, 0),
+	dependencies := &am.WebDomainDependency{
+		Nodes:   make([]*am.WebDomainNode, 0),
+		Links:   make([]*am.WebDomainLink, 0),
 		GroupID: groupID,
 	}
 
 	var lastIndex int64
 	lastIndex = math.MaxInt64
+	linkLimitPerRequest := 3000
+	firstRequest := true
 	for {
 		filters := &am.FilterType{}
 		filters.AddInt64("after_request_time", time.Now().Add(time.Hour*-(2*24)).UnixNano())
@@ -189,58 +174,57 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 			GroupID: groupID,
 			Start:   lastIndex,
 			Filters: filters,
-			Limit:   500,
+			Limit:   linkLimitPerRequest,
 		}
-		logger.Info().Msg("Retrieving urls for domain dependencies...")
-		oid, responses, err := h.webClient.GetURLList(req.Context(), userContext, filter)
+		logger.Info().Int64("lastIndex", lastIndex).Msg("Retrieving urls for domain dependencies...")
+
+		_, deps, err := h.webClient.GetDomainDependency(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting websites")
 			middleware.ReturnError(w, "internal error", 500)
 			return
 		}
 
-		if len(responses) == 0 {
-			logger.Info().Msg("No urls...")
+		if len(deps.Nodes) == 0 {
+			logger.Info().Msg("No more deps...")
 			break
 		}
 
-		for _, response := range responses {
-			if response.OrgID != userContext.GetOrgID() {
-				logger.Error().Err(am.ErrOrgIDMismatch).Msg("authorization failure")
-				middleware.ReturnError(w, "internal error", 500)
-				return
-			}
+		if deps.OrgID != userContext.GetOrgID() {
+			logger.Error().Err(am.ErrOrgIDMismatch).Int("deps.OrgID", deps.OrgID).Msg("authorization failure")
+			middleware.ReturnError(w, "internal error", 500)
+			return
+		}
 
-			if response.URLRequestTimestamp < lastIndex {
-				lastIndex = response.URLRequestTimestamp
-			}
+		// we don't need to bother copying to a different structure because we have everything after the first request
+		if len(deps.Links) < linkLimitPerRequest && firstRequest {
+			logger.Info().Int("num domains", len(deps.Links)).Msg("got all dependencies in one request")
+			dependencies = deps
+			break
+		}
+		firstRequest = false
 
-			if _, ok := uniqueNodes[response.HostAddress]; !ok {
-				uniqueNodes[response.HostAddress] = struct{}{}
-				dependencies.Nodes = append(dependencies.Nodes, domainNode{ID: response.HostAddress, Origin: 1})
-			}
+		if deps.LastIndex < lastIndex {
+			lastIndex = deps.LastIndex
+		}
 
-			for _, dependentURL := range response.URLs {
-				u, err := url.Parse(dependentURL.URL)
-				if err != nil {
-					continue
-				}
-				// add the target to the uniqueNode list
-				if _, ok := uniqueNodes[u.Host]; !ok {
-					uniqueNodes[u.Host] = struct{}{}
-					dependencies.Nodes = append(dependencies.Nodes, domainNode{ID: u.Host})
-				}
-				if _, ok := uniqueLinks[response.HostAddress+u.Host]; !ok {
-					uniqueLinks[response.HostAddress+u.Host] = struct{}{}
-					dependencies.Links = append(dependencies.Links, domainLink{Source: response.HostAddress, Target: u.Host})
-				}
+		for _, node := range deps.Nodes {
+			if _, ok := uniqueNodes[node.ID]; !ok {
+				uniqueNodes[node.ID] = struct{}{}
+				dependencies.Nodes = append(dependencies.Nodes, &am.WebDomainNode{ID: node.ID, Origin: node.Origin})
 			}
+		}
 
-			if oid != response.OrgID {
-				logger.Error().Err(err).Msg("authorization failure")
-				middleware.ReturnError(w, "failed to get addresses", 500)
-				return
+		for _, link := range deps.Links {
+			if _, ok := uniqueLinks[link.Source+link.Target]; !ok {
+				uniqueLinks[link.Source+link.Target] = struct{}{}
+				dependencies.Links = append(dependencies.Links, &am.WebDomainLink{Source: link.Source, Target: link.Target})
 			}
+		}
+
+		// if we have less than filter.Limit links, we have everything
+		if len(deps.Links) < linkLimitPerRequest {
+			break
 		}
 	}
 
@@ -248,7 +232,6 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 	data, _ := json.Marshal(dependencies)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
-	logger.Info().Msgf("dataA: %s", string(data))
 }
 
 type webResponse struct {

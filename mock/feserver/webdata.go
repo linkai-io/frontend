@@ -67,6 +67,30 @@ func testWebClient() am.WebDataService {
 		return userContext.GetOrgID(), responses, nil
 	}
 
+	webClient.GetDomainDependencyFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebResponseFilter) (int, *am.WebDomainDependency, error) {
+
+		r := &am.WebDomainDependency{
+			Status:    "OK",
+			OrgID:     userContext.GetOrgID(),
+			GroupID:   filter.GroupID,
+			LastIndex: math.MaxInt64,
+			Nodes: []*am.WebDomainNode{
+				&am.WebDomainNode{ID: "example.com", Origin: 1},
+				&am.WebDomainNode{ID: "js.com", Origin: 0},
+				&am.WebDomainNode{ID: "example1.com", Origin: 1},
+				&am.WebDomainNode{ID: "asdf.com", Origin: 0},
+				&am.WebDomainNode{ID: "exasdfdfafample.com", Origin: 0},
+			},
+			Links: []*am.WebDomainLink{
+				&am.WebDomainLink{Source: "example.com", Target: "js.com"},
+				&am.WebDomainLink{Source: "example.com", Target: "asdf.com"},
+				&am.WebDomainLink{Source: "example1.com", Target: "exasdfdfafample.com"},
+				&am.WebDomainLink{Source: "example1.com", Target: "asdf.com"},
+			},
+		}
+		return userContext.GetOrgID(), r, nil
+	}
+
 	webClient.GetCertificatesFn = func(ctx context.Context, userContext am.UserContext, filter *am.WebCertificateFilter) (int, []*am.WebCertificate, error) {
 		if filter.Start > 2 {
 			return userContext.GetOrgID(), make([]*am.WebCertificate, 0), nil
