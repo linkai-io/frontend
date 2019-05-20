@@ -179,10 +179,10 @@ func (h *AddressHandlers) GetAddresses(w http.ResponseWriter, req *http.Request)
 	filter, err := h.ParseGetFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed parse url query parameters")
-		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		middleware.ReturnError(w, "invalid parameters supplied: "+err.Error(), 401)
 		return
 	}
-
+	logger.Info().Msgf("Getting address with filters: %#v", filter.Filters)
 	oid, addrs, err := h.addrClient.Get(req.Context(), userContext, filter)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to get addresses")
@@ -236,150 +236,283 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		Filters: &am.FilterType{},
 	}
 	log.Info().Msgf("parsing URL Filter: %#v\n", values)
-	ignored := values.Get("ignored")
+	ignored := values.Get(am.FilterIgnored)
 	if ignored == "true" {
-		filter.Filters.AddBool("ignored", true)
-	} else if ignored == "false" {
-		filter.Filters.AddBool("ignored", false)
+		filter.Filters.AddBool(am.FilterIgnored, true)
 	}
 
-	wildcard := values.Get("wildcard")
+	notIgnored := values.Get("not_" + am.FilterIgnored)
+	if notIgnored == "true" {
+		filter.Filters.AddBool(am.FilterIgnored, false)
+	}
+
+	wildcard := values.Get(am.FilterWildcard)
 	if wildcard == "true" {
-		filter.Filters.AddBool("wildcard", true)
-	} else if wildcard == "false" {
-		filter.Filters.AddBool("wildcard", false)
+		filter.Filters.AddBool(am.FilterWildcard, true)
 	}
 
-	hosted := values.Get("hosted")
+	notWildcard := values.Get("not_" + am.FilterWildcard)
+	if notWildcard == "true" {
+		filter.Filters.AddBool(am.FilterWildcard, false)
+	}
+
+	hosted := values.Get(am.FilterHosted)
 	if hosted == "true" {
-		filter.Filters.AddBool("hosted", true)
-	} else if hosted == "false" {
-		filter.Filters.AddBool("hosted", false)
+		filter.Filters.AddBool(am.FilterHosted, true)
 	}
 
-	beforeScanned := values.Get("before_scanned")
+	notHosted := values.Get("not_" + am.FilterHosted)
+	if notHosted == "false" {
+		filter.Filters.AddBool(am.FilterHosted, false)
+	}
+
+	beforeScanned := values.Get(am.FilterBeforeScannedTime)
 	if beforeScanned != "" {
 		beforeScannedTime, err := strconv.ParseInt(beforeScanned, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_scanned_time", beforeScannedTime)
+		filter.Filters.AddInt64(am.FilterBeforeScannedTime, beforeScannedTime)
 	}
 
-	afterScanned := values.Get("after_scanned")
+	afterScanned := values.Get(am.FilterAfterScannedTime)
 	if afterScanned != "" {
 		afterScannedTime, err := strconv.ParseInt(afterScanned, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_scanned_time", afterScannedTime)
+		filter.Filters.AddInt64(am.FilterAfterScannedTime, afterScannedTime)
 	}
 
-	beforeSeen := values.Get("before_seen")
+	beforeSeen := values.Get(am.FilterBeforeSeenTime)
 	if beforeSeen != "" {
 		beforeSeenTime, err := strconv.ParseInt(beforeSeen, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		log.Info().Msgf("adding before seen: %s", beforeSeen)
-		filter.Filters.AddInt64("before_seen_time", beforeSeenTime)
+		filter.Filters.AddInt64(am.FilterBeforeSeenTime, beforeSeenTime)
 	}
 
-	afterSeen := values.Get("after_seen")
+	afterSeen := values.Get(am.FilterAfterSeenTime)
 	if afterSeen != "" {
 		afterSeenTime, err := strconv.ParseInt(afterSeen, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_seen_time", afterSeenTime)
+		filter.Filters.AddInt64(am.FilterAfterSeenTime, afterSeenTime)
 	}
 
-	beforeDiscovered := values.Get("before_discovered")
+	beforeDiscovered := values.Get(am.FilterBeforeDiscoveredTime)
 	if beforeDiscovered != "" {
 		beforeDiscoveredTime, err := strconv.ParseInt(beforeDiscovered, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_discovered_time", beforeDiscoveredTime)
+		filter.Filters.AddInt64(am.FilterBeforeDiscoveredTime, beforeDiscoveredTime)
 	}
 
-	afterDiscovered := values.Get("after_discovered")
+	afterDiscovered := values.Get(am.FilterAfterDiscoveredTime)
 	if afterDiscovered != "" {
 		afterDiscoveredTime, err := strconv.ParseInt(afterDiscovered, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_discovered_time", afterDiscoveredTime)
+		filter.Filters.AddInt64(am.FilterAfterDiscoveredTime, afterDiscoveredTime)
 	}
 
-	aboveConfidence := values.Get("above_confidence")
+	equalsConfidence := values.Get(am.FilterEqualsConfidence)
+	if equalsConfidence != "" {
+		equalsConfidenceValue, err := validateFloat(equalsConfidence, am.FilterEqualsConfidence, 0, 100)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32(am.FilterEqualsConfidence, float32(equalsConfidenceValue))
+	}
+
+	aboveConfidence := values.Get(am.FilterAboveConfidence)
 	if aboveConfidence != "" {
-		aboveConfidenceValue, err := strconv.ParseFloat(aboveConfidence, 32)
+		aboveConfidenceValue, err := validateFloat(aboveConfidence, am.FilterAboveConfidence, 0, 99)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddFloat32("above_confidence", float32(aboveConfidenceValue))
+		filter.Filters.AddFloat32(am.FilterAboveConfidence, float32(aboveConfidenceValue))
 	}
 
-	belowConfidence := values.Get("below_confidence")
+	belowConfidence := values.Get(am.FilterBelowConfidence)
 	if belowConfidence != "" {
-		belowConfidenceValue, err := strconv.ParseFloat(belowConfidence, 32)
+		belowConfidenceValue, err := validateFloat(belowConfidence, am.FilterBelowConfidence, 0, 100)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddFloat32("below_confidence", float32(belowConfidenceValue))
+		filter.Filters.AddFloat32(am.FilterBelowConfidence, float32(belowConfidenceValue))
 	}
 
-	aboveUserConfidence := values.Get("above_user_confidence")
+	equalsUserConfidence := values.Get(am.FilterEqualsUserConfidence)
+	if equalsUserConfidence != "" {
+		equalsUserConfidenceValue, err := validateFloat(equalsUserConfidence, am.FilterEqualsUserConfidence, 0, 100)
+		if err != nil {
+			return nil, err
+		}
+		filter.Filters.AddFloat32(am.FilterEqualsUserConfidence, float32(equalsUserConfidenceValue))
+	}
+
+	aboveUserConfidence := values.Get(am.FilterAboveUserConfidence)
 	if aboveUserConfidence != "" {
-		aboveUserConfidenceValue, err := strconv.ParseFloat(aboveUserConfidence, 32)
+		aboveUserConfidenceValue, err := validateFloat(aboveUserConfidence, am.FilterAboveUserConfidence, 0, 99)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddFloat32("above_user_confidence", float32(aboveUserConfidenceValue))
+		filter.Filters.AddFloat32(am.FilterAboveUserConfidence, float32(aboveUserConfidenceValue))
 	}
 
-	belowUserConfidence := values.Get("below_user_confidence")
+	belowUserConfidence := values.Get(am.FilterBelowUserConfidence)
 	if belowUserConfidence != "" {
-		belowUserConfidenceValue, err := strconv.ParseFloat(belowUserConfidence, 32)
+		belowUserConfidenceValue, err := validateFloat(belowUserConfidence, am.FilterBelowUserConfidence, 0, 100)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddFloat32("below_user_confidence", float32(belowUserConfidenceValue))
+		filter.Filters.AddFloat32(am.FilterBelowUserConfidence, float32(belowUserConfidenceValue))
 	}
 
-	nsRecord := values.Get("ns_record")
-	if nsRecord != "" {
-		nsRecordValue, err := strconv.Atoi(nsRecord)
-		if err != nil {
-			return nil, err
+	if records, ok := values[am.FilterEqualsNSRecord+"[]"]; ok {
+		for _, record := range records {
+			recordValue, ok := am.NSRecords[record]
+			if !ok {
+				return nil, errors.New("invalid ns record name for " + am.FilterEqualsNSRecord + "[]")
+			}
+			filter.Filters.AddInt32(am.FilterEqualsNSRecord, int32(recordValue))
 		}
-		filter.Filters.AddInt32("ns_record", int32(nsRecordValue))
 	}
 
-	ipAddress := values.Get("ip_address")
+	record := values.Get(am.FilterEqualsNSRecord)
+	if record != "" {
+		recordValue, ok := am.NSRecords[record]
+		if !ok {
+			return nil, errors.New("invalid ns record name for " + am.FilterEqualsNSRecord)
+		}
+		filter.Filters.AddInt32(am.FilterEqualsNSRecord, int32(recordValue))
+	}
+
+	if notRecords, ok := values[am.FilterNotNSRecord+"[]"]; ok {
+		for _, notRecord := range notRecords {
+			recordValue, ok := am.NSRecords[notRecord]
+			if !ok {
+				return nil, errors.New("invalid ns record name for " + am.FilterNotNSRecord + "[]")
+			}
+			filter.Filters.AddInt32(am.FilterNotNSRecord, int32(recordValue))
+		}
+	}
+
+	notRecord := values.Get(am.FilterNotNSRecord)
+	if notRecord != "" {
+		recordValue, ok := am.NSRecords[notRecord]
+		if !ok {
+			return nil, errors.New("invalid ns record name for " + am.FilterNotNSRecord)
+		}
+		filter.Filters.AddInt32(am.FilterNotNSRecord, int32(recordValue))
+	}
+
+	if ipAddresses, ok := values[am.FilterIPAddress+"[]"]; ok {
+		for _, ipAddress := range ipAddresses {
+			filter.Filters.AddString(am.FilterIPAddress, ipAddress)
+		}
+	}
+	ipAddress := values.Get(am.FilterIPAddress)
 	if ipAddress != "" {
-		filter.Filters.AddString("ip_address", ipAddress)
+		filter.Filters.AddString(am.FilterIPAddress, ipAddress)
 	}
 
-	hostAddress := values.Get("host_address")
+	if notIPAddresses, ok := values[am.FilterNotIPAddress+"[]"]; ok {
+		for _, notIPAddress := range notIPAddresses {
+			filter.Filters.AddString(am.FilterNotIPAddress, notIPAddress)
+		}
+	}
+	notIPAddress := values.Get(am.FilterNotIPAddress)
+	if notIPAddress != "" {
+		filter.Filters.AddString(am.FilterNotIPAddress, notIPAddress)
+	}
+
+	if hostAddresses, ok := values[am.FilterHostAddress+"[]"]; ok {
+		for _, hostAddress := range hostAddresses {
+			filter.Filters.AddString(am.FilterHostAddress, hostAddress)
+		}
+	}
+	hostAddress := values.Get(am.FilterHostAddress)
 	if hostAddress != "" {
-		filter.Filters.AddString("host_address", hostAddress)
+		filter.Filters.AddString(am.FilterHostAddress, hostAddress)
 	}
 
-	endHostAddress := values.Get("ends_host_address")
+	if notHostAddresses, ok := values[am.FilterNotHostAddress+"[]"]; ok {
+		for _, notHostAddress := range notHostAddresses {
+			filter.Filters.AddString(am.FilterNotHostAddress, notHostAddress)
+		}
+	}
+	notHostAddress := values.Get(am.FilterNotHostAddress)
+	if notHostAddress != "" {
+		filter.Filters.AddString(am.FilterNotHostAddress, notHostAddress)
+	}
+
+	if endHostAddresses, ok := values[am.FilterEndsHostAddress+"[]"]; ok {
+		for _, endHostAddress := range endHostAddresses {
+			filter.Filters.AddString(am.FilterEndsHostAddress, endHostAddress)
+		}
+	}
+	endHostAddress := values.Get(am.FilterEndsHostAddress)
 	if endHostAddress != "" {
-		filter.Filters.AddString("ends_host_address", endHostAddress)
+		filter.Filters.AddString(am.FilterEndsHostAddress, endHostAddress)
 	}
 
-	startHostAddress := values.Get("starts_host_address")
-	if startHostAddress != "" {
-		filter.Filters.AddString("starts_host_address", startHostAddress)
+	if notEndHostAddresses, ok := values[am.FilterNotEndsHostAddress+"[]"]; ok {
+		for _, notEndHostAddress := range notEndHostAddresses {
+			filter.Filters.AddString(am.FilterNotEndsHostAddress, notEndHostAddress)
+		}
+	}
+	notEndHostAddress := values.Get(am.FilterNotEndsHostAddress)
+	if notEndHostAddress != "" {
+		filter.Filters.AddString(am.FilterNotEndsHostAddress, notEndHostAddress)
 	}
 
-	startHost := values.Get("start_host")
-	if startHost != "" {
-		filter.Filters.AddString("start_host", startHost)
+	if startsHostAddresses, ok := values[am.FilterStartsHostAddress+"[]"]; ok {
+		for _, startsHostAddress := range startsHostAddresses {
+			filter.Filters.AddString(am.FilterStartsHostAddress, startsHostAddress)
+		}
+	}
+
+	startsHostAddress := values.Get(am.FilterStartsHostAddress)
+	if startsHostAddress != "" {
+		filter.Filters.AddString(am.FilterStartsHostAddress, startsHostAddress)
+	}
+
+	if notStartsHostAddresses, ok := values[am.FilterNotStartsHostAddress+"[]"]; ok {
+		for _, notStartsHostAddress := range notStartsHostAddresses {
+			filter.Filters.AddString(am.FilterNotStartsHostAddress, notStartsHostAddress)
+		}
+	}
+
+	notStartsHostAddress := values.Get(am.FilterNotStartsHostAddress)
+	if notStartsHostAddress != "" {
+		filter.Filters.AddString(am.FilterNotStartsHostAddress, notStartsHostAddress)
+	}
+
+	//FilterContainsHostAddress
+	if containsHostAddresses, ok := values[am.FilterContainsHostAddress+"[]"]; ok {
+		for _, containshostAddress := range containsHostAddresses {
+			filter.Filters.AddString(am.FilterContainsHostAddress, containshostAddress)
+		}
+	}
+	containsHostAddress := values.Get(am.FilterContainsHostAddress)
+	if containsHostAddress != "" {
+		filter.Filters.AddString(am.FilterContainsHostAddress, containsHostAddress)
+	}
+
+	if notContainsHostAddresses, ok := values[am.FilterNotContainsHostAddress+"[]"]; ok {
+		for _, notContainsHostAddress := range notContainsHostAddresses {
+			filter.Filters.AddString(am.FilterNotContainsHostAddress, notContainsHostAddress)
+		}
+	}
+	notContainsHostAddress := values.Get(am.FilterNotContainsHostAddress)
+	if notContainsHostAddress != "" {
+		filter.Filters.AddString(am.FilterNotContainsHostAddress, notContainsHostAddress)
 	}
 
 	start := values.Get("start")
@@ -406,6 +539,20 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 	}
 	log.Info().Msgf("restricting results with filter %v %#v", filter, filter.Filters)
 	return filter, nil
+}
+
+func validateFloat(in, field string, min, max float64) (float64, error) {
+	inValue, err := strconv.ParseFloat(in, 32)
+	if err != nil {
+		return 0, err
+	}
+	if inValue > max {
+		return 0, fmt.Errorf("value exceeds maximum of %f for %s", max, field)
+	}
+	if inValue < min {
+		return 0, fmt.Errorf("value exceeds minimum of %f for %s", min, field)
+	}
+	return inValue, nil
 }
 
 type PutResponse struct {

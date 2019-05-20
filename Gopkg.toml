@@ -38,6 +38,11 @@
   version = "1.4.0"
 
 [[constraint]]
+  name = "github.com/wirepair/gateway"
+  version = "1.1.2"
+
+
+[[constraint]]
    name = "github.com/linkai-io/am"
    branch = "master"
    source = "github.com/linkai-io/am"

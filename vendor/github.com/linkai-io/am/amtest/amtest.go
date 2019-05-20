@@ -173,6 +173,10 @@ func RunAggregates(db *pgx.ConnPool, t *testing.T) {
 		}
 		t.Logf("%s - %d %d\n", agg, start, end)
 	}
+
+	if _, err := db.Exec("REFRESH MATERIALIZED VIEW CONCURRENTLY am.webdata_server_counts_mv"); err != nil {
+		t.Fatalf("failed to run aggregation functions")
+	}
 }
 
 func CreateModuleConfig() *am.ModuleConfiguration {
@@ -505,7 +509,7 @@ func CreateMultiWebData(address *am.ScanGroupAddress, host, ip string) []*am.Web
 	return webData
 }
 
-func CreateMultiWebDataWithSub(address *am.ScanGroupAddress, host, ip string) []*am.WebData {
+func CreateMultiWebDataWithSub(address *am.ScanGroupAddress, host, ip string, total int) []*am.WebData {
 	webData := make([]*am.WebData, 0)
 	insertHost := host
 
@@ -513,7 +517,7 @@ func CreateMultiWebDataWithSub(address *am.ScanGroupAddress, host, ip string) []
 	urlIndex := 0
 	groupIdx := 0
 
-	for i := 1; i < 101; i++ {
+	for i := 1; i < total+1; i++ {
 		headers := make(map[string]string, 0)
 		headers["host"] = host
 		headers["server"] = fmt.Sprintf("Apache 1.0.%d", i)

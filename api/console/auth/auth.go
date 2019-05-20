@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/apex/gateway"
+	"github.com/wirepair/gateway"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/cookie"
 	"github.com/linkai-io/frontend/pkg/middleware"

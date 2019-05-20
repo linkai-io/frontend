@@ -7,7 +7,7 @@ import (
 	"github.com/linkai-io/frontend/api/console/org"
 	"github.com/linkai-io/frontend/pkg/initializers"
 
-	"github.com/apex/gateway"
+	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
 
