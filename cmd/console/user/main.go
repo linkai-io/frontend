@@ -7,7 +7,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
 
-	"github.com/apex/gateway"
+	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/api/console/user"
 	"github.com/linkai-io/frontend/pkg/initializers"

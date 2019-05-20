@@ -9,7 +9,7 @@ import (
 
 	"github.com/linkai-io/frontend/api/console/admin"
 
-	"github.com/apex/gateway"
+	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/lb/consul"

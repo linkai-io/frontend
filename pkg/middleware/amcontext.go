@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/apex/gateway"
 	"github.com/linkai-io/am/am"
 	"github.com/rs/zerolog/log"
+	"github.com/wirepair/gateway"
 )
 
 // UserContextExtractor create the extractor as a type so it's easier to mock/test
@@ -40,6 +40,7 @@ func UserCtx(next http.Handler) http.Handler {
 		requestContext, ok := gateway.RequestContext(r.Context())
 		if !ok {
 			ReturnError(w, "missing request context", 401)
+			return
 		}
 
 		if requestContext.Authorizer == nil || len(requestContext.Authorizer) == 0 {

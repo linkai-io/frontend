@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/apex/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/lb/consul"
@@ -13,6 +12,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/wirepair/gateway"
 )
 
 var addrClient am.AddressService

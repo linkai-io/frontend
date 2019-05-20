@@ -19,14 +19,6 @@
   version = "v0.39.0"
 
 [[projects]]
-  digest = "1:9447e63c3d421bca04c226442321db764b781fe45419d9f0d68c9ed5d6c5caf6"
-  name = "github.com/apex/gateway"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "21c9971861be4e8be9352e7a2540710b0c46610f"
-  version = "v1.1.1"
-
-[[projects]]
   branch = "master"
   digest = "1:7a9140c806333a78122763d08ec6c0d7358c7fff1df8cfbb01881c5dc46e24e5"
   name = "github.com/armon/go-metrics"
@@ -58,7 +50,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:6799cfdae0c0ebdfed3e36ceaa5f053eefdb9f20491c19c9eaf99be10a8e68db"
+  digest = "1:87cf24cde9f35643e66bcd0f773e85f162d4dcf76adb8329be1eea86e2036186"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +92,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "49378c3c0300fe39e80f4e4794a8b62daae83139"
-  version = "v1.19.29"
+  revision = "0db84dcbcc56669065730700b054eb6d1438a0f7"
+  version = "v1.19.33"
 
 [[projects]]
   digest = "1:d31234d2f5dff3058f63fc38a3994e508cb09af0501792466dd259fcd62aa678"
@@ -146,19 +138,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fe1f5a8a2884a361b21421c8a07df5f1a66ce7171904235bad427659a42b0d70"
+  digest = "1:81fdf324d5dc13c248c91911cf19d177f267ef044eece53833c311b5416685cd"
   name = "github.com/gammazero/deque"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2afb3858e9c73b567e0e05ea79906f4e1138bd4e"
+  revision = "50f5fc498a275c04ffa2b964fd97fc6d9c1bb709"
 
 [[projects]]
   branch = "master"
-  digest = "1:56d108880235425ce767421db2ed706fd4a164cc1507a2e7ecd7b85e009b23d6"
+  digest = "1:305d409bea6f12113d2e07ac327bed0ca95a4850ad2ed299d2c3a46d76879ddb"
   name = "github.com/gammazero/workerpool"
   packages = ["."]
   pruneopts = "UT"
-  revision = "88d534f22b564446dfea98776bf4ba1c1820b526"
+  revision = "567ff334f003fdfe4d8f93b2728133ccec9f1704"
 
 [[projects]]
   digest = "1:1c70b4d7285f792bd387c1adac08825715147fa210b3d2826ffd2bf56be9455b"
@@ -304,8 +296,8 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "domain-dep-method"
-  digest = "1:9ae3601fe70d1106aa2d21162f76500633e17abe89ab92145b737eb547d0440d"
+  branch = "enhanced-filters"
+  digest = "1:f94aa5f04940a6d13f2750a92500ec2d2547eccb1e38f2675281ef1bbd2b73b0"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -338,16 +330,16 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "57d4edaf2c452029f29b409fd50004f0c2695794"
+  revision = "62e520214808097dfd79145add4252123e994b62"
   source = "github.com/linkai-io/am"
 
 [[projects]]
-  digest = "1:3a3bc3c022d600ed4aced1d220d92c80bf3e42ff5acf95b59839f7af9ac53346"
+  digest = "1:77a6c878b740196013e4dfc5d9d04615dad5c82be266d0f0ca60bef945dd067c"
   name = "github.com/miekg/dns"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8aa92d4e02c501ba21e26fb92cf2fb9f23f56917"
-  version = "v1.1.9"
+  revision = "d49318b5a0e9de24ab05f8e507272f0f166dbf7a"
+  version = "v1.1.10"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -385,6 +377,14 @@
   pruneopts = "UT"
   revision = "acf3980132bfcdc48638724e6e3d9e5749b85999"
   version = "v1.14.3"
+
+[[projects]]
+  digest = "1:210ba8019d2abe6648d08bfed8211c6354b554f20b75252cd0be4253f45cad0f"
+  name = "github.com/wirepair/gateway"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "64387ed196b78f4e6a32a40afb103fbb3d8b6de4"
+  version = "v1.1.2"
 
 [[projects]]
   digest = "1:e2536f81005f70e0aad65c21ee4c71d58eafca8abdd354630facbc57beb67160"
@@ -436,7 +436,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:09e53dbf9657857d0a1d4b2b72817f91450cc143d9a5298c6ca27dc3b9092512"
+  digest = "1:9ea3503361a8d5b2d3ae4d839bba6b917e68fc18d5b3e57cd91c0a0f54130769"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -457,11 +457,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "a4d6f7feada510cc50e69a37b484cb0fdc6b7876"
+  revision = "3ec19112720433827bbce8be9342797f5a6aaaf9"
 
 [[projects]]
   branch = "master"
-  digest = "1:645cb780e4f3177111b40588f0a7f5950efcfb473e7ff41d8d81b2ba5eaa6ed5"
+  digest = "1:85a6bd7dc73d56e1208ebf9a904516a92aec6e9a7cebff5fef2a1ab24c01a308"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -471,15 +471,15 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "9f3314589c9a9136388751d9adae6b0ed400978a"
+  revision = "950ef44c6e079baf075030377d90bf0c7e4b7b7a"
 
 [[projects]]
   branch = "master"
-  digest = "1:4fc43e824f7e546353de724c00507b1d9c0bab56344b10c2330a97f166a0fba7"
+  digest = "1:3851a6d548ec5a808e396408f03a30b8d05ef4426db7ad8688f639b2d88b47bd"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "a5b02f93d862f065920dd6a40dddc66b60d0dec4"
+  revision = "61b9204099cb1bebc803c9ffb9b2d3acd9d457d9"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
@@ -531,7 +531,7 @@
   version = "v0.5.0"
 
 [[projects]]
-  digest = "1:04f2ff15fc59e1ddaf9900ad0e19e5b19586b31f9dafd4d592b617642b239d8f"
+  digest = "1:ae8b6cd1af38908c84050254b3fe998dcf6926c6e85d8e504a7402ab32da4569"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -546,8 +546,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
-  version = "v1.5.0"
+  revision = "4c25cacc810c02874000e4f7071286a8e96b2515"
+  version = "v1.6.0"
 
 [[projects]]
   branch = "master"
@@ -558,7 +558,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "d00d292a067ce1aa0017b40ca75437b42461fa61"
+  revision = "bb713bdc0e5239f2b68e560efbe1c701a6fe78f9"
 
 [[projects]]
   digest = "1:a1f1707d71a652caa4da563d6a98e1d1cf3a1500dec7059e5989753b09112e27"
@@ -614,7 +614,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/apex/gateway",
     "github.com/aws/aws-lambda-go/cfn",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
@@ -647,6 +646,7 @@
     "github.com/pkg/errors",
     "github.com/rs/zerolog",
     "github.com/rs/zerolog/log",
+    "github.com/wirepair/gateway",
     "google.golang.org/grpc",
     "google.golang.org/grpc/health/grpc_health_v1",
     "gopkg.in/go-playground/validator.v9",
