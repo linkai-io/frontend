@@ -519,8 +519,9 @@ type TechDataEntry struct {
 }
 
 type TechDetails struct {
-	Website string `json:"website"`
-	Icon    string `json:"icon"`
+	Website  string `json:"website"`
+	Icon     string `json:"icon"`
+	Category string `json:"category"`
 }
 
 func (t *TechDataEntry) Hash(techName string) string {
@@ -618,6 +619,7 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 				}
 				techData.TechDetails[tech].Icon = snapshot.TechIcons[i]
 				techData.TechDetails[tech].Website = snapshot.TechWebsites[i]
+				techData.TechDetails[tech].Category = snapshot.TechCategories[i]
 				hashes[entry.Hash(tech)] = struct{}{}
 				techData.Technologies[tech] = append(techData.Technologies[tech], entry)
 			}
