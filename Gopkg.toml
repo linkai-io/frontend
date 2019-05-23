@@ -44,5 +44,5 @@
 
 [[constraint]]
    name = "github.com/linkai-io/am"
-   branch = "master"
+   branch = "unified-view"
    source = "github.com/linkai-io/am"

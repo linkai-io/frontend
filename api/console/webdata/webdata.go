@@ -167,7 +167,7 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 	firstRequest := true
 	for {
 		filters := &am.FilterType{}
-		filters.AddInt64("after_request_time", time.Now().Add(time.Hour*-(2*24)).UnixNano())
+		filters.AddInt64(am.FilterWebAfterURLRequestTime, time.Now().Add(time.Hour*-(2*24)).UnixNano())
 		filters.AddBool("is_domain_dependency", true)
 		filter := &am.WebResponseFilter{
 			OrgID:   userContext.GetOrgID(),
@@ -326,7 +326,7 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 	lastIndex = math.MaxInt64
 	for {
 		filters := &am.FilterType{}
-		filters.AddInt64("after_response_time", time.Now().Add(time.Hour*48).UnixNano())
+		filters.AddInt64(am.FilterWebAfterResponseTime, time.Now().Add(time.Hour*48).UnixNano())
 		filter := &am.WebResponseFilter{
 			OrgID:   userContext.GetOrgID(),
 			GroupID: id,
@@ -566,7 +566,7 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 			Limit:   1000,
 			Filters: &am.FilterType{},
 		}
-		filter.Filters.AddInt64("after_response_time", time.Now().Add(time.Hour*(-24*7)).UnixNano()) // only search past 7 days
+		filter.Filters.AddInt64(am.FilterWebAfterResponseTime, time.Now().Add(time.Hour*(-24*7)).UnixNano()) // only search past 7 days
 		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting snapshots for tech data")
@@ -777,13 +777,13 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 		Limit:   0,
 	}
 
-	afterRequest := values.Get("after_request_time")
+	afterRequest := values.Get(am.FilterWebAfterURLRequestTime)
 	if afterRequest != "" {
 		afterRequestTime, err := strconv.ParseInt(afterRequest, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_request_time", afterRequestTime)
+		filter.Filters.AddInt64(am.FilterWebAfterURLRequestTime, afterRequestTime)
 	}
 
 	start := values.Get("start")
@@ -797,94 +797,94 @@ func (h *WebHandlers) ParseResponseFilterQuery(values url.Values, orgID, groupID
 	}
 
 	if len(values["with_header"]) > 0 {
-		filter.Filters.AddStrings("header_names", values["with_header"])
+		filter.Filters.AddStrings(am.FilterWebHeaderNames, values["with_header"])
 	}
 
 	if len(values["without_header"]) > 0 {
-		filter.Filters.AddStrings("not_header_names", values["without_header"])
+		filter.Filters.AddStrings(am.FilterWebNotHeaderNames, values["without_header"])
 	}
 
 	if len(values["mime_type"]) > 0 {
-		filter.Filters.AddStrings("mime_type", values["mime_type"])
+		filter.Filters.AddStrings(am.FilterWebMimeType, values["mime_type"])
 	}
 
-	if values.Get("latest_only") == "true" {
-		filter.Filters.AddBool("latest_only", true)
+	if values.Get(am.FilterWebLatestOnly) == "true" {
+		filter.Filters.AddBool(am.FilterWebLatestOnly, true)
 	}
 
-	headerName := values.Get("header_pair_names")
-	headerValue := values.Get("header_pair_values")
+	headerName := values.Get(am.FilterWebHeaderPairNames)
+	headerValue := values.Get(am.FilterWebHeaderPairValues)
 	if headerName != "" && headerValue != "" {
-		filter.Filters.AddString("header_pair_names", headerName)
-		filter.Filters.AddString("header_pair_values", headerValue)
+		filter.Filters.AddString(am.FilterWebHeaderPairNames, headerName)
+		filter.Filters.AddString(am.FilterWebHeaderPairValues, headerValue)
 	}
 
-	responseURL := values.Get("url")
+	responseURL := values.Get(am.FilterWebEqualsURL)
 	if responseURL != "" {
-		filter.Filters.AddString("url", responseURL)
+		filter.Filters.AddString(am.FilterWebEqualsURL, responseURL)
 	}
 
-	ipAddress := values.Get("ip_address")
+	ipAddress := values.Get(am.FilterWebEqualsIPAddress)
 	if ipAddress != "" {
-		filter.Filters.AddString("ip_address", ipAddress)
+		filter.Filters.AddString(am.FilterWebEqualsIPAddress, ipAddress)
 	}
 
-	hostAddress := values.Get("host_address")
+	hostAddress := values.Get(am.FilterWebEqualsHostAddress)
 	if hostAddress != "" {
-		filter.Filters.AddString("host_address", hostAddress)
+		filter.Filters.AddString(am.FilterWebEqualsHostAddress, hostAddress)
 	}
 
-	endHostAddress := values.Get("ends_host_address")
+	endHostAddress := values.Get(am.FilterWebEndsHostAddress)
 	if endHostAddress != "" {
-		filter.Filters.AddString("ends_host_address", endHostAddress)
+		filter.Filters.AddString(am.FilterWebEndsHostAddress, endHostAddress)
 	}
 
-	startHostAddress := values.Get("starts_host_address")
+	startHostAddress := values.Get(am.FilterWebStartsHostAddress)
 	if startHostAddress != "" {
-		filter.Filters.AddString("starts_host_address", startHostAddress)
+		filter.Filters.AddString(am.FilterWebStartsHostAddress, startHostAddress)
 	}
 
 	loadIPAddress := values.Get("original_ip_address")
 	if loadIPAddress != "" {
-		filter.Filters.AddString("load_ip_address", loadIPAddress)
+		filter.Filters.AddString(am.FilterWebEqualsLoadIPAddress, loadIPAddress)
 	}
 
 	loadHostAddress := values.Get("original_host_address")
 	if loadHostAddress != "" {
-		filter.Filters.AddString("host_address", loadHostAddress)
+		filter.Filters.AddString(am.FilterWebEqualsLoadHostAddress, loadHostAddress)
 	}
 
 	endLoadHostAddress := values.Get("ends_original_host_address")
 	if endLoadHostAddress != "" {
-		filter.Filters.AddString("ends_load_host_address", endLoadHostAddress)
+		filter.Filters.AddString(am.FilterWebEndsLoadHostAddress, endLoadHostAddress)
 	}
 
 	startLoadHostAddress := values.Get("starts_original_host_address")
 	if startLoadHostAddress != "" {
-		filter.Filters.AddString("starts_load_host_address", startLoadHostAddress)
+		filter.Filters.AddString(am.FilterWebStartsLoadHostAddress, startLoadHostAddress)
 	}
 
-	serverType := values.Get("server_type")
+	serverType := values.Get(am.FilterWebEqualsServerType)
 	if serverType != "" {
-		filter.Filters.AddString("server_type", serverType)
+		filter.Filters.AddString(am.FilterWebEqualsServerType, serverType)
 	}
 
-	urlRequestTime := values.Get("url_request_timestamp")
+	urlRequestTime := values.Get(am.FilterWebEqualsURLRequestTime)
 	if urlRequestTime != "" {
 		urlRequestTimestamp, err := strconv.ParseInt(urlRequestTime, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("url_request_timestamp", urlRequestTimestamp)
+		filter.Filters.AddInt64(am.FilterWebEqualsURLRequestTime, urlRequestTimestamp)
 	}
 
-	responseTime := values.Get("response_timestamp")
+	responseTime := values.Get(am.FilterWebEqualsResponseTime)
 	if responseTime != "" {
 		responseTimestamp, err := strconv.ParseInt(responseTime, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("response_timestamp", responseTimestamp)
+		filter.Filters.AddInt64(am.FilterWebEqualsResponseTime, responseTimestamp)
 	}
 
 	limit := values.Get("limit")
@@ -913,63 +913,63 @@ func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, gro
 		Limit:   0,
 	}
 
-	afterResponse := values.Get("after_response_time")
+	afterResponse := values.Get(am.FilterWebAfterResponseTime)
 	if afterResponse != "" {
 		afterResponseTime, err := strconv.ParseInt(afterResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_response_time", afterResponseTime)
+		filter.Filters.AddInt64(am.FilterWebAfterResponseTime, afterResponseTime)
 	}
 
-	beforeResponse := values.Get("before_response_time")
+	beforeResponse := values.Get(am.FilterWebBeforeResponseTime)
 	if beforeResponse != "" {
 		beforeResponseTime, err := strconv.ParseInt(beforeResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_response_time", beforeResponseTime)
+		filter.Filters.AddInt64(am.FilterWebBeforeResponseTime, beforeResponseTime)
 	}
 
-	afterValidTo := values.Get("after_valid_to")
+	afterValidTo := values.Get(am.FilterWebAfterValidTo)
 	if afterValidTo != "" {
 		validToValue, err := strconv.ParseInt(afterValidTo, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_valid_to", validToValue)
+		filter.Filters.AddInt64(am.FilterWebAfterValidTo, validToValue)
 	}
 
-	beforeValidTo := values.Get("before_valid_to")
+	beforeValidTo := values.Get(am.FilterWebBeforeValidTo)
 	if beforeValidTo != "" {
 		validToValue, err := strconv.ParseInt(beforeValidTo, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_valid_to", validToValue)
+		filter.Filters.AddInt64(am.FilterWebBeforeValidTo, validToValue)
 	}
 
-	afterValidFrom := values.Get("after_valid_from")
+	afterValidFrom := values.Get(am.FilterWebAfterValidFrom)
 	if afterValidFrom != "" {
 		validToValue, err := strconv.ParseInt(afterValidFrom, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_valid_from", validToValue)
+		filter.Filters.AddInt64(am.FilterWebAfterValidFrom, validToValue)
 	}
 
-	beforeValidFrom := values.Get("before_valid_from")
+	beforeValidFrom := values.Get(am.FilterWebBeforeValidFrom)
 	if beforeValidFrom != "" {
 		validToValue, err := strconv.ParseInt(beforeValidFrom, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("before_valid_from", validToValue)
+		filter.Filters.AddInt64(am.FilterWebBeforeValidFrom, validToValue)
 	}
 
-	hostAddress := values.Get("host_address")
+	hostAddress := values.Get(am.FilterWebEqualsHostAddress)
 	if hostAddress != "" {
-		filter.Filters.AddString("host_address", hostAddress)
+		filter.Filters.AddString(am.FilterWebEqualsHostAddress, hostAddress)
 	}
 
 	start := values.Get("start")
@@ -1007,23 +1007,29 @@ func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupI
 		Limit:   0,
 	}
 
-	afterResponse := values.Get("after_response_time")
+	afterResponse := values.Get(am.FilterWebAfterResponseTime)
 	if afterResponse != "" {
 		afterResponseTime, err := strconv.ParseInt(afterResponse, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		filter.Filters.AddInt64("after_response_time", afterResponseTime)
+		filter.Filters.AddInt64(am.FilterWebAfterResponseTime, afterResponseTime)
 	}
 
-	hostAddress := values.Get("host_address")
+	hostAddress := values.Get(am.FilterWebEqualsHostAddress)
 	if hostAddress != "" {
-		filter.Filters.AddString("host_address", hostAddress)
+		filter.Filters.AddString(am.FilterWebEqualsHostAddress, hostAddress)
 	}
 
-	techType := values.Get("tech_type")
+	dependentHostAddress := values.Get(am.FilterWebDependentHostAddress)
+	if dependentHostAddress != "" {
+		filter.Filters.AddString(am.FilterWebDependentHostAddress, dependentHostAddress)
+		filter.Filters.AddInt64(am.FilterWebAfterURLRequestTime, time.Now().Add(time.Hour*(-24*7)).UnixNano())
+	}
+
+	techType := values.Get(am.FilterWebTechType)
 	if techType != "" {
-		filter.Filters.AddString("tech_type", techType)
+		filter.Filters.AddString(am.FilterWebTechType, techType)
 	}
 
 	port := values.Get("port")
