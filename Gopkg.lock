@@ -50,7 +50,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:1ecf9e25fbf6930eefbfbde31b95d8a25efe8d81bb1214df840ea19925bfabfc"
+  digest = "1:09d209ed7ee889662d2f0d7c9e5dad5f5f7bc7298ec598ec8634bbf6cc8dd4d6"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -92,8 +92,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "43d801a05e0735a9069534588ec469235347e6c6"
-  version = "v1.19.36"
+  revision = "a4072efa95b76eb4d8eaebe701abee730cce3e60"
+  version = "v1.19.37"
 
 [[projects]]
   digest = "1:d31234d2f5dff3058f63fc38a3994e508cb09af0501792466dd259fcd62aa678"
@@ -218,12 +218,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:909c6473fd4087c25f4a2c0891f2d80e90cd8e326e77d01f9de590f0da0229e7"
+  digest = "1:3db4f016af6ec500e79f6987c6ad284143b21effd504a2a8462be6c41b8198f5"
   name = "github.com/hashicorp/consul"
   packages = ["api"]
   pruneopts = "UT"
-  revision = "34eff659dcc5503b6eb117733c9f7def63f01bad"
-  version = "v1.5.0"
+  revision = "40cec98468b829e5cdaacb0629b3e23a028db688"
+  version = "v1.5.1"
 
 [[projects]]
   digest = "1:af105c7c5dc0b4ae41991f122cae860b9600f7d226072c2a83127048c991660c"
@@ -297,7 +297,7 @@
 
 [[projects]]
   branch = "unified-view"
-  digest = "1:e62f767cf6ffe3bd9ecd0d90c5e054ed2cc25d86fecd81f5c93c1bc95b063460"
+  digest = "1:c9f723ed2b5fcc7de7ce821c5c610d70aa47082b4e6a84ff0bd08e6422302501"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -330,7 +330,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "a75b6fdaee94d275c7173a0cb38017f88baf1183"
+  revision = "cdcbb863cdbbe14f7b0fb151ba98670f37cc91e1"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -461,7 +461,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:85a6bd7dc73d56e1208ebf9a904516a92aec6e9a7cebff5fef2a1ab24c01a308"
+  digest = "1:7cba983d19f4aa6a154d73268dcc67a66bcc24bd7ee1c1b09d448a721dea0d9f"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -471,18 +471,18 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "950ef44c6e079baf075030377d90bf0c7e4b7b7a"
+  revision = "aaccbc9213b0974828f81aaac109d194880e3014"
 
 [[projects]]
   branch = "master"
-  digest = "1:76a8f15384d51164875fe295559d2e5a8180d67312bb040d0509b5b1114c0267"
+  digest = "1:087bd1835b210da9dba19b18fdc140f683fe1e1af3239226d4fcbd76da1a2e39"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "8097e1b27ff5e40620836729a9584e91b094b062"
+  revision = "0e01d883c5c5e3a1741118a9962f68d71b0a6ed4"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
@@ -606,12 +606,12 @@
   version = "v1.21.0"
 
 [[projects]]
-  digest = "1:7bb1ad654b21fb8f44c77c07840007d6796f70d42d1b470600f943a508ff8a72"
+  digest = "1:ee2db1a4b9111947da887ff2f8972dd2cc80906e521a2d856901fa699b4b51ee"
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
   pruneopts = "UT"
-  revision = "46b4b1e301c24cac870ffcb4ba5c8a703d1ef475"
-  version = "v9.28.0"
+  revision = "884d31b8cad6a1ec877f2400d555924cea03bbea"
+  version = "v9.29.0"
 
 [solve-meta]
   analyzer-name = "dep"

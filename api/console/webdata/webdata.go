@@ -1032,6 +1032,11 @@ func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupI
 		filter.Filters.AddString(am.FilterWebTechType, techType)
 	}
 
+	techTypeVersion := values.Get(am.FilterWebTechTypeVersion)
+	if techTypeVersion != "" {
+		filter.Filters.AddString(am.FilterWebTechTypeVersion, techTypeVersion)
+	}
+
 	port := values.Get("port")
 	if port != "" {
 		portValue, err := strconv.Atoi(port)
