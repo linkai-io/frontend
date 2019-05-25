@@ -458,6 +458,13 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	queryFilter, err := h.ParseSnapshotsFilterQuery(req.URL.Query(), userContext.GetOrgID(), id)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed parse url query parameters")
+		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		return
+	}
+
 	allSnapshots := make([]*am.WebSnapshot, 0)
 
 	var lastIndex int64
@@ -469,6 +476,8 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 			Limit:   1000,
 			Filters: &am.FilterType{},
 		}
+
+		filter.Filters = queryFilter.Filters
 		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting websites")

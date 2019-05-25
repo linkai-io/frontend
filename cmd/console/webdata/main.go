@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/clients/webdata"
 	"github.com/linkai-io/am/pkg/lb/consul"
@@ -12,6 +11,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/wirepair/gateway"
 
 	"github.com/linkai-io/am/am"
 )
@@ -37,7 +37,7 @@ func main() {
 	r.Route("/webdata", func(r chi.Router) {
 		r.Get("/stats", webHandlers.OrgStats)
 		r.Get("/group/{id}/snapshots", webHandlers.GetSnapshots)
-		r.Post("/group/{id}/snapshots/download", webHandlers.ExportSnapshots)
+		r.Get("/group/{id}/snapshots/download", webHandlers.ExportSnapshots)
 		r.Get("/group/{id}/certificates", webHandlers.GetCertificates)
 		r.Post("/group/{id}/certificates/download", webHandlers.ExportCertificates)
 		r.Get("/group/{id}/responses", webHandlers.GetResponses)

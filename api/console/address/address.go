@@ -985,7 +985,7 @@ func (h *AddressHandlers) ExportHostList(w http.ResponseWriter, req *http.Reques
 			Limit:   1000,
 			Filters: &am.FilterType{},
 		}
-		filter.Filters.AddString("start_host", lastHost)
+		filter.Filters.AddString(am.FilterStartsHostAddress, lastHost)
 		oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting addresses")
