@@ -50,7 +50,7 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:09d209ed7ee889662d2f0d7c9e5dad5f5f7bc7298ec598ec8634bbf6cc8dd4d6"
+  digest = "1:1e7f1b39ef32df969c5e3076bead056974e34d8b28b8948898fa566501dd57bf"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -92,8 +92,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "a4072efa95b76eb4d8eaebe701abee730cce3e60"
-  version = "v1.19.37"
+  revision = "8943f83bb1e98c94710f767576fe17cc29adb4dd"
+  version = "v1.19.38"
 
 [[projects]]
   digest = "1:d31234d2f5dff3058f63fc38a3994e508cb09af0501792466dd259fcd62aa678"
@@ -330,16 +330,16 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "cdcbb863cdbbe14f7b0fb151ba98670f37cc91e1"
+  revision = "eb44ea9ac881b1f2b21bdfc9f24a116ba293d76d"
   source = "github.com/linkai-io/am"
 
 [[projects]]
-  digest = "1:2c94f9293f5e811de26d526b51d9b3c7a0145c9b2ff68f70ad08c49630270889"
+  digest = "1:bb576d748d34ebc8f2598cd29cd00b0d8dd959c54bfbbc2cef2feb5f8a235846"
   name = "github.com/miekg/dns"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a2c73fb86d62c6fc8391d163814396a338cbcedf"
-  version = "v1.1.12"
+  revision = "d16ecb693e3f8d524769fefce2192a4c92207ff9"
+  version = "v1.1.13"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -475,14 +475,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:087bd1835b210da9dba19b18fdc140f683fe1e1af3239226d4fcbd76da1a2e39"
+  digest = "1:94c860578f679ed05a51f2062266ed10a2a4fa7f79987cad7e1556b2d33d9a37"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "0e01d883c5c5e3a1741118a9962f68d71b0a6ed4"
+  revision = "9cd6430ef91e39e1a0ec0470cf1321a33ef1b887"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
