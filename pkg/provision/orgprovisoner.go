@@ -292,7 +292,7 @@ func (p *OrgProvision) createUserPool(ctx context.Context, orgData *am.Organizat
 	userPool := &cip.CreateUserPoolInput{
 		AdminCreateUserConfig: &cip.AdminCreateUserConfigType{
 			AllowAdminCreateUserOnly:  aws.Bool(true),
-			UnusedAccountValidityDays: aws.Int64(5),
+			UnusedAccountValidityDays: aws.Int64(14),
 			InviteMessageTemplate: &cip.MessageTemplateType{
 				EmailSubject: aws.String(WelcomeTitleMsg),
 				EmailMessage: aws.String(fmt.Sprintf(WelcomeSubjectMsg, orgData.FirstName, p.loginURL, orgData.OrgName)),
