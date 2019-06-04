@@ -40,7 +40,7 @@ type PolicyStatement struct {
 type Container struct {
 	env       string
 	region    string
-	iam       *iam.IAM
+	iam       *iam.Client
 	policyMap map[string]*events.APIGatewayCustomAuthorizerPolicy // rolename (owner/admin) : policy
 }
 

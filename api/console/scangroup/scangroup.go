@@ -29,7 +29,8 @@ type ScanGroupDetails struct {
 	GroupName          string   `json:"group_name" validate:"required,gte=1,lte=128,excludesall=/"`
 	CustomSubNames     []string `json:"custom_sub_names" validate:"omitempty,max=100,dive,gte=1,lte=128,subdomain"`
 	CustomPorts        []int32  `json:"custom_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
-	ConcurrentRequests int32    `json:"concurrent_requests" validate:"required,gte=1,lte=10"` // lte 25, beta is limited to 10
+	ConcurrentRequests int32    `json:"concurrent_requests" validate:"required,gte=1,lte=20"` // lte 25, beta is limited to 10
+	ArchiveAfterDays   int32    `json:"archive_after_days" validate:"required,gte=2,lte=14"`
 }
 
 type ScanGroupEnv struct {
@@ -293,6 +294,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	group.ModifiedTime = now
 	group.OriginalInputS3URL = "s3://empty"
 	group.Paused = true
+	group.ArchiveAfterDays = groupDetails.ArchiveAfterDays
 
 	group.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
@@ -402,6 +404,7 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 
 	original.GroupName = updatedGroup.GroupName
 	original.ModifiedByID = userContext.GetUserID()
+	original.ArchiveAfterDays = updatedGroup.ArchiveAfterDays
 	original.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
 			RequestsPerSecond: updatedGroup.ConcurrentRequests,
@@ -532,7 +535,7 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 	}
 
 	if err != nil {
-		logger.Error().Err(err).Msg("deletion failure")
+		logger.Error().Err(err).Msg("update failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
 	}

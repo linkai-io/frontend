@@ -46,154 +46,6 @@ const (
 	UsGovWest1RegionID = "us-gov-west-1" // AWS GovCloud (US).
 )
 
-// Service identifiers
-const (
-	A4bServiceID                          = "a4b"                          // A4b.
-	AcmServiceID                          = "acm"                          // Acm.
-	AcmPcaServiceID                       = "acm-pca"                      // AcmPca.
-	ApiEcrServiceID                       = "api.ecr"                      // ApiEcr.
-	ApiMediatailorServiceID               = "api.mediatailor"              // ApiMediatailor.
-	ApiPricingServiceID                   = "api.pricing"                  // ApiPricing.
-	ApiSagemakerServiceID                 = "api.sagemaker"                // ApiSagemaker.
-	ApigatewayServiceID                   = "apigateway"                   // Apigateway.
-	ApplicationAutoscalingServiceID       = "application-autoscaling"      // ApplicationAutoscaling.
-	Appstream2ServiceID                   = "appstream2"                   // Appstream2.
-	AppsyncServiceID                      = "appsync"                      // Appsync.
-	AthenaServiceID                       = "athena"                       // Athena.
-	AutoscalingServiceID                  = "autoscaling"                  // Autoscaling.
-	AutoscalingPlansServiceID             = "autoscaling-plans"            // AutoscalingPlans.
-	BatchServiceID                        = "batch"                        // Batch.
-	BudgetsServiceID                      = "budgets"                      // Budgets.
-	CeServiceID                           = "ce"                           // Ce.
-	ChimeServiceID                        = "chime"                        // Chime.
-	Cloud9ServiceID                       = "cloud9"                       // Cloud9.
-	ClouddirectoryServiceID               = "clouddirectory"               // Clouddirectory.
-	CloudformationServiceID               = "cloudformation"               // Cloudformation.
-	CloudfrontServiceID                   = "cloudfront"                   // Cloudfront.
-	CloudhsmServiceID                     = "cloudhsm"                     // Cloudhsm.
-	Cloudhsmv2ServiceID                   = "cloudhsmv2"                   // Cloudhsmv2.
-	CloudsearchServiceID                  = "cloudsearch"                  // Cloudsearch.
-	CloudsearchdomainServiceID            = "cloudsearchdomain"            // Cloudsearchdomain.
-	CloudtrailServiceID                   = "cloudtrail"                   // Cloudtrail.
-	CodebuildServiceID                    = "codebuild"                    // Codebuild.
-	CodecommitServiceID                   = "codecommit"                   // Codecommit.
-	CodedeployServiceID                   = "codedeploy"                   // Codedeploy.
-	CodepipelineServiceID                 = "codepipeline"                 // Codepipeline.
-	CodestarServiceID                     = "codestar"                     // Codestar.
-	CognitoIdentityServiceID              = "cognito-identity"             // CognitoIdentity.
-	CognitoIdpServiceID                   = "cognito-idp"                  // CognitoIdp.
-	CognitoSyncServiceID                  = "cognito-sync"                 // CognitoSync.
-	ComprehendServiceID                   = "comprehend"                   // Comprehend.
-	ComprehendmedicalServiceID            = "comprehendmedical"            // Comprehendmedical.
-	ConfigServiceID                       = "config"                       // Config.
-	CurServiceID                          = "cur"                          // Cur.
-	DataIotServiceID                      = "data.iot"                     // DataIot.
-	DatapipelineServiceID                 = "datapipeline"                 // Datapipeline.
-	DatasyncServiceID                     = "datasync"                     // Datasync.
-	DaxServiceID                          = "dax"                          // Dax.
-	DevicefarmServiceID                   = "devicefarm"                   // Devicefarm.
-	DirectconnectServiceID                = "directconnect"                // Directconnect.
-	DiscoveryServiceID                    = "discovery"                    // Discovery.
-	DmsServiceID                          = "dms"                          // Dms.
-	DocdbServiceID                        = "docdb"                        // Docdb.
-	DsServiceID                           = "ds"                           // Ds.
-	DynamodbServiceID                     = "dynamodb"                     // Dynamodb.
-	Ec2ServiceID                          = "ec2"                          // Ec2.
-	Ec2metadataServiceID                  = "ec2metadata"                  // Ec2metadata.
-	EcsServiceID                          = "ecs"                          // Ecs.
-	ElasticacheServiceID                  = "elasticache"                  // Elasticache.
-	ElasticbeanstalkServiceID             = "elasticbeanstalk"             // Elasticbeanstalk.
-	ElasticfilesystemServiceID            = "elasticfilesystem"            // Elasticfilesystem.
-	ElasticloadbalancingServiceID         = "elasticloadbalancing"         // Elasticloadbalancing.
-	ElasticmapreduceServiceID             = "elasticmapreduce"             // Elasticmapreduce.
-	ElastictranscoderServiceID            = "elastictranscoder"            // Elastictranscoder.
-	EmailServiceID                        = "email"                        // Email.
-	EntitlementMarketplaceServiceID       = "entitlement.marketplace"      // EntitlementMarketplace.
-	EsServiceID                           = "es"                           // Es.
-	EventsServiceID                       = "events"                       // Events.
-	FirehoseServiceID                     = "firehose"                     // Firehose.
-	FmsServiceID                          = "fms"                          // Fms.
-	FsxServiceID                          = "fsx"                          // Fsx.
-	GameliftServiceID                     = "gamelift"                     // Gamelift.
-	GlacierServiceID                      = "glacier"                      // Glacier.
-	GlueServiceID                         = "glue"                         // Glue.
-	GreengrassServiceID                   = "greengrass"                   // Greengrass.
-	GuarddutyServiceID                    = "guardduty"                    // Guardduty.
-	HealthServiceID                       = "health"                       // Health.
-	IamServiceID                          = "iam"                          // Iam.
-	ImportexportServiceID                 = "importexport"                 // Importexport.
-	InspectorServiceID                    = "inspector"                    // Inspector.
-	IotServiceID                          = "iot"                          // Iot.
-	IotanalyticsServiceID                 = "iotanalytics"                 // Iotanalytics.
-	KinesisServiceID                      = "kinesis"                      // Kinesis.
-	KinesisanalyticsServiceID             = "kinesisanalytics"             // Kinesisanalytics.
-	KinesisvideoServiceID                 = "kinesisvideo"                 // Kinesisvideo.
-	KmsServiceID                          = "kms"                          // Kms.
-	LambdaServiceID                       = "lambda"                       // Lambda.
-	LicenseManagerServiceID               = "license-manager"              // LicenseManager.
-	LightsailServiceID                    = "lightsail"                    // Lightsail.
-	LogsServiceID                         = "logs"                         // Logs.
-	MachinelearningServiceID              = "machinelearning"              // Machinelearning.
-	MarketplacecommerceanalyticsServiceID = "marketplacecommerceanalytics" // Marketplacecommerceanalytics.
-	MediaconnectServiceID                 = "mediaconnect"                 // Mediaconnect.
-	MediaconvertServiceID                 = "mediaconvert"                 // Mediaconvert.
-	MedialiveServiceID                    = "medialive"                    // Medialive.
-	MediapackageServiceID                 = "mediapackage"                 // Mediapackage.
-	MediastoreServiceID                   = "mediastore"                   // Mediastore.
-	MeteringMarketplaceServiceID          = "metering.marketplace"         // MeteringMarketplace.
-	MghServiceID                          = "mgh"                          // Mgh.
-	MobileanalyticsServiceID              = "mobileanalytics"              // Mobileanalytics.
-	ModelsLexServiceID                    = "models.lex"                   // ModelsLex.
-	MonitoringServiceID                   = "monitoring"                   // Monitoring.
-	MqServiceID                           = "mq"                           // Mq.
-	MturkRequesterServiceID               = "mturk-requester"              // MturkRequester.
-	NeptuneServiceID                      = "neptune"                      // Neptune.
-	OpsworksServiceID                     = "opsworks"                     // Opsworks.
-	OpsworksCmServiceID                   = "opsworks-cm"                  // OpsworksCm.
-	OrganizationsServiceID                = "organizations"                // Organizations.
-	PinpointServiceID                     = "pinpoint"                     // Pinpoint.
-	PollyServiceID                        = "polly"                        // Polly.
-	RdsServiceID                          = "rds"                          // Rds.
-	RedshiftServiceID                     = "redshift"                     // Redshift.
-	RekognitionServiceID                  = "rekognition"                  // Rekognition.
-	ResourceGroupsServiceID               = "resource-groups"              // ResourceGroups.
-	RobomakerServiceID                    = "robomaker"                    // Robomaker.
-	Route53ServiceID                      = "route53"                      // Route53.
-	Route53domainsServiceID               = "route53domains"               // Route53domains.
-	Route53resolverServiceID              = "route53resolver"              // Route53resolver.
-	RuntimeLexServiceID                   = "runtime.lex"                  // RuntimeLex.
-	RuntimeSagemakerServiceID             = "runtime.sagemaker"            // RuntimeSagemaker.
-	S3ServiceID                           = "s3"                           // S3.
-	S3ControlServiceID                    = "s3-control"                   // S3Control.
-	SdbServiceID                          = "sdb"                          // Sdb.
-	SecretsmanagerServiceID               = "secretsmanager"               // Secretsmanager.
-	SecurityhubServiceID                  = "securityhub"                  // Securityhub.
-	ServerlessrepoServiceID               = "serverlessrepo"               // Serverlessrepo.
-	ServicecatalogServiceID               = "servicecatalog"               // Servicecatalog.
-	ServicediscoveryServiceID             = "servicediscovery"             // Servicediscovery.
-	ShieldServiceID                       = "shield"                       // Shield.
-	SmsServiceID                          = "sms"                          // Sms.
-	SnowballServiceID                     = "snowball"                     // Snowball.
-	SnsServiceID                          = "sns"                          // Sns.
-	SqsServiceID                          = "sqs"                          // Sqs.
-	SsmServiceID                          = "ssm"                          // Ssm.
-	StatesServiceID                       = "states"                       // States.
-	StoragegatewayServiceID               = "storagegateway"               // Storagegateway.
-	StreamsDynamodbServiceID              = "streams.dynamodb"             // StreamsDynamodb.
-	StsServiceID                          = "sts"                          // Sts.
-	SupportServiceID                      = "support"                      // Support.
-	SwfServiceID                          = "swf"                          // Swf.
-	TaggingServiceID                      = "tagging"                      // Tagging.
-	TransferServiceID                     = "transfer"                     // Transfer.
-	TranslateServiceID                    = "translate"                    // Translate.
-	WafServiceID                          = "waf"                          // Waf.
-	WafRegionalServiceID                  = "waf-regional"                 // WafRegional.
-	WorkdocsServiceID                     = "workdocs"                     // Workdocs.
-	WorkmailServiceID                     = "workmail"                     // Workmail.
-	WorkspacesServiceID                   = "workspaces"                   // Workspaces.
-	XrayServiceID                         = "xray"                         // Xray.
-)
-
 // NewDefaultResolver returns an Endpoint resolver that will be able
 // to resolve endpoints for: AWS Standard, AWS China, and AWS GovCloud (US).
 //
@@ -566,6 +418,24 @@ var awsPartition = partition{
 				"us-west-2":      endpoint{},
 			},
 		},
+		"appmesh": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"ap-northeast-2": endpoint{},
+				"ap-south-1":     endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ap-southeast-2": endpoint{},
+				"ca-central-1":   endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-east-2":      endpoint{},
+				"us-west-1":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
 		"appstream2": service{
 			Defaults: endpoint{
 				Protocols: []string{"https"},
@@ -734,6 +604,7 @@ var awsPartition = partition{
 			Endpoints: endpoints{
 				"ap-northeast-1": endpoint{},
 				"ap-southeast-1": endpoint{},
+				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
@@ -812,6 +683,7 @@ var awsPartition = partition{
 				},
 			},
 			Endpoints: endpoints{
+				"ap-east-1":      endpoint{},
 				"ap-northeast-1": endpoint{},
 				"ap-northeast-2": endpoint{},
 				"ap-south-1":     endpoint{},
@@ -881,6 +753,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
 				"eu-west-1":      endpoint{},
 				"eu-west-2":      endpoint{},
 				"eu-west-3":      endpoint{},
@@ -944,6 +817,7 @@ var awsPartition = partition{
 		"codedeploy": service{
 
 			Endpoints: endpoints{
+				"ap-east-1":      endpoint{},
 				"ap-northeast-1": endpoint{},
 				"ap-northeast-2": endpoint{},
 				"ap-south-1":     endpoint{},
@@ -1131,6 +1005,19 @@ var awsPartition = partition{
 				Unresolveable: boxedTrue,
 			},
 		},
+		"data.mediastore": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"ap-northeast-2": endpoint{},
+				"ap-southeast-2": endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
+				"eu-west-1":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
 		"datapipeline": service{
 
 			Endpoints: endpoints{
@@ -1230,6 +1117,18 @@ var awsPartition = partition{
 		"docdb": service{
 
 			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{
+					Hostname: "rds.ap-northeast-1.amazonaws.com",
+					CredentialScope: credentialScope{
+						Region: "ap-northeast-1",
+					},
+				},
+				"ap-northeast-2": endpoint{
+					Hostname: "rds.ap-northeast-2.amazonaws.com",
+					CredentialScope: credentialScope{
+						Region: "ap-northeast-2",
+					},
+				},
 				"eu-central-1": endpoint{
 					Hostname: "rds.eu-central-1.amazonaws.com",
 					CredentialScope: credentialScope{
@@ -1400,6 +1299,7 @@ var awsPartition = partition{
 		"elasticbeanstalk": service{
 
 			Endpoints: endpoints{
+				"ap-east-1":      endpoint{},
 				"ap-northeast-1": endpoint{},
 				"ap-northeast-2": endpoint{},
 				"ap-south-1":     endpoint{},
@@ -1425,6 +1325,7 @@ var awsPartition = partition{
 				"ap-northeast-2": endpoint{},
 				"ap-southeast-1": endpoint{},
 				"ap-southeast-2": endpoint{},
+				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
 				"eu-west-2":      endpoint{},
@@ -1503,10 +1404,12 @@ var awsPartition = partition{
 		"email": service{
 
 			Endpoints: endpoints{
-				"eu-central-1": endpoint{},
-				"eu-west-1":    endpoint{},
-				"us-east-1":    endpoint{},
-				"us-west-2":    endpoint{},
+				"ap-south-1":     endpoint{},
+				"ap-southeast-2": endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-west-1":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-west-2":      endpoint{},
 			},
 		},
 		"entitlement.marketplace": service{
@@ -1579,6 +1482,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
 				"eu-west-1":      endpoint{},
 				"eu-west-2":      endpoint{},
 				"eu-west-3":      endpoint{},
@@ -1595,11 +1499,15 @@ var awsPartition = partition{
 			},
 			Endpoints: endpoints{
 				"ap-northeast-1": endpoint{},
+				"ap-northeast-2": endpoint{},
+				"ap-southeast-1": endpoint{},
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
+				"us-west-1":      endpoint{},
 				"us-west-2":      endpoint{},
 			},
 		},
@@ -1703,6 +1611,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
 				"eu-west-1":      endpoint{},
 				"eu-west-2":      endpoint{},
 				"eu-west-3":      endpoint{},
@@ -1793,6 +1702,18 @@ var awsPartition = partition{
 				"us-west-2":      endpoint{},
 			},
 		},
+		"kafka": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ap-southeast-2": endpoint{},
+				"eu-west-1":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-east-2":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
 		"kinesis": service{
 
 			Endpoints: endpoints{
@@ -1818,11 +1739,16 @@ var awsPartition = partition{
 		"kinesisanalytics": service{
 
 			Endpoints: endpoints{
-				"eu-central-1": endpoint{},
-				"eu-west-1":    endpoint{},
-				"us-east-1":    endpoint{},
-				"us-east-2":    endpoint{},
-				"us-west-2":    endpoint{},
+				"ap-northeast-1": endpoint{},
+				"ap-northeast-2": endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ap-southeast-2": endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-east-2":      endpoint{},
+				"us-west-2":      endpoint{},
 			},
 		},
 		"kinesisvideo": service{
@@ -1894,11 +1820,16 @@ var awsPartition = partition{
 				"ap-south-1":     endpoint{},
 				"ap-southeast-1": endpoint{},
 				"ap-southeast-2": endpoint{},
+				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
 				"eu-west-1":      endpoint{},
 				"eu-west-2":      endpoint{},
+				"eu-west-3":      endpoint{},
+				"sa-east-1":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
+				"us-west-1":      endpoint{},
 				"us-west-2":      endpoint{},
 			},
 		},
@@ -2033,6 +1964,7 @@ var awsPartition = partition{
 				"ap-northeast-2": endpoint{},
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
+				"eu-north-1":     endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-west-2":      endpoint{},
@@ -2145,6 +2077,12 @@ var awsPartition = partition{
 					Hostname: "rds.ap-northeast-1.amazonaws.com",
 					CredentialScope: credentialScope{
 						Region: "ap-northeast-1",
+					},
+				},
+				"ap-northeast-2": endpoint{
+					Hostname: "rds.ap-northeast-2.amazonaws.com",
+					CredentialScope: credentialScope{
+						Region: "ap-northeast-2",
 					},
 				},
 				"ap-south-1": endpoint{
@@ -2280,6 +2218,37 @@ var awsPartition = partition{
 				"eu-west-2":      endpoint{},
 				"eu-west-3":      endpoint{},
 				"sa-east-1":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-east-2":      endpoint{},
+				"us-west-1":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
+		"projects.iot1click": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-east-2":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
+		"ram": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"ap-northeast-2": endpoint{},
+				"ap-south-1":     endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ap-southeast-2": endpoint{},
+				"ca-central-1":   endpoint{},
+				"eu-central-1":   endpoint{},
+				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
+				"eu-west-3":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
 				"us-west-1":      endpoint{},
@@ -3221,7 +3190,11 @@ var awsPartition = partition{
 				Protocols: []string{"https"},
 			},
 			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
 				"ap-northeast-2": endpoint{},
+				"ap-south-1":     endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ca-central-1":   endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
@@ -3650,7 +3623,12 @@ var awscnPartition = partition{
 		"mediaconvert": service{
 
 			Endpoints: endpoints{
-				"cn-northwest-1": endpoint{},
+				"cn-northwest-1": endpoint{
+					Hostname: "subscribe.mediaconvert.cn-northwest-1.amazonaws.com.cn",
+					CredentialScope: credentialScope{
+						Region: "cn-northwest-1",
+					},
+				},
 			},
 		},
 		"monitoring": service{
@@ -3838,6 +3816,15 @@ var awsusgovPartition = partition{
 				"us-gov-west-1": endpoint{},
 			},
 		},
+		"acm-pca": service{
+			Defaults: endpoint{
+				Protocols: []string{"https"},
+			},
+			Endpoints: endpoints{
+				"us-gov-east-1": endpoint{},
+				"us-gov-west-1": endpoint{},
+			},
+		},
 		"api.ecr": service{
 
 			Endpoints: endpoints{
@@ -3878,6 +3865,7 @@ var awsusgovPartition = partition{
 		"athena": service{
 
 			Endpoints: endpoints{
+				"us-gov-east-1": endpoint{},
 				"us-gov-west-1": endpoint{},
 			},
 		},
@@ -3994,6 +3982,7 @@ var awsusgovPartition = partition{
 		"ds": service{
 
 			Endpoints: endpoints{
+				"us-gov-east-1": endpoint{},
 				"us-gov-west-1": endpoint{},
 			},
 		},
@@ -4221,6 +4210,19 @@ var awsusgovPartition = partition{
 			Endpoints: endpoints{
 				"us-gov-east-1": endpoint{},
 				"us-gov-west-1": endpoint{},
+			},
+		},
+		"organizations": service{
+			PartitionEndpoint: "aws-us-gov-global",
+			IsRegionalized:    boxedFalse,
+
+			Endpoints: endpoints{
+				"aws-us-gov-global": endpoint{
+					Hostname: "organizations.us-gov-west-1.amazonaws.com",
+					CredentialScope: credentialScope{
+						Region: "us-gov-west-1",
+					},
+				},
 			},
 		},
 		"polly": service{

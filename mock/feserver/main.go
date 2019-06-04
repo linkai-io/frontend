@@ -133,8 +133,8 @@ func main() {
 
 	// events
 	r.Route("/event", func(r chi.Router) {
-		r.Get("/events", eventHandlers.Get)
-		r.Patch("/events", eventHandlers.MarkRead)
+		r.Get("/group/{id}/events", eventHandlers.Get)
+		r.Patch("/group/{id}/events", eventHandlers.MarkRead)
 		r.Get("/settings", eventHandlers.GetSettings)
 		r.Patch("/settings", eventHandlers.UpdateSettings)
 	})
@@ -203,7 +203,7 @@ func testEventClient() am.EventService {
 	eventClient := &mock.EventService{}
 	eventLock := &sync.RWMutex{}
 
-	events := make(map[int64]*am.Event, 4)
+	events := make(map[int64]*am.Event, 5)
 	events[0] = &am.Event{
 		NotificationID: 0,
 		OrgID:          0,
@@ -238,6 +238,15 @@ func testEventClient() am.EventService {
 		TypeID:         am.EventCertExpiring,
 		EventTimestamp: time.Now().UnixNano(),
 		Data:           []string{"example.com", "443", "24 hours"},
+		Read:           false,
+	}
+	events[4] = &am.Event{
+		NotificationID: 4,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventNewWebTech,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"http://example.com", "80", "jQuery", "1.2.3", "https://new.example.com", "443", "jQuery", "1.2.4"},
 		Read:           false,
 	}
 
@@ -275,9 +284,14 @@ func testEventClient() am.EventService {
 		eventLock.Lock()
 		defer eventLock.Unlock()
 		cp := make([]*am.Event, 0)
+		var groupID int32
+		val, ok := filter.Filters.Int32(am.FilterEventGroupID)
+		if ok {
+			groupID = val
+		}
 		for _, v := range events {
 			v.OrgID = userContext.GetOrgID()
-			v.GroupID = 1
+			v.GroupID = int(groupID)
 			cp = append(cp, v)
 		}
 		return cp, nil

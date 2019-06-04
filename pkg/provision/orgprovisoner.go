@@ -64,8 +64,8 @@ type OrgProvision struct {
 	loginURL   string
 	logoutURL  string
 	resetURL   string
-	svc        *cip.CognitoIdentityProvider
-	fedSvc     *identity.CognitoIdentity
+	svc        *cip.Client
+	fedSvc     *identity.Client
 }
 
 // NewOrgProvision in the env/region
@@ -468,8 +468,8 @@ func (p *OrgProvision) createAppClient(ctx context.Context, orgData *am.Organiza
 func (p *OrgProvision) createIdentityPool(ctx context.Context, orgData *am.Organization, roles map[string]string) (string, error) {
 	providerName := fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", p.region, orgData.UserPoolID)
 
-	providers := make([]identity.Provider, 0)
-	providers = append(providers, identity.Provider{
+	providers := make([]identity.CognitoIdentityProvider, 0)
+	providers = append(providers, identity.CognitoIdentityProvider{
 		ClientId:             aws.String(orgData.UserPoolAppClientID),
 		ProviderName:         aws.String(providerName),
 		ServerSideTokenCheck: aws.Bool(true),

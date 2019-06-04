@@ -19,7 +19,7 @@ import (
 type AWSAuthenticate struct {
 	env    string
 	region string
-	svc    *cip.CognitoIdentityProvider
+	svc    *cip.Client
 
 	tokener token.Tokener
 }
