@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/lb/consul"
@@ -13,6 +12,7 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/wirepair/gateway"
 )
 
 var eventClient am.EventService
@@ -34,8 +34,8 @@ func main() {
 	eventHandlers := event.New(eventClient)
 
 	r.Route("/event", func(r chi.Router) {
-		r.Get("/events", eventHandlers.Get)
-		r.Patch("/events", eventHandlers.MarkRead)
+		r.Get("/group/{id}/events", eventHandlers.Get)
+		r.Patch("/group/{id}/events", eventHandlers.MarkRead)
 		r.Get("/settings", eventHandlers.GetSettings)
 		r.Patch("/settings", eventHandlers.UpdateSettings)
 	})

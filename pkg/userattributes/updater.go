@@ -11,7 +11,7 @@ import (
 type Updater struct {
 	env    string
 	region string
-	svc    *cip.CognitoIdentityProvider
+	svc    *cip.Client
 }
 
 func New(env, region string) *Updater {

@@ -38,7 +38,7 @@ type JWKKey struct {
 type AWSToken struct {
 	env    string
 	region string
-	fedSvc *identity.CognitoIdentity
+	fedSvc *identity.Client
 }
 
 func New(env, region string) *AWSToken {

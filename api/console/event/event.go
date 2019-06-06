@@ -2,12 +2,16 @@ package event
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
 
 	"github.com/linkai-io/am/am"
@@ -25,6 +29,11 @@ func New(eventClient am.EventService) *EventHandlers {
 	}
 }
 
+type eventResponse struct {
+	Events  []*am.Event `json:"events"`
+	GroupID int         `json:"group_id"`
+}
+
 func (h *EventHandlers) Get(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
@@ -36,21 +45,62 @@ func (h *EventHandlers) Get(w http.ResponseWriter, req *http.Request) {
 
 	logger := middleware.UserContextLogger(userContext)
 	logger.Info().Msg("Retrieving notifications...")
+	groupID, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
 
-	events, err := h.eventClient.Get(req.Context(), userContext, &am.EventFilter{Start: 0, Limit: 10, Filters: &am.FilterType{}})
+	filter, err := h.ParseGetFilterQuery(req.URL.Query(), groupID)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed parse url query parameters")
+		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		return
+	}
+
+	events, err := h.eventClient.Get(req.Context(), userContext, filter)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to retrieve events")
 		middleware.ReturnError(w, "error retrieving notifications", 500)
 		return
 	}
 
-	if data, err = json.Marshal(events); err != nil {
+	resp := &eventResponse{}
+	resp.Events = events
+	resp.GroupID = groupID
+
+	if data, err = json.Marshal(resp); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
 
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
+}
+
+func (h *EventHandlers) ParseGetFilterQuery(values url.Values, groupID int) (*am.EventFilter, error) {
+	filter := &am.EventFilter{
+		Start:   0,
+		Limit:   0,
+		Filters: &am.FilterType{},
+	}
+	filter.Filters.AddInt32(am.FilterEventGroupID, int32(groupID))
+
+	limit := values.Get("limit")
+	if limit == "" {
+		filter.Limit = 25
+	} else {
+		l, err := strconv.Atoi(limit)
+		if err != nil {
+			return nil, err
+		}
+		filter.Limit = int32(l)
+		if filter.Limit > 5000 {
+			return nil, errors.New("limit max size exceeded (5000)")
+		}
+	}
+
+	return filter, nil
 }
 
 func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
@@ -217,4 +267,10 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 	}
 
 	middleware.ReturnSuccess(w, "Settings updated", 200)
+}
+
+func groupIDFromRequest(req *http.Request) (int, error) {
+	param := chi.URLParam(req, "id")
+	id, err := strconv.Atoi(param)
+	return id, err
 }

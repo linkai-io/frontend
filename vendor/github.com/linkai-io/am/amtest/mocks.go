@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/linkai-io/am/pkg/parsers"
 
@@ -57,6 +58,18 @@ func MockAddressService(orgID int, addresses []*am.ScanGroupAddress) *mock.Addre
 		return orgID, len(addrs), nil
 	}
 	return addrClient
+}
+
+func MockWebDataService(orgID, groupID int) *mock.WebDataService {
+	webClient := &mock.WebDataService{}
+	webClient.InitFn = func(config []byte) error {
+		return nil
+	}
+
+	webClient.ArchiveFn = func(ctx context.Context, userContext am.UserContext, group *am.ScanGroup, archiveTime time.Time) (int, int, error) {
+		return orgID, 0, nil
+	}
+	return webClient
 }
 
 func MockScanGroupService(orgID, groupID int) *mock.ScanGroupService {
@@ -277,6 +290,22 @@ func MockBigDataState() *mock.BigDataState {
 		return false, nil
 	}
 	return mockState
+}
+
+func MockBigQueryClient() *mock.BigQuerier {
+	client := &mock.BigQuerier{}
+	client.InitFn = func(config, credentials []byte) error {
+		return nil
+	}
+
+	client.QueryETLDFn = func(ctx context.Context, from time.Time, etld string) (map[string]*am.CTRecord, error) {
+		return make(map[string]*am.CTRecord), nil
+	}
+
+	client.QuerySubdomainsFn = func(ctx context.Context, from time.Time, etld string) (map[string]*am.CTSubdomain, error) {
+		return make(map[string]*am.CTSubdomain), nil
+	}
+	return client
 }
 
 func MockWebDetector() *mock.Detector {

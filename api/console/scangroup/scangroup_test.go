@@ -31,12 +31,14 @@ func TestNewGroupValidators(t *testing.T) {
 		port2      bool
 		port3      bool
 		concurrent bool
+		archive    bool
 	}
 	newGroup := &scangroup.ScanGroupDetails{}
 	newGroup.GroupName = "test/"
 	domains := []string{"ok", "日本", ")@#asdbadf", "bad.bad", "bad,"}
 	newGroup.CustomSubNames = domains
 	newGroup.ConcurrentRequests = 100
+	newGroup.ArchiveAfterDays = 100
 	newGroup.CustomPorts = []int32{1, 65535, 90000, 0}
 
 	err := validate.Struct(newGroup)
@@ -64,10 +66,12 @@ func TestNewGroupValidators(t *testing.T) {
 			er.port3 = true
 		case "ConcurrentRequests":
 			er.concurrent = true
+		case "ArchiveAfterDays":
+			er.archive = true
 		}
 		t.Logf("error! %#v", v)
 	}
-	if !er.groupName || !er.sub2 || !er.sub3 || !er.sub4 || !er.port2 || !er.port3 || !er.concurrent {
+	if !er.groupName || !er.sub2 || !er.sub3 || !er.sub4 || !er.port2 || !er.port3 || !er.concurrent || !er.archive {
 		t.Fatalf("%#v\n", er)
 	}
 
@@ -75,6 +79,7 @@ func TestNewGroupValidators(t *testing.T) {
 	validGroup.GroupName = "日本"
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 5
+	validGroup.ArchiveAfterDays = 5
 	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
 	if err := validate.Struct(validGroup); err != nil {
 		t.Fatalf("should not have got error on validation: %#v\n", err)
@@ -156,6 +161,7 @@ func TestNewGroupSubscriptionLevels(t *testing.T) {
 	validGroup.GroupName = "日本"
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 5
+	validGroup.ArchiveAfterDays = 5
 	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
 	data, err := json.Marshal(validGroup)
 	if err != nil {
