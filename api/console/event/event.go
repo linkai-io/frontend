@@ -64,6 +64,7 @@ func (h *EventHandlers) Get(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "error retrieving notifications", 500)
 		return
 	}
+
 	resp := &eventResponse{}
 	resp.Events = events
 	resp.GroupID = groupID
