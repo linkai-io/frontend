@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
-	"github.com/wirepair/gateway"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/frontend/pkg/cookie"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/token"
+	"github.com/wirepair/gateway"
 	validator "gopkg.in/go-playground/validator.v9"
 
 	"github.com/linkai-io/frontend/pkg/authz"
@@ -184,6 +185,9 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "validation failure "+err.Error(), 500)
 		return
 	}
+	loginDetails.OrgName = strings.ToLower(loginDetails.OrgName)
+	loginDetails.Username = strings.ToLower(loginDetails.Username)
+
 	log.Info().Str("org", loginDetails.OrgName).Str("user", loginDetails.Username).Msg("login attempt")
 
 	orgData, err := h.getOrgByName(req.Context(), systemContext, loginDetails.OrgName)
@@ -252,6 +256,9 @@ func (h *AuthHandlers) Forgot(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	forgotDetails.OrgName = strings.ToLower(forgotDetails.OrgName)
+	forgotDetails.Username = strings.ToLower(forgotDetails.Username)
+
 	log.Info().Str("user", forgotDetails.Username).Str("org", forgotDetails.OrgName).Msg("failed to get organization from name")
 	orgData, err := h.getOrgByName(req.Context(), systemContext, forgotDetails.OrgName)
 	if err != nil {
@@ -307,6 +314,9 @@ func (h *AuthHandlers) ForgotConfirm(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	resetDetails.OrgName = strings.ToLower(resetDetails.OrgName)
+	resetDetails.Username = strings.ToLower(resetDetails.Username)
+
 	orgData, err := h.getOrgByName(req.Context(), systemContext, resetDetails.OrgName)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get organization from name")
@@ -358,6 +368,9 @@ func (h *AuthHandlers) ChangePwd(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "validation failure "+err.Error(), 500)
 		return
 	}
+
+	loginDetails.OrgName = strings.ToLower(loginDetails.OrgName)
+	loginDetails.Username = strings.ToLower(loginDetails.Username)
 
 	orgData, err := h.getOrgByName(req.Context(), systemContext, loginDetails.OrgName)
 	if err != nil {
