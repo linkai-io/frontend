@@ -90,6 +90,7 @@ func testAddrClient() am.AddressService {
 				HostAddress: fmt.Sprintf("%d.example.com", i),
 				AddressIDs:  []int64{int64(i * 10), int64(i*10 + 1)},
 				IPAddresses: []string{fmt.Sprintf("192.168.1.%d", i), fmt.Sprintf("192.168.1.%d", i+1)},
+				//Ports: &am.PortResults{}
 			}
 			hosts = append(hosts, host)
 		}

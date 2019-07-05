@@ -53,7 +53,7 @@ func main() {
 	webHandlers := webdata.New(webClient)
 	webHandlers.ContextExtractor = fakeContext
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
+	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, orgClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
 	scanGroupHandlers.ContextExtractor = fakeContext
 	r.NotFound(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
@@ -349,5 +349,6 @@ func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organiz
 		SubscriptionID:          am.SubscriptionEnterprise,
 		LimitHosts:              10000,
 		LimitTLD:                3,
+		PortScanEnabled:         true,
 	}
 }
