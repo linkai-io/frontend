@@ -121,8 +121,7 @@ func testAddrClient() am.AddressService {
 	}
 
 	addrClient.GetPortsFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.PortResults, error) {
-		addrLock.RLock()
-		defer addrLock.RUnlock()
+		log.Info().Msgf("GETTING PORTS: %#v", filter)
 		ports := make([]*am.PortResults, 0)
 		if filter.Start > 150 {
 			return userContext.GetOrgID(), ports, nil
@@ -154,7 +153,7 @@ func testAddrClient() am.AddressService {
 			}
 			ports = append(ports, port)
 		}
-		log.Info().Msgf("GETTING PORTS: %#v", filter)
+
 		return userContext.GetOrgID(), ports, nil
 	}
 

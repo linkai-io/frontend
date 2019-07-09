@@ -99,6 +99,65 @@ func (h *AddressHandlers) OrgStats(w http.ResponseWriter, req *http.Request) {
 
 func (h *AddressHandlers) GetPorts(w http.ResponseWriter, req *http.Request) {
 	var err error
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	groupID, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	filter, err := h.ParseGetFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed parse url query parameters")
+		middleware.ReturnError(w, "invalid parameters supplied", 401)
+		return
+	}
+
+	oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get hosts")
+		middleware.ReturnError(w, "failed to get hosts: "+err.Error(), 500)
+		return
+	}
+
+	if oid != userContext.GetOrgID() {
+		logger.Error().Err(err).Msg("authorization failure")
+		middleware.ReturnError(w, "failed to get hosts", 500)
+		return
+	}
+
+	var lastHost string
+	for _, host := range hosts {
+		host.ETLD, err = parsers.GetETLD(host.HostAddress)
+		if err != nil {
+			logger.Warn().Err(err).Msg("failed parsing etld from host address")
+			host.ETLD = host.HostAddress
+		}
+		lastHost = host.HostAddress
+	}
+
+	response := &HostlistResponse{
+		Status:   "OK",
+		LastHost: lastHost,
+		Hosts:    hosts,
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get marshal response")
+		middleware.ReturnError(w, "failed return hostlist", 500)
+		return
+	}
+
+	fmt.Fprintf(w, string(data))
+
 }
 
 func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) {
