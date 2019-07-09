@@ -97,6 +97,10 @@ func (h *AddressHandlers) OrgStats(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, string(data))
 }
 
+func (h *AddressHandlers) GetPorts(w http.ResponseWriter, req *http.Request) {
+	var err error
+}
+
 func (h *AddressHandlers) GetHostList(w http.ResponseWriter, req *http.Request) {
 	var err error
 

@@ -90,11 +90,72 @@ func testAddrClient() am.AddressService {
 				HostAddress: fmt.Sprintf("%d.example.com", i),
 				AddressIDs:  []int64{int64(i * 10), int64(i*10 + 1)},
 				IPAddresses: []string{fmt.Sprintf("192.168.1.%d", i), fmt.Sprintf("192.168.1.%d", i+1)},
-				//Ports: &am.PortResults{}
+				Ports: &am.PortResults{
+					PortID:      i,
+					OrgID:       userContext.GetOrgID(),
+					GroupID:     filter.GroupID,
+					HostAddress: fmt.Sprintf("%d.example.com", i),
+					Ports: &am.Ports{
+						Current: &am.PortData{
+							IPAddress:  fmt.Sprintf("192.168.1.%d", i),
+							TCPPorts:   []int32{80, 443, 20, 21},
+							UDPPorts:   nil,
+							TCPBanners: nil,
+							UDPBanners: nil,
+						},
+						Previous: &am.PortData{
+							IPAddress:  fmt.Sprintf("192.168.1.%d", i+1),
+							TCPPorts:   []int32{80, 443, 20},
+							UDPPorts:   nil,
+							TCPBanners: nil,
+							UDPBanners: nil,
+						},
+					},
+					ScannedTimestamp:         time.Now().UnixNano(),
+					PreviousScannedTimestamp: time.Now().Add(time.Hour * -2).UnixNano(),
+				},
 			}
 			hosts = append(hosts, host)
 		}
 		return userContext.GetOrgID(), hosts, nil
+	}
+
+	addrClient.GetPortsFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.PortResults, error) {
+		addrLock.RLock()
+		defer addrLock.RUnlock()
+		ports := make([]*am.PortResults, 0)
+		if filter.Start > 150 {
+			return userContext.GetOrgID(), ports, nil
+		}
+		for i := 0; i < filter.Limit; i++ {
+			port := &am.PortResults{
+				PortID:      int64(i) + filter.Start,
+				OrgID:       userContext.GetOrgID(),
+				GroupID:     filter.GroupID,
+				HostAddress: fmt.Sprintf("%d.example.com", i),
+				Ports: &am.Ports{
+					Current: &am.PortData{
+						IPAddress:  fmt.Sprintf("192.168.1.%d", i),
+						TCPPorts:   []int32{80, 443, 20, 21},
+						UDPPorts:   nil,
+						TCPBanners: nil,
+						UDPBanners: nil,
+					},
+					Previous: &am.PortData{
+						IPAddress:  fmt.Sprintf("192.168.1.%d", i+1),
+						TCPPorts:   []int32{80, 443, 20},
+						UDPPorts:   nil,
+						TCPBanners: nil,
+						UDPBanners: nil,
+					},
+				},
+				ScannedTimestamp:         time.Now().UnixNano(),
+				PreviousScannedTimestamp: time.Now().Add(time.Hour * -2).UnixNano(),
+			}
+			ports = append(ports, port)
+		}
+		log.Info().Msgf("GETTING PORTS: %#v", filter)
+		return userContext.GetOrgID(), ports, nil
 	}
 
 	addrClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.ScanGroupAddressFilter) (int, []*am.ScanGroupAddress, error) {

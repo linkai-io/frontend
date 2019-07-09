@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/linkai-io/am/amtest"
+
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/mock"
@@ -18,6 +20,19 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	validator "gopkg.in/go-playground/validator.v9"
 )
+
+func TestVerifyWebScanPorts(t *testing.T) {
+	tcpPorts := []int32{80, 443, 21, 22}
+	webPorts := []int32{80, 443}
+	web, tcp, valid := scangroup.VerifyWebScanPorts(webPorts, tcpPorts)
+	if !valid {
+		t.Fatalf("invalid ports")
+	}
+	t.Logf("%#v\n", web)
+	amtest.SortEqualInt32(tcpPorts, tcp, t)
+	amtest.SortEqualInt32(webPorts, web, t)
+	t.Logf("%#v\n", tcp)
+}
 
 func TestNewGroupValidators(t *testing.T) {
 	validate := validator.New()

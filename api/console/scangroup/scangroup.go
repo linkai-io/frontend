@@ -31,7 +31,7 @@ type ScanGroupDetails struct {
 	PortScanEnabled    bool     `json:"port_scan_enabled"`
 	CustomSubNames     []string `json:"custom_sub_names" validate:"omitempty,max=100,dive,gte=1,lte=128,subdomain"`
 	CustomWebPorts     []int32  `json:"custom_web_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
-	TCPPorts           []int32  `json:"tcp_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
+	TCPPorts           []int32  `json:"tcp_ports" validate:"omitempty,max=50,dive,gte=1,lte=65535"`
 	AllowedTLDs        []string `json:"allowed_tlds" validate:"omitempty,max=100"`
 	AllowedHosts       []string `json:"allowed_hosts" validate:"omitempty,max=5000"`
 	DisallowedTLDs     []string `json:"disallowed_tlds" validate:"omitempty,max=100"`
@@ -218,7 +218,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	var err error
 	var body []byte
 	var gid int
-	var portScanEnabled bool
+	var orgPortScanEnabled bool
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -244,7 +244,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	if err != nil {
 		logger.Warn().Msg("unable to retrieve organization for checking features")
 	} else {
-		portScanEnabled = org.PortScanEnabled
+		orgPortScanEnabled = org.PortScanEnabled
 	}
 
 	param := chi.URLParam(req, "name")
@@ -320,7 +320,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		CustomWebPorts:    groupDetails.CustomWebPorts,
 	}
 
-	if portScanEnabled {
+	if orgPortScanEnabled && groupDetails.PortScanEnabled {
 		portConfig, err = createPortConfig(groupDetails)
 		if err != nil {
 			middleware.ReturnError(w, err.Error(), 401)
@@ -382,7 +382,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var body []byte
-	var portScanEnabled bool
+	var orgPortScanEnabled bool
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -410,7 +410,7 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 	if err != nil {
 		logger.Warn().Msg("unable to retrieve organization for checking features")
 	} else {
-		portScanEnabled = org.PortScanEnabled
+		orgPortScanEnabled = org.PortScanEnabled
 	}
 
 	body, err = ioutil.ReadAll(req.Body)
@@ -449,12 +449,13 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 		CustomWebPorts:    updatedGroup.CustomWebPorts,
 	}
 
-	if portScanEnabled {
+	if orgPortScanEnabled && updatedGroup.PortScanEnabled {
 		portConfig, err = createPortConfig(updatedGroup)
 		if err != nil {
 			middleware.ReturnError(w, err.Error(), 401)
 			return
 		}
+		log.Info().Msgf("%#v", portConfig)
 	}
 
 	original.ModuleConfigurations = &am.ModuleConfiguration{
@@ -598,13 +599,13 @@ func createPortConfig(details *ScanGroupDetails) (*am.PortScanModuleConfig, erro
 		pps = 5
 	}
 
-	webPorts, tcpPorts, valid := verifyWebScanPorts(details.CustomWebPorts, details.TCPPorts)
+	webPorts, tcpPorts, valid := VerifyWebScanPorts(details.CustomWebPorts, details.TCPPorts)
 	if !valid {
 		return nil, errors.New("not all webports exist in tcp ports")
 	}
 
 	if len(details.AllowedTLDs) == 0 && len(details.AllowedHosts) == 0 {
-		return nil, errors.New("you have not specified any allowed hosts or tlds")
+		return nil, errors.New("you have not specified any allowed hosts or TLDs")
 	}
 
 	portConfig := &am.PortScanModuleConfig{
@@ -621,17 +622,26 @@ func createPortConfig(details *ScanGroupDetails) (*am.PortScanModuleConfig, erro
 	return portConfig, nil
 }
 
-// terriby inefficient method of validating webports are a subset of tcpports
+// VerifyWebScanPorts a terribly inefficient method of validating webports are a subset of tcpports
 // and removes duplicates
-func verifyWebScanPorts(webPorts, tcpPorts []int32) ([]int32, []int32, bool) {
-	tcp := make(map[int32]struct{})
+func VerifyWebScanPorts(webPorts, tcpPorts []int32) ([]int32, []int32, bool) {
 	web := make(map[int32]struct{})
+	for _, port := range webPorts {
+		web[port] = struct{}{}
+	}
+
+	tcp := make(map[int32]struct{})
 	for _, port := range tcpPorts {
 		tcp[port] = struct{}{}
 	}
 
-	for _, port := range webPorts {
-		web[port] = struct{}{}
+	// manually add 80 and 443 if not in there
+	if _, ok := tcp[80]; !ok {
+		tcp[80] = struct{}{}
+	}
+
+	if _, ok := tcp[443]; !ok {
+		tcp[443] = struct{}{}
 	}
 
 	// validate web ports are in tcp ports
@@ -640,6 +650,7 @@ func verifyWebScanPorts(webPorts, tcpPorts []int32) ([]int32, []int32, bool) {
 			return nil, nil, false
 		}
 	}
+
 	w := make([]int32, len(web))
 	i := 0
 	for port := range web {
@@ -649,7 +660,7 @@ func verifyWebScanPorts(webPorts, tcpPorts []int32) ([]int32, []int32, bool) {
 
 	t := make([]int32, len(tcp))
 	i = 0
-	for port := range web {
+	for port := range tcp {
 		t[i] = port
 		i++
 	}
