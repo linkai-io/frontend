@@ -41,6 +41,7 @@ func main() {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Get("/group/{id}/ports", addrHandlers.GetPorts)
+		r.Get("/group/{id}/ports/download", addrHandlers.ExportPorts)
 		r.Get("/group/{id}/hosts/download", addrHandlers.ExportHostList)
 		r.Put("/group/{id}/add", addrHandlers.PutAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)

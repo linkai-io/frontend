@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -37,6 +38,12 @@ type HostlistResponse struct {
 	Hosts    []*am.ScanGroupHostList `json:"hosts"`
 	Status   string                  `json:"status"`
 	LastHost string                  `json:"last_host"`
+}
+
+type PortsResponse struct {
+	Ports     []*am.PortResults `json:"ports"`
+	Status    string            `json:"status"`
+	LastIndex int64             `json:"last_index"`
 }
 
 type AddressHandlers struct {
@@ -120,39 +127,43 @@ func (h *AddressHandlers) GetPorts(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	oid, hosts, err := h.addrClient.GetHostList(req.Context(), userContext, filter)
+	oid, ports, err := h.addrClient.GetPorts(req.Context(), userContext, filter)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to get hosts")
-		middleware.ReturnError(w, "failed to get hosts: "+err.Error(), 500)
+		logger.Error().Err(err).Msg("failed to get ports")
+		middleware.ReturnError(w, "failed to get ports: "+err.Error(), 500)
 		return
 	}
 
 	if oid != userContext.GetOrgID() {
 		logger.Error().Err(err).Msg("authorization failure")
-		middleware.ReturnError(w, "failed to get hosts", 500)
+		middleware.ReturnError(w, "failed to get ports", 500)
 		return
 	}
 
-	var lastHost string
-	for _, host := range hosts {
-		host.ETLD, err = parsers.GetETLD(host.HostAddress)
-		if err != nil {
-			logger.Warn().Err(err).Msg("failed parsing etld from host address")
-			host.ETLD = host.HostAddress
+	var lastIndex int64
+	lastIndex = math.MaxInt64
+	for _, port := range ports {
+		if oid != port.OrgID {
+			logger.Error().Err(err).Msg("authorization failure")
+			middleware.ReturnError(w, "failed to get port list", 500)
+			return
 		}
-		lastHost = host.HostAddress
+
+		if port.ScannedTimestamp < lastIndex {
+			lastIndex = port.ScannedTimestamp
+		}
 	}
 
-	response := &HostlistResponse{
-		Status:   "OK",
-		LastHost: lastHost,
-		Hosts:    hosts,
+	response := &PortsResponse{
+		Status:    "OK",
+		LastIndex: lastIndex,
+		Ports:     ports,
 	}
 
 	data, err := json.Marshal(response)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to get marshal response")
-		middleware.ReturnError(w, "failed return hostlist", 500)
+		middleware.ReturnError(w, "failed return ports", 500)
 		return
 	}
 
@@ -1086,6 +1097,74 @@ func (h *AddressHandlers) ExportHostList(w http.ResponseWriter, req *http.Reques
 	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=hosts.%d.%d.json", id, time.Now().Unix()))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
+func (h *AddressHandlers) ExportPorts(w http.ResponseWriter, req *http.Request) {
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	id, err := groupIDFromRequest(req)
+	if err != nil {
+		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
+		return
+	}
+
+	req.Body.Close()
+
+	allPorts := make([]*am.PortResults, 0)
+
+	var lastIndex int64
+	lastIndex = math.MaxInt64
+	for {
+		filters := &am.FilterType{}
+		filter := &am.ScanGroupAddressFilter{
+			OrgID:   userContext.GetOrgID(),
+			GroupID: id,
+			Start:   lastIndex,
+			Filters: filters,
+			Limit:   1000,
+		}
+		oid, ports, err := h.addrClient.GetPorts(req.Context(), userContext, filter)
+		if err != nil {
+			logger.Error().Err(err).Msg("error getting websites")
+			middleware.ReturnError(w, "internal error", 500)
+			return
+		}
+
+		if len(ports) == 0 {
+			break
+		}
+
+		for _, port := range ports {
+			if port.ScannedTimestamp < lastIndex {
+				lastIndex = port.ScannedTimestamp
+			}
+
+			allPorts = append(allPorts, port)
+
+			if oid != port.OrgID {
+				logger.Error().Err(err).Msg("authorization failure")
+				middleware.ReturnError(w, "failed to get addresses", 500)
+				return
+			}
+		}
+	}
+
+	data, err := json.Marshal(allPorts)
+	if err != nil {
+		logger.Error().Err(err).Msg("error during marshal")
+		middleware.ReturnError(w, "internal error during processing", 500)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=ports.%d.%d.json", id, time.Now().Unix()))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
