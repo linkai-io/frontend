@@ -297,7 +297,7 @@
 
 [[projects]]
   branch = "port-scan"
-  digest = "1:67b0b631f446c9413b8565d82d05b0ce509eb9d03dc069a3a1641ff52d136aec"
+  digest = "1:5bb61617f168b64ea85b39a8c44ec0f333fff63736cb4eed03311c739d71dc00"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -330,7 +330,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "a2006a6f7d118cb1b5eb971bdfb0cb03b208905a"
+  revision = "631d526f01a03344e60da045d9b314eb44b22d41"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -475,14 +475,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:47a52ed81842d647114b9210719bb6d8e1595094a6cb23e70123bb1f109f3c80"
+  digest = "1:31d44814b45607afa77c6e8ef20ea8bacc1d1053fe084440c874f311732e7ec3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "6ec70d6a5542cba804c6d16ebe8392601a0b7b60"
+  revision = "fae7ac547cb717d141c433a2a173315e216b64c4"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
