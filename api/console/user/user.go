@@ -225,6 +225,13 @@ func (h *UserHandlers) ChangePassword(w http.ResponseWriter, req *http.Request) 
 	fmt.Fprint(w, string(data))
 }
 
+type userDetails struct {
+	*am.User
+	LimitTLDReached   bool `json:"limit_tld_reached"`
+	LimitHostsReached bool `json:"limit_hosts_reached"`
+	PortScanEnabled   bool `json:"port_scan_enabled"`
+}
+
 func (h *UserHandlers) Get(w http.ResponseWriter, req *http.Request) {
 
 	userContext, ok := h.ContextExtractor(req.Context())
@@ -242,7 +249,15 @@ func (h *UserHandlers) Get(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	data, _ := json.Marshal(user)
+	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to get org details to check features")
+		middleware.ReturnError(w, "error retreiving user details", 500)
+	}
+
+	details := &userDetails{User: user, LimitHostsReached: org.LimitHostsReached, LimitTLDReached: org.LimitTLDReached, PortScanEnabled: org.PortScanEnabled}
+
+	data, _ := json.Marshal(details)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
 }

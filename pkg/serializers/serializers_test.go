@@ -52,9 +52,9 @@ func TestScanGroupForUsers(t *testing.T) {
 				RequestsPerSecond: 0,
 				MaxDepth:          0,
 			},
-			PortModule: &am.PortModuleConfig{
+			PortModule: &am.PortScanModuleConfig{
 				RequestsPerSecond: 0,
-				CustomPorts:       []int32{80, 443},
+				CustomWebPorts:    []int32{80, 443},
 			},
 			WebModule: &am.WebModuleConfig{
 				TakeScreenShots:       false,
@@ -141,9 +141,9 @@ func testGroup(name string) *am.ScanGroup {
 				RequestsPerSecond: 0,
 				MaxDepth:          0,
 			},
-			PortModule: &am.PortModuleConfig{
+			PortModule: &am.PortScanModuleConfig{
 				RequestsPerSecond: 0,
-				CustomPorts:       []int32{80, 443},
+				CustomWebPorts:    []int32{80, 443},
 			},
 			WebModule: &am.WebModuleConfig{
 				TakeScreenShots:       false,

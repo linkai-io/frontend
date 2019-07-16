@@ -53,7 +53,7 @@ func main() {
 	webHandlers := webdata.New(webClient)
 	webHandlers.ContextExtractor = fakeContext
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
+	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, orgClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
 	scanGroupHandlers.ContextExtractor = fakeContext
 	r.NotFound(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
@@ -80,6 +80,8 @@ func main() {
 		r.Get("/group/{id}", addrHandlers.GetAddresses)
 		r.Get("/group/{id}/hosts", addrHandlers.GetHostList)
 		r.Get("/group/{id}/hosts/download", addrHandlers.ExportHostList)
+		r.Get("/group/{id}/ports", addrHandlers.GetPorts)
+		r.Get("/group/{id}/ports/download", addrHandlers.ExportPorts)
 		r.Put("/group/{id}/add", addrHandlers.PutAddresses)
 		r.Get("/group/{id}/count", addrHandlers.GetGroupCount)
 		r.Post("/group/{id}/download", addrHandlers.ExportAddresses)
@@ -203,7 +205,7 @@ func testEventClient() am.EventService {
 	eventClient := &mock.EventService{}
 	eventLock := &sync.RWMutex{}
 
-	events := make(map[int64]*am.Event, 5)
+	events := make(map[int64]*am.Event, 7)
 	events[0] = &am.Event{
 		NotificationID: 0,
 		OrgID:          0,
@@ -249,7 +251,24 @@ func testEventClient() am.EventService {
 		Data:           []string{"http://example.com", "80", "jQuery", "1.2.3", "https://new.example.com", "443", "jQuery", "1.2.4"},
 		Read:           false,
 	}
-
+	events[5] = &am.Event{
+		NotificationID: 5,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventNewOpenPort,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"example.com", "1.1.1.1", "1.1.1.2", "8080", "example1.com", "1.1.1.1", "1.1.1.2", "8080,443"},
+		Read:           false,
+	}
+	events[6] = &am.Event{
+		NotificationID: 6,
+		OrgID:          0,
+		GroupID:        0,
+		TypeID:         am.EventClosedPort,
+		EventTimestamp: time.Now().UnixNano(),
+		Data:           []string{"example.com", "1.1.1.1", "1.1.1.1", "80", "example1.com", "1.1.1.1", "1.1.1.2", "9090"},
+		Read:           false,
+	}
 	eventSettings := &am.UserEventSettings{
 		WeeklyReportSendDay: 0,
 		ShouldWeeklyEmail:   false,
@@ -274,6 +293,16 @@ func testEventClient() am.EventService {
 			},
 			&am.EventSubscriptions{
 				TypeID:              am.EventNewWebsite,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+			&am.EventSubscriptions{
+				TypeID:              am.EventNewOpenPort,
+				SubscribedTimestamp: time.Now().UnixNano(),
+				Subscribed:          true,
+			},
+			&am.EventSubscriptions{
+				TypeID:              am.EventClosedPort,
 				SubscribedTimestamp: time.Now().UnixNano(),
 				Subscribed:          true,
 			},
@@ -349,5 +378,6 @@ func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organiz
 		SubscriptionID:          am.SubscriptionEnterprise,
 		LimitHosts:              10000,
 		LimitTLD:                3,
+		PortScanEnabled:         true,
 	}
 }

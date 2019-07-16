@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/linkai-io/am/amtest"
+
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/mock"
@@ -18,6 +20,19 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	validator "gopkg.in/go-playground/validator.v9"
 )
+
+func TestVerifyWebScanPorts(t *testing.T) {
+	tcpPorts := []int32{80, 443, 21, 22}
+	webPorts := []int32{80, 443}
+	web, tcp, valid := scangroup.VerifyWebScanPorts(webPorts, tcpPorts)
+	if !valid {
+		t.Fatalf("invalid ports")
+	}
+	t.Logf("%#v\n", web)
+	amtest.SortEqualInt32(tcpPorts, tcp, t)
+	amtest.SortEqualInt32(webPorts, web, t)
+	t.Logf("%#v\n", tcp)
+}
 
 func TestNewGroupValidators(t *testing.T) {
 	validate := validator.New()
@@ -39,7 +54,7 @@ func TestNewGroupValidators(t *testing.T) {
 	newGroup.CustomSubNames = domains
 	newGroup.ConcurrentRequests = 100
 	newGroup.ArchiveAfterDays = 100
-	newGroup.CustomPorts = []int32{1, 65535, 90000, 0}
+	newGroup.CustomWebPorts = []int32{1, 65535, 90000, 0}
 
 	err := validate.Struct(newGroup)
 	if err == nil {
@@ -58,11 +73,11 @@ func TestNewGroupValidators(t *testing.T) {
 			er.sub3 = true
 		case "CustomSubNames[4]":
 			er.sub4 = true
-		case "CustomPorts[0]", "CustomPorts[1]":
+		case "CustomWebPorts[0]", "CustomWebPorts[1]":
 			t.Fatalf("got error on ports when should not have")
-		case "CustomPorts[2]":
+		case "CustomWebPorts[2]":
 			er.port2 = true
-		case "CustomPorts[3]":
+		case "CustomWebPorts[3]":
 			er.port3 = true
 		case "ConcurrentRequests":
 			er.concurrent = true
@@ -80,7 +95,7 @@ func TestNewGroupValidators(t *testing.T) {
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 5
 	validGroup.ArchiveAfterDays = 5
-	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
+	validGroup.CustomWebPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
 	if err := validate.Struct(validGroup); err != nil {
 		t.Fatalf("should not have got error on validation: %#v\n", err)
 	}
@@ -122,6 +137,25 @@ func testUserClient() am.UserService {
 	}
 	return userClient
 }
+
+func testOrgClient() am.OrganizationService {
+	orgClient := &mock.OrganizationService{}
+
+	orgClient.GetByCIDFn = func(ctx context.Context, userContext am.UserContext, orgCID string) (int, *am.Organization, error) {
+		return userContext.GetOrgID(), &am.Organization{
+			OrgID:           userContext.GetOrgID(),
+			OrgCID:          userContext.GetOrgCID(),
+			OwnerEmail:      "test@test.com",
+			FirstName:       "test",
+			LastName:        "test",
+			StatusID:        am.UserStatusActive,
+			CreationTime:    time.Now().UnixNano(),
+			Deleted:         false,
+			PortScanEnabled: true,
+		}, nil
+	}
+	return orgClient
+}
 func TestNewGroupSubscriptionLevels(t *testing.T) {
 	scanGroupClient := &mock.ScanGroupService{}
 
@@ -137,7 +171,7 @@ func TestNewGroupSubscriptionLevels(t *testing.T) {
 		return userContext.GetOrgID(), make([]*am.ScanGroup, 0), nil
 	}
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
+	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), testOrgClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
 
 	scanGroupHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
 		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101}, true
@@ -162,7 +196,10 @@ func TestNewGroupSubscriptionLevels(t *testing.T) {
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 5
 	validGroup.ArchiveAfterDays = 5
-	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
+	validGroup.CustomWebPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
+	validGroup.TCPPorts = []int32{20, 21, 80, 443, 8080, 9000, 9200, 8443, 8555}
+	validGroup.AllowedHosts = []string{"test.com"}
+
 	data, err := json.Marshal(validGroup)
 	if err != nil {
 		t.Fatalf("error marshalling: %v\n", err)
@@ -222,7 +259,7 @@ func TestDeleteGroupSubscriptionLevels(t *testing.T) {
 		return userContext.GetOrgID(), make([]*am.ScanGroup, 0), nil
 	}
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
+	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), testOrgClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
 
 	scanGroupHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
 		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101}, true
@@ -246,7 +283,7 @@ func TestDeleteGroupSubscriptionLevels(t *testing.T) {
 	validGroup.GroupName = "日本"
 	validGroup.CustomSubNames = []string{"ok", "日本", "some", "domain"}
 	validGroup.ConcurrentRequests = 5
-	validGroup.CustomPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
+	validGroup.CustomWebPorts = []int32{80, 443, 8080, 9000, 9200, 8443, 8555}
 	data, err := json.Marshal(validGroup)
 	if err != nil {
 		t.Fatalf("error marshalling: %v\n", err)

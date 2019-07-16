@@ -2,6 +2,7 @@ package scangroup
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -27,8 +28,15 @@ func ValidateSubDomain(fl validator.FieldLevel) bool {
 
 type ScanGroupDetails struct {
 	GroupName          string   `json:"group_name" validate:"required,gte=1,lte=128,excludesall=/"`
+	PortScanEnabled    bool     `json:"port_scan_enabled"`
 	CustomSubNames     []string `json:"custom_sub_names" validate:"omitempty,max=100,dive,gte=1,lte=128,subdomain"`
-	CustomPorts        []int32  `json:"custom_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
+	CustomWebPorts     []int32  `json:"custom_web_ports" validate:"omitempty,max=10,dive,gte=1,lte=65535"`
+	TCPPorts           []int32  `json:"tcp_ports" validate:"omitempty,max=50,dive,gte=1,lte=65535"`
+	AllowedTLDs        []string `json:"allowed_tlds" validate:"omitempty,max=100"`
+	AllowedHosts       []string `json:"allowed_hosts" validate:"omitempty,max=5000"`
+	DisallowedTLDs     []string `json:"disallowed_tlds" validate:"omitempty,max=100"`
+	DisallowedHosts    []string `json:"disallowed_hosts" validate:"omitempty,max=5000"`
+	PortsPerSecond     int32    `json:"ports_per_second" validate:"omitempty,gte=1,lte=50"`
 	ConcurrentRequests int32    `json:"concurrent_requests" validate:"required,gte=1,lte=20"` // lte 25, beta is limited to 10
 	ArchiveAfterDays   int32    `json:"archive_after_days" validate:"required,gte=2,lte=14"`
 }
@@ -43,15 +51,17 @@ type ScanGroupHandlers struct {
 	env              *ScanGroupEnv
 	scanGroupClient  am.ScanGroupService
 	userClient       am.UserService
+	orgClient        am.OrganizationService
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(scanGroupClient am.ScanGroupService, userClient am.UserService, env *ScanGroupEnv) *ScanGroupHandlers {
+func New(scanGroupClient am.ScanGroupService, userClient am.UserService, orgClient am.OrganizationService, env *ScanGroupEnv) *ScanGroupHandlers {
 	validate := validator.New()
 	validate.RegisterValidation("subdomain", ValidateSubDomain)
 	return &ScanGroupHandlers{
 		scanGroupClient:  scanGroupClient,
 		userClient:       userClient,
+		orgClient:        orgClient,
 		env:              env,
 		ContextExtractor: middleware.ExtractUserContext,
 		validate:         validate,
@@ -208,6 +218,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	var err error
 	var body []byte
 	var gid int
+	var orgPortScanEnabled bool
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -227,6 +238,13 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 		logger.Warn().Msg("user has not accepted agreement")
 		middleware.ReturnError(w, "user has not accepted agreement, unable to create scan group.", 401)
 		return
+	}
+
+	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
+	if err != nil {
+		logger.Warn().Msg("unable to retrieve organization for checking features")
+	} else {
+		orgPortScanEnabled = org.PortScanEnabled
 	}
 
 	param := chi.URLParam(req, "name")
@@ -296,6 +314,20 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	group.Paused = true
 	group.ArchiveAfterDays = groupDetails.ArchiveAfterDays
 
+	portConfig := &am.PortScanModuleConfig{
+		RequestsPerSecond: groupDetails.ConcurrentRequests,
+		PortScanEnabled:   false,
+		CustomWebPorts:    groupDetails.CustomWebPorts,
+	}
+
+	if orgPortScanEnabled && groupDetails.PortScanEnabled {
+		portConfig, err = createPortConfig(groupDetails)
+		if err != nil {
+			middleware.ReturnError(w, err.Error(), 401)
+			return
+		}
+	}
+
 	group.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
 			RequestsPerSecond: groupDetails.ConcurrentRequests,
@@ -305,10 +337,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 			RequestsPerSecond: groupDetails.ConcurrentRequests,
 			MaxDepth:          2,
 		},
-		PortModule: &am.PortModuleConfig{
-			RequestsPerSecond: groupDetails.ConcurrentRequests,
-			CustomPorts:       groupDetails.CustomPorts,
-		},
+		PortModule: portConfig,
 		WebModule: &am.WebModuleConfig{
 			TakeScreenShots:       true,
 			RequestsPerSecond:     groupDetails.ConcurrentRequests,
@@ -353,6 +382,7 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var body []byte
+	var orgPortScanEnabled bool
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -374,6 +404,13 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 		logger.Error().Err(am.ErrOrgIDMismatch).Int("org_id", oid).Msg("authorization failure")
 		middleware.ReturnError(w, "internal error", 500)
 		return
+	}
+
+	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
+	if err != nil {
+		logger.Warn().Msg("unable to retrieve organization for checking features")
+	} else {
+		orgPortScanEnabled = org.PortScanEnabled
 	}
 
 	body, err = ioutil.ReadAll(req.Body)
@@ -405,6 +442,22 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 	original.GroupName = updatedGroup.GroupName
 	original.ModifiedByID = userContext.GetUserID()
 	original.ArchiveAfterDays = updatedGroup.ArchiveAfterDays
+
+	portConfig := &am.PortScanModuleConfig{
+		RequestsPerSecond: updatedGroup.ConcurrentRequests,
+		PortScanEnabled:   false,
+		CustomWebPorts:    updatedGroup.CustomWebPorts,
+	}
+
+	if orgPortScanEnabled && updatedGroup.PortScanEnabled {
+		portConfig, err = createPortConfig(updatedGroup)
+		if err != nil {
+			middleware.ReturnError(w, err.Error(), 401)
+			return
+		}
+		log.Info().Msgf("%#v", portConfig)
+	}
+
 	original.ModuleConfigurations = &am.ModuleConfiguration{
 		NSModule: &am.NSModuleConfig{
 			RequestsPerSecond: updatedGroup.ConcurrentRequests,
@@ -414,10 +467,7 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 			RequestsPerSecond: updatedGroup.ConcurrentRequests,
 			MaxDepth:          2,
 		},
-		PortModule: &am.PortModuleConfig{
-			RequestsPerSecond: updatedGroup.ConcurrentRequests,
-			CustomPorts:       updatedGroup.CustomPorts,
-		},
+		PortModule: portConfig,
 		WebModule: &am.WebModuleConfig{
 			TakeScreenShots:       true,
 			RequestsPerSecond:     updatedGroup.ConcurrentRequests,
@@ -541,4 +591,79 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 	}
 
 	middleware.ReturnSuccess(w, "OK", 200)
+}
+
+func createPortConfig(details *ScanGroupDetails) (*am.PortScanModuleConfig, error) {
+	pps := details.PortsPerSecond
+	if pps == 0 {
+		pps = 5
+	}
+
+	webPorts, tcpPorts, valid := VerifyWebScanPorts(details.CustomWebPorts, details.TCPPorts)
+	if !valid {
+		return nil, errors.New("not all webports exist in tcp ports")
+	}
+
+	if len(details.AllowedTLDs) == 0 && len(details.AllowedHosts) == 0 {
+		return nil, errors.New("you have not specified any allowed hosts or TLDs")
+	}
+
+	portConfig := &am.PortScanModuleConfig{
+		RequestsPerSecond: pps,
+		PortScanEnabled:   details.PortScanEnabled,
+		CustomWebPorts:    webPorts,
+		TCPPorts:          tcpPorts,
+		UDPPorts:          nil,
+		AllowedTLDs:       details.AllowedTLDs,
+		AllowedHosts:      details.AllowedHosts,
+		DisallowedTLDs:    details.DisallowedTLDs,
+		DisallowedHosts:   details.DisallowedHosts,
+	}
+	return portConfig, nil
+}
+
+// VerifyWebScanPorts a terribly inefficient method of validating webports are a subset of tcpports
+// and removes duplicates
+func VerifyWebScanPorts(webPorts, tcpPorts []int32) ([]int32, []int32, bool) {
+	web := make(map[int32]struct{})
+	for _, port := range webPorts {
+		web[port] = struct{}{}
+	}
+
+	tcp := make(map[int32]struct{})
+	for _, port := range tcpPorts {
+		tcp[port] = struct{}{}
+	}
+
+	// manually add 80 and 443 if not in there
+	if _, ok := tcp[80]; !ok {
+		tcp[80] = struct{}{}
+	}
+
+	if _, ok := tcp[443]; !ok {
+		tcp[443] = struct{}{}
+	}
+
+	// validate web ports are in tcp ports
+	for port := range web {
+		if _, ok := tcp[port]; !ok {
+			return nil, nil, false
+		}
+	}
+
+	w := make([]int32, len(web))
+	i := 0
+	for port := range web {
+		w[i] = port
+		i++
+	}
+
+	t := make([]int32, len(tcp))
+	i = 0
+	for port := range tcp {
+		t[i] = port
+		i++
+	}
+
+	return w, t, true
 }

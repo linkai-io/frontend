@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/wirepair/gateway"
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/pkg/lb/consul"
@@ -13,10 +12,12 @@ import (
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/wirepair/gateway"
 )
 
 var scanGroupClient am.ScanGroupService
 var userClient am.UserService
+var orgClient am.OrganizationService
 var scanGroupEnv *scangroup.ScanGroupEnv
 var env string
 var region string
@@ -33,12 +34,13 @@ func init() {
 
 	scanGroupClient = initializers.ScanGroupClient()
 	userClient = initializers.UserClient()
+	orgClient = initializers.OrgClient()
 }
 
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, scanGroupEnv)
+	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, orgClient, scanGroupEnv)
 
 	r.Route("/scangroup", func(r chi.Router) {
 		r.Get("/groups", scanGroupHandlers.GetScanGroups)
