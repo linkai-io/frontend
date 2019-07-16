@@ -50,7 +50,7 @@
   version = "v1.11.1"
 
 [[projects]]
-  digest = "1:3e0c87532ae1a7b777eedc08122ae971243e2beb29d495eff5ded97015e6c572"
+  digest = "1:231fddc1ce2a9b035606eb500ed2cfb14be8dc61d07185f7a2dc218acd47ed08"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -92,8 +92,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "29db91562071cdb55ce57e0c3fb3f2abf184749b"
-  version = "v1.20.19"
+  revision = "420cda5d6383f94f7d9c231aa44bad3325181950"
+  version = "v1.20.20"
 
 [[projects]]
   digest = "1:8b82f47e70a7cacb4c93a09e747b78c2223893671776bac0463fe6603a702248"
@@ -296,7 +296,7 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "port-scan"
+  branch = "master"
   digest = "1:5bb61617f168b64ea85b39a8c44ec0f333fff63736cb4eed03311c739d71dc00"
   name = "github.com/linkai-io/am"
   packages = [
@@ -330,7 +330,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "631d526f01a03344e60da045d9b314eb44b22d41"
+  revision = "3a056ba10ceb90286ed128068a34e0bbf61ae9cd"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -607,12 +607,12 @@
   version = "v1.22.0"
 
 [[projects]]
-  digest = "1:ee2db1a4b9111947da887ff2f8972dd2cc80906e521a2d856901fa699b4b51ee"
+  digest = "1:ffb045e56464a5f683830c7a8eec153d35c0444c77f6132bc531617ed58a94d2"
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
   pruneopts = "UT"
-  revision = "884d31b8cad6a1ec877f2400d555924cea03bbea"
-  version = "v9.29.0"
+  revision = "556b9da3c05f2a935bc086fb5a0bb55dd8112d2d"
+  version = "v9.29.1"
 
 [solve-meta]
   analyzer-name = "dep"

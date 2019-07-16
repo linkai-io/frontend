@@ -44,5 +44,5 @@
 
 [[constraint]]
    name = "github.com/linkai-io/am"
-   branch = "port-scan"
+   branch = "master"
    source = "github.com/linkai-io/am"
