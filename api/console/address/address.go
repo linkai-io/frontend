@@ -340,6 +340,15 @@ func (h *AddressHandlers) ParseGetFilterQuery(values url.Values, orgID, groupID 
 		filter.Filters.AddBool(am.FilterHosted, false)
 	}
 
+	discoveredBy := values.Get(am.FilterDiscoveredBy)
+	if discoveredBy != "" {
+		discoveredByValue, ok := am.DiscoveryMap[discoveredBy]
+		if !ok {
+			return nil, errors.New("invalid discovery type")
+		}
+		filter.Filters.AddInt32(am.FilterDiscoveredBy, discoveredByValue)
+	}
+
 	beforeScanned := values.Get(am.FilterBeforeScannedTime)
 	if beforeScanned != "" {
 		beforeScannedTime, err := strconv.ParseInt(beforeScanned, 10, 64)

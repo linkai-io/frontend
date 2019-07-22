@@ -66,7 +66,7 @@ func TestGetAddresses(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	rr, body := fetest.RouterTestRequest(t, ts, "GET", "/address/group/1", nil)
+	rr, body := fetest.RouterTestRequest(t, ts, "GET", "/address/group/1?discovered_by=input_list", nil)
 
 	// Check the status code is what we expect.
 	if status := rr.StatusCode; status != http.StatusOK {
