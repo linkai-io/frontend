@@ -10,20 +10,23 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/serializers"
-
 	"github.com/rs/zerolog/log"
+	stripe "github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/client"
 
 	"github.com/linkai-io/am/am"
 )
 
 type OrgHandlers struct {
 	orgClient        am.OrganizationService
+	stripeClient     *client.API
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(orgClient am.OrganizationService) *OrgHandlers {
+func New(orgClient am.OrganizationService, stripeClient *client.API) *OrgHandlers {
 	return &OrgHandlers{
 		orgClient:        orgClient,
+		stripeClient:     stripeClient,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
 }
@@ -35,6 +38,7 @@ func (h *OrgHandlers) GetByName(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 	param := chi.URLParam(req, "name")
 	_, org, err := h.orgClient.Get(req.Context(), userContext, param)
@@ -58,6 +62,7 @@ func (h *OrgHandlers) GetByID(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	param := chi.URLParam(req, "id")
@@ -88,6 +93,7 @@ func (h *OrgHandlers) GetByCID(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	param := chi.URLParam(req, "cid")
@@ -212,6 +218,56 @@ func (h *OrgHandlers) Delete(w http.ResponseWriter, req *http.Request) {
 	resp["status"] = "ok"
 
 	data, _ = json.Marshal(resp)
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
+type BillingResponse struct {
+	OrgCID           string         `json:"org_cid"`
+	OwnerEmail       string         `json:"owner_email"`
+	SubscriptionPlan string         `json:"subscription_plan"`
+	Plans            []*stripe.Plan `json:"plans"`
+}
+
+// GetBilling plan data and org data
+func (h *OrgHandlers) GetBilling(w http.ResponseWriter, req *http.Request) {
+	var data []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		log.Error().Msg("failed to get context")
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+	logger := middleware.UserContextLogger(userContext)
+
+	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
+	if err != nil {
+		middleware.ReturnError(w, err.Error(), 500)
+		return
+	}
+
+	params := &stripe.PlanListParams{}
+	params.Filters.AddFilter("limit", "", "10")
+	i := h.stripeClient.Plans.List(params)
+	logger.Info().Msg("got plans")
+	plans := make([]*stripe.Plan, 0)
+	for i.Next() {
+		p := i.Plan()
+		if !p.Active || p.Deleted {
+			continue
+		}
+		logger.Info().Msgf("%#v", p)
+		plans = append(plans, p)
+	}
+
+	billing := &BillingResponse{
+		Plans:      plans,
+		OrgCID:     userContext.GetOrgCID(),
+		OwnerEmail: org.OwnerEmail,
+	}
+
+	data, _ = json.Marshal(billing)
 	w.WriteHeader(200)
 	fmt.Fprint(w, string(data))
 }

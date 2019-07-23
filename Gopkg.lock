@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:a9ac4c16cb0c7e6700a6e1cc4dff348487c43600f6e0ad58c0a75881f0134a34"
+  digest = "1:338226968dacb9cf77c46043950020710c6bc058e2dbc2622d41417a52e80c96"
   name = "cloud.google.com/go"
   packages = [
     "bigquery",
@@ -15,8 +15,8 @@
     "internal/version",
   ]
   pruneopts = "UT"
-  revision = "cf81fad90a1a1de334c4fc27e23eb9a4224b627a"
-  version = "v0.41.0"
+  revision = "cdaaf98f9226c39dc162b8e55083b2fbc67b4674"
+  version = "v0.43.0"
 
 [[projects]]
   branch = "master"
@@ -50,7 +50,7 @@
   version = "v1.11.1"
 
 [[projects]]
-  digest = "1:32c3f1f3f6d308905d6eeac18986965693d2f1fd8e5a13e878ed65c136f3ff13"
+  digest = "1:b94c4b20d4729adbdfa69a028e721f8126422530601be7863769b88e65693b0a"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -90,10 +90,11 @@
     "service/s3",
     "service/ssm",
     "service/sts",
+    "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "d56b50aa9d71793a9ebf86116b12789048a7f032"
-  version = "v1.20.21"
+  revision = "246b05ad4b913883ee208efe8c779ea711ba11a4"
+  version = "v1.21.2"
 
 [[projects]]
   digest = "1:8b82f47e70a7cacb4c93a09e747b78c2223893671776bac0463fe6603a702248"
@@ -330,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "5e9f1b0143b6fbadb553a5d3c9c5fb08eabc3d94"
+  revision = "ffa4b84bf851344e092b51ddaf2c50f3390746ff"
   source = "github.com/linkai-io/am"
 
 [[projects]]

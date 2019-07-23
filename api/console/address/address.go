@@ -72,7 +72,7 @@ func (h *AddressHandlers) OrgStats(w http.ResponseWriter, req *http.Request) {
 	}
 	logger := middleware.UserContextLogger(userContext)
 
-	log.Info().Msg("getting stats for org")
+	logger.Info().Msg("getting stats for org")
 	oid, stats, err := h.addrClient.OrgStats(req.Context(), userContext)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to get addresses")
@@ -85,7 +85,7 @@ func (h *AddressHandlers) OrgStats(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "failed to get addresses", 500)
 		return
 	}
-	log.Info().Msgf("stats... %#v\n", stats)
+	logger.Info().Msgf("stats... %#v\n", stats)
 	for i := 0; i < len(stats); i++ {
 		log.Info().Msgf("%#v\n", stats[i])
 	}
