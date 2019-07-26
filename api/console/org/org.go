@@ -223,10 +223,16 @@ func (h *OrgHandlers) Delete(w http.ResponseWriter, req *http.Request) {
 }
 
 type BillingResponse struct {
-	OrgCID           string         `json:"org_cid"`
-	OwnerEmail       string         `json:"owner_email"`
-	SubscriptionPlan string         `json:"subscription_plan"`
-	Plans            []*stripe.Plan `json:"plans"`
+	OrgCID                   string         `json:"org_cid"`
+	OrgStatus                int            `json:"org_status"`
+	OwnerEmail               string         `json:"owner_email"`
+	SubscriptionPlan         string         `json:"subscription_plan"`
+	PaymentRequiredTimestamp int64          `json:"payment_required_timestamp"`
+	BillingPlanType          string         `json:"billing_plan_type"`
+	BillingPlanID            string         `json:"billing_plan_id"`
+	IsBetaPlan               bool           `json:"is_beta_plan"`
+	Plans                    []*stripe.Plan `json:"plans"`
+	BillingSubscriptionID    string         `json:"billing_subscription_id"`
 }
 
 // GetBilling plan data and org data
@@ -239,6 +245,7 @@ func (h *OrgHandlers) GetBilling(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+
 	logger := middleware.UserContextLogger(userContext)
 
 	_, org, err := h.orgClient.GetByCID(req.Context(), userContext, userContext.GetOrgCID())
@@ -262,9 +269,15 @@ func (h *OrgHandlers) GetBilling(w http.ResponseWriter, req *http.Request) {
 	}
 
 	billing := &BillingResponse{
-		Plans:      plans,
-		OrgCID:     userContext.GetOrgCID(),
-		OwnerEmail: org.OwnerEmail,
+		Plans:                    plans,
+		OrgCID:                   userContext.GetOrgCID(),
+		OrgStatus:                org.StatusID,
+		OwnerEmail:               org.OwnerEmail,
+		PaymentRequiredTimestamp: org.PaymentRequiredTimestamp,
+		BillingPlanID:            org.BillingPlanID,
+		BillingPlanType:          org.BillingPlanType,
+		BillingSubscriptionID:    org.BillingSubscriptionID,
+		IsBetaPlan:               org.IsBetaPlan,
 	}
 
 	data, _ = json.Marshal(billing)

@@ -9,10 +9,12 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/stripe/stripe-go/client"
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/mock"
+	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/api/console/address"
 	"github.com/linkai-io/frontend/api/console/event"
 	"github.com/linkai-io/frontend/api/console/org"
@@ -30,6 +32,15 @@ func main() {
 	zerolog.TimeFieldFormat = ""
 	log.Logger = log.With().Str("service", "FakeServer").Logger()
 
+	secret := secrets.NewSecretsCache(env, region)
+	stripeKey, err := secret.GetSecureString(fmt.Sprintf("/am/%s/billing/stripe/key", env))
+	if err != nil {
+		log.Fatal().Err(err).Msg("error reading stripe key")
+	}
+
+	sc := &client.API{}
+	sc.Init(stripeKey, nil)
+
 	r := chi.NewRouter()
 	orgClient := testOrgClient()
 	addrClient := testAddrClient()
@@ -44,7 +55,7 @@ func main() {
 	addrHandlers := address.New(addrClient, scanGroupClient, orgClient)
 	addrHandlers.ContextExtractor = fakeContext
 
-	orgHandlers := org.New(orgClient)
+	orgHandlers := org.New(orgClient, sc)
 	orgHandlers.ContextExtractor = fakeContext
 
 	userHandlers := user.New(userClient, tokener, authenticator, orgClient, &user.UserEnv{Env: env, Region: region})
@@ -108,6 +119,7 @@ func main() {
 		r.Delete("/id/{id}", orgHandlers.Delete)
 		r.Get("/cid/{cid}", orgHandlers.GetByCID)
 		r.Get("/list", orgHandlers.List)
+		r.Get("/billing", orgHandlers.GetBilling)
 	})
 
 	// testing user
@@ -142,7 +154,7 @@ func main() {
 	})
 
 	log.Info().Msg("listening on :3000")
-	err := http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(":3000", r)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve")
 	}

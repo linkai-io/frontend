@@ -50,7 +50,7 @@
   version = "v1.11.1"
 
 [[projects]]
-  digest = "1:b94c4b20d4729adbdfa69a028e721f8126422530601be7863769b88e65693b0a"
+  digest = "1:be04b11e8a2fbd604be4814b16b287256c4b7baa1ba78da5ea38c2598d5fecbe"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -93,8 +93,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "246b05ad4b913883ee208efe8c779ea711ba11a4"
-  version = "v1.21.2"
+  revision = "77b6968988559d355ab953b6436eafe6a76e4a92"
+  version = "v1.21.4"
 
 [[projects]]
   digest = "1:8b82f47e70a7cacb4c93a09e747b78c2223893671776bac0463fe6603a702248"
@@ -297,8 +297,8 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "addr-filter"
-  digest = "1:b02e88b2914a345ff3b8877414e9cf9d194a87a21f677ab263f91d2742279412"
+  branch = "billing"
+  digest = "1:bcc0e6fea28a9b1b12a7d5f8a8a10cf64999b8af1c294a23b7bc5374b9345c07"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -331,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "ffa4b84bf851344e092b51ddaf2c50f3390746ff"
+  revision = "fd76b779eb6c461d7c60c8534a8677048922d19e"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -380,6 +380,91 @@
   version = "v1.14.3"
 
 [[projects]]
+  digest = "1:b96bafe3a61f44401a1810e551fa7f4cd83467fd7341c3a4014580658d7640d5"
+  name = "github.com/stripe/stripe-go"
+  packages = [
+    ".",
+    "account",
+    "accountlink",
+    "applepaydomain",
+    "balance",
+    "bankaccount",
+    "bitcoinreceiver",
+    "bitcointransaction",
+    "capability",
+    "card",
+    "charge",
+    "checkout/session",
+    "client",
+    "countryspec",
+    "coupon",
+    "creditnote",
+    "customer",
+    "customerbalancetransaction",
+    "discount",
+    "dispute",
+    "ephemeralkey",
+    "event",
+    "exchangerate",
+    "fee",
+    "feerefund",
+    "file",
+    "filelink",
+    "form",
+    "invoice",
+    "invoiceitem",
+    "issuerfraudrecord",
+    "issuing/authorization",
+    "issuing/card",
+    "issuing/cardholder",
+    "issuing/dispute",
+    "issuing/transaction",
+    "loginlink",
+    "order",
+    "orderreturn",
+    "paymentintent",
+    "paymentmethod",
+    "paymentsource",
+    "payout",
+    "person",
+    "plan",
+    "product",
+    "radar/earlyfraudwarning",
+    "radar/valuelist",
+    "radar/valuelistitem",
+    "recipient",
+    "refund",
+    "reporting/reportrun",
+    "reporting/reporttype",
+    "reversal",
+    "review",
+    "setupintent",
+    "sigma/scheduledqueryrun",
+    "sku",
+    "source",
+    "sourcetransaction",
+    "sub",
+    "subitem",
+    "subschedule",
+    "subschedulerevision",
+    "taxid",
+    "taxrate",
+    "terminal/connectiontoken",
+    "terminal/location",
+    "terminal/reader",
+    "threedsecure",
+    "token",
+    "topup",
+    "transfer",
+    "usagerecord",
+    "usagerecordsummary",
+    "webhookendpoint",
+  ]
+  pruneopts = "UT"
+  revision = "809b19b623ac151b0a44cb654f2cb10ddfc8c1ff"
+  version = "v61.19.0"
+
+[[projects]]
   digest = "1:210ba8019d2abe6648d08bfed8211c6354b554f20b75252cd0be4253f45cad0f"
   name = "github.com/wirepair/gateway"
   packages = ["."]
@@ -388,15 +473,15 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:e2536f81005f70e0aad65c21ee4c71d58eafca8abdd354630facbc57beb67160"
+  digest = "1:0f1edcb06a4a5ff542c1fb73c955d87409b46eb35b0afbe82ddcf469744085e6"
   name = "github.com/wirepair/gcd"
   packages = [
     "gcdapi",
     "gcdmessage",
   ]
   pruneopts = "UT"
-  revision = "44bb7d51f34e1a82ad6868dcad7ff21222c80c96"
-  version = "v1.0.6"
+  revision = "55ec1aef55e586500bd3f04449565a4978a52c9a"
+  version = "v1.0.7"
 
 [[projects]]
   digest = "1:74055050ea547bb04600be79cc501965cb3de8988018262f2ca430f0a0b48ec3"
@@ -437,7 +522,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0fec8a9295ec561acd457140409f34cb665f224fe0370fd1ec10890f5263ed61"
+  digest = "1:72d7243bb3c53dba0f181814611af508663257ae52e2fe114ed7fad662cd9096"
   name = "golang.org/x/net"
   packages = [
     "bpf",
@@ -458,7 +543,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "da137c7871d730100384dbcf36e6f8fa493aef5b"
+  revision = "ca1201d0de80cfde86cb01aea620983605dfe99b"
 
 [[projects]]
   branch = "master"
@@ -651,6 +736,8 @@
     "github.com/pkg/errors",
     "github.com/rs/zerolog",
     "github.com/rs/zerolog/log",
+    "github.com/stripe/stripe-go",
+    "github.com/stripe/stripe-go/client",
     "github.com/wirepair/gateway",
     "google.golang.org/grpc",
     "google.golang.org/grpc/health/grpc_health_v1",
