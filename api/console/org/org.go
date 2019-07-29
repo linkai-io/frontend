@@ -224,6 +224,7 @@ func (h *OrgHandlers) Delete(w http.ResponseWriter, req *http.Request) {
 
 type BillingResponse struct {
 	OrgCID                   string         `json:"org_cid"`
+	OrgCreated               int64          `json:"org_created"`
 	OrgStatus                int            `json:"org_status"`
 	OwnerEmail               string         `json:"owner_email"`
 	SubscriptionPlan         string         `json:"subscription_plan"`
@@ -271,6 +272,7 @@ func (h *OrgHandlers) GetBilling(w http.ResponseWriter, req *http.Request) {
 	billing := &BillingResponse{
 		Plans:                    plans,
 		OrgCID:                   userContext.GetOrgCID(),
+		OrgCreated:               org.CreationTime,
 		OrgStatus:                org.StatusID,
 		OwnerEmail:               org.OwnerEmail,
 		PaymentRequiredTimestamp: org.PaymentRequiredTimestamp,

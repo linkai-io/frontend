@@ -44,7 +44,7 @@ func main() {
 		log.Fatal().Err(err).Msg("error reading stripe key")
 	}
 
-	endpointKey, err := secret.GetSecureString(fmt.Sprintf("/am/%s/billing/stripe/endpoint_key"))
+	endpointKey, err := secret.GetSecureString(fmt.Sprintf("/am/%s/billing/stripe/endpoint_key", env))
 	if err != nil {
 		log.Fatal().Err(err).Msg("error reading webhook endpoint key")
 	}
@@ -76,11 +76,10 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
-	billingHandlers := billing.New(orgClient, sc)
+	billingHandlers := billing.New(orgClient, systemContext, sc, endpointKey)
 
 	r.Route("/incoming", func(r chi.Router) {
-		r.Get("/stripe_events", billingHandlers.GetByName)
-
+		r.Post("/stripe_events", billingHandlers.HandleStripe)
 	})
 
 	err = gateway.ListenAndServe(":3000", r)

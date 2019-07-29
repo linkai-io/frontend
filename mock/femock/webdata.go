@@ -1,4 +1,4 @@
-package main
+package femock
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/linkai-io/am/pkg/convert"
 )
 
-func testWebClient() am.WebDataService {
+func MockWebClient() am.WebDataService {
 	webClient := &mock.WebDataService{}
 	var respID int64
 	var certID int64

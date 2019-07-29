@@ -1,4 +1,4 @@
-package main
+package femock
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func testScanGroupClient() am.ScanGroupService {
+func MockScanGroupClient() am.ScanGroupService {
 	var newID int32
 	groupLock := &sync.RWMutex{}
 
