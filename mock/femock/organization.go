@@ -7,6 +7,7 @@ import (
 
 	"github.com/linkai-io/am/am"
 	"github.com/linkai-io/am/mock"
+	"github.com/rs/zerolog/log"
 )
 
 func MockOrgClient() am.OrganizationService {
@@ -30,7 +31,7 @@ func MockOrgClient() am.OrganizationService {
 		if org, ok := orgs[orgCID]; ok {
 			return org.OrgID, org, nil
 		}
-
+		log.Info().Msgf("userContext: %#v", userContext)
 		org = BuildOrg(userContext, orgCID, userContext.GetOrgID())
 		return userContext.GetOrgID(), org, nil
 	}
@@ -39,6 +40,7 @@ func MockOrgClient() am.OrganizationService {
 		orgLock.Lock()
 		defer orgLock.Unlock()
 		orgs[updated.OrgCID] = updated
+		log.Info().Msgf("org updated: %#v", updated)
 		return userContext.GetOrgID(), nil
 	}
 	return orgClient
@@ -47,7 +49,7 @@ func MockOrgClient() am.OrganizationService {
 func BuildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organization {
 	return &am.Organization{
 		OrgID:                      userContext.GetOrgID(),
-		OrgCID:                     "test",
+		OrgCID:                     orgName,
 		OrgName:                    orgName,
 		OwnerEmail:                 "test@" + orgName + ".com",
 		UserPoolID:                 "test",

@@ -1,6 +1,7 @@
 package billing_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -8,21 +9,26 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi"
-	"github.com/linkai-io/am/mock"
 	"github.com/linkai-io/am/pkg/secrets"
 	"github.com/linkai-io/frontend/fetest"
 	"github.com/linkai-io/frontend/mock/femock"
+	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/client"
-	"github.com/stripe/stripe-go/webhook"
 )
 
 var subscriptionMessage = `{
-      "id": "cs_test_xmpFWYi9XgxUSIx12G3VNp8YI0DCwn5KDPwPy85tKaI3ictC0Lw6NuCo",
+  "id": "evt_1F1numDU5nzuhrj2rwI9Z52w",
+  "object": "event",
+  "api_version": "2018-05-21",
+  "created": 1564464623,
+  "data": {
+    "object": {
+      "id": "cs_test_3IFMNAGQUYoB5vEGItkOgviEbmMeQVtFbqhVECJnqeBw9ucidPiwUAmK",
       "object": "checkout.session",
       "billing_address_collection": "required",
       "cancel_url": "https://console.linkai.io/incoming/canceled",
       "client_reference_id": "somerandomvalue",
-      "customer": "cus_FWZdZvoNltPyoR",
+      "customer": "cus_FWreLjK3DSiaje",
       "customer_email": "test@somerandomvalue.com",
       "display_items": [
         {
@@ -65,11 +71,18 @@ var subscriptionMessage = `{
         "card"
       ],
       "submit_type": null,
-      "subscription": "sub_FWZdlA6FprXyiT",
+      "subscription": "sub_FWre6YYyYb84WD",
       "success_url": "https://console.linkai.io/incoming/success"
     }
-  }`
-var subSign = `t=1564397639,v1=0a892a62c471f950b452b18f19862f1a3b58d0705230a467a3929aed4f2373c6,v0=4f8e01b93b78a2657adce767d1b4f2e92f4e3b802c0d9edcb8d66a00fc6f5b38`
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_apoTns6E0YcdaN",
+    "idempotency_key": null
+  },
+  "type": "checkout.session.completed"
+}`
 
 func TestSuccess(t *testing.T) {
 
@@ -82,9 +95,17 @@ func TestSuccess(t *testing.T) {
 	sc := &client.API{}
 	sc.Init(stripeKey, nil)
 
-	orgClient := &mock.OrganizationService{}
+	orgClient := femock.MockOrgClient()
 	billingHandlers := femock.MockWebHooks("local", "us-east-1", sc, orgClient, secret)
-	billingHandlers.SigVerifier = webhook.ConstructEventIgnoringTolerance
+	// ignore sig validation
+	billingHandlers.SigVerifier = func(payload []byte, header, secret string) (stripe.Event, error) {
+		e := stripe.Event{}
+		if err := json.Unmarshal(payload, &e); err != nil {
+			return e, fmt.Errorf("Failed to parse webhook body json: %s", err.Error())
+		}
+
+		return e, nil
+	}
 	r := chi.NewRouter()
 	r.Route("/incoming", func(r chi.Router) {
 		r.Post("/stripe_events", billingHandlers.HandleStripe)
@@ -93,7 +114,6 @@ func TestSuccess(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 	headers := make(http.Header)
-	headers.Add("Stripe-Signature", subSign)
 
 	rr, _ := fetest.RouterTestRequestWithHeaders(t, ts, "POST", "/incoming/stripe_events", headers, strings.NewReader(subscriptionMessage))
 	// Check the status code is what we expect.

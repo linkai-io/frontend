@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/linkai-io/am/am"
@@ -18,6 +19,7 @@ import (
 var (
 	ErrInvalidCustomerID = errors.New("invalid customer id")
 	ErrInvalidDisplayNum = errors.New("invalid number of display items in events")
+	ErrNoMetadataKey     = errors.New("key not found in metadata map")
 )
 
 type SigFn func(payload []byte, header string, secret string) (stripe.Event, error)
@@ -32,10 +34,11 @@ type BillingHandlers struct {
 
 func New(orgClient am.OrganizationService, systemContext am.UserContext, stripeClient *client.API, endpointKey string) *BillingHandlers {
 	return &BillingHandlers{
-		orgClient:    orgClient,
-		stripeClient: stripeClient,
-		endpointKey:  endpointKey,
-		SigVerifier:  webhook.ConstructEvent,
+		orgClient:     orgClient,
+		systemContext: systemContext,
+		stripeClient:  stripeClient,
+		endpointKey:   endpointKey,
+		SigVerifier:   webhook.ConstructEvent,
 	}
 }
 
@@ -60,24 +63,62 @@ func (h *BillingHandlers) handlePaymentSuccess(ctx context.Context, session stri
 		return err
 	}
 
-	// convert sec to nsec
-	periodEnd := time.Unix(sub.CurrentPeriodEnd, 0)
+	return h.UpdateSubscription(ctx, org, sub)
+}
 
-	org.BillingSubscriptionID = session.Subscription.ID
-	org.BillingPlanID = session.DisplayItems[0].Plan.ID
-	org.BillingPlanType = "stripe"
-	org.PaymentRequiredTimestamp = periodEnd.UnixNano()
-
+func (h *BillingHandlers) UpdateSubscription(ctx context.Context, org *am.Organization, sub *stripe.Subscription) error {
+	// some what of a hack since we don't have the proper userid looked up from the users table, but
+	// the org service only uses user context orgID to validate.
 	proxyContext := am.ProxyUserContext(org.OrgID, h.systemContext)
 	proxyContext.OrgCID = org.OrgCID
 	proxyContext.OrgStatusID = org.StatusID
 	proxyContext.SubscriptionID = org.SubscriptionID
+
+	// convert sec to nsec
+	periodEnd := time.Unix(sub.CurrentPeriodEnd, 0)
+
+	tlds, err := GetMetadataInt32(sub.Metadata, "tlds")
+	if err != nil {
+		return err
+	}
+
+	hosts, err := GetMetadataInt32(sub.Metadata, "hosts")
+	if err != nil {
+		return err
+	}
+
+	var subID int32
+	size := sub.Metadata["size"]
+	switch size {
+	case "small":
+		subID = am.SubscriptionMonthlySmall
+	case "medium":
+		subID = am.SubscriptionMonthlyMedium
+	case "large":
+		subID = am.SubscriptionEnterprise
+	}
+
+	// new plan
+	if org.BillingSubscriptionID == "" {
+		//hours, err := GetMetadataInt32(sub.Metadata, "hours")
+		org.LimitTLD = tlds
+		org.LimitHosts = hosts
+	}
+	org.SubscriptionID = subID
+	org.BillingSubscriptionID = sub.ID
+	org.BillingPlanID = sub.Plan.ID
+	org.BillingPlanType = "stripe"
+	org.PaymentRequiredTimestamp = periodEnd.UnixNano()
+
 	_, err = h.orgClient.Update(ctx, proxyContext, org)
 	return err
 }
 
-func (h *BillingHandlers) handlePaymentFailure(ctx context.Context, event stripe.Invoice) error {
+func (h *BillingHandlers) handleReoccurringPaymentSuccess(ctx context.Context, event stripe.Invoice) error {
+	return nil
+}
 
+func (h *BillingHandlers) handlePaymentFailure(ctx context.Context, event stripe.Invoice) error {
 	return nil
 }
 
@@ -92,17 +133,21 @@ func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request)
 	// Pass the request body and Stripe-Signature header to ConstructEvent, along
 	// with the webhook signing key.
 	// You can find your endpoint's secret in your webhook settings
-	event, err := webhook.ConstructEvent(body, req.Header.Get("Stripe-Signature"), h.endpointKey)
-	log.Info().Str("sig", req.Header.Get("Stripe-Signature")).Msg("signing header")
+	log.Info().Str("body", string(body)).Msg("body data")
+	log.Info().Str("sig", req.Header.Get("Stripe-Signature")).Msg("sig data")
+	event, err := h.SigVerifier(body, req.Header.Get("Stripe-Signature"), h.endpointKey)
+
 	if err != nil {
 		log.Error().Err(err).Msg("verifying webhook signature failed")
 		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
 
-	log.Info().Msgf("incoming webhook event %s", event.Data.Raw)
+	log.Info().Msgf("incoming webhook event %#v", event)
+	log.Info().Msgf("incoming webhook event data %#v", event.Data)
 	// Unmarshal the event data into an appropriate struct depending on its Type
 	switch event.Type {
+	// This is the first event for a new customer we need to handle
 	case "checkout.session.completed":
 		var session stripe.CheckoutSession
 		err := json.Unmarshal(event.Data.Raw, &session)
@@ -117,7 +162,21 @@ func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-	//case "customer.subscription.deleted":
+		// if customer changes their subscription level
+	case "customer.subscription.updated":
+		// if customer deletes their subscription
+	case "customer.subscription.deleted":
+		// payment succeeded for re-occuring payments
+	case "invoice.payment_succeeded":
+		var invoice stripe.Invoice
+		err := json.Unmarshal(event.Data.Raw, &invoice)
+		if err != nil {
+			log.Error().Err(err).Msg("parsing webhook JSON failed")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		h.handleReoccurringPaymentSuccess(req.Context(), invoice)
+	// payment failed for re-occuring payments
 	case "invoice.payment_failed":
 		var invoice stripe.Invoice
 		err := json.Unmarshal(event.Data.Raw, &invoice)
@@ -130,9 +189,24 @@ func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request)
 	// ... handle other event types
 	default:
 		log.Error().Err(err).Msgf("Unexpected event type: %s", event.Type)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func GetMetadataInt32(metadata map[string]string, key string) (int32, error) {
+	var v string
+	var ok bool
+
+	if v, ok = metadata[key]; !ok {
+		return 0, ErrNoMetadataKey
+	}
+
+	iv, err := strconv.Atoi(v)
+	if err != nil {
+		return 0, err
+	}
+	return int32(iv), nil
 }
