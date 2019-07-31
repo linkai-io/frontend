@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -73,22 +74,21 @@ func (h *BillingHandlers) UpdateSubscription(ctx context.Context, org *am.Organi
 	proxyContext.OrgCID = org.OrgCID
 	proxyContext.OrgStatusID = org.StatusID
 	proxyContext.SubscriptionID = org.SubscriptionID
-
 	// convert sec to nsec
 	periodEnd := time.Unix(sub.CurrentPeriodEnd, 0)
 
-	tlds, err := GetMetadataInt32(sub.Metadata, "tlds")
+	tlds, err := GetMetadataInt32(sub.Plan.Metadata, "tlds")
 	if err != nil {
 		return err
 	}
 
-	hosts, err := GetMetadataInt32(sub.Metadata, "hosts")
+	hosts, err := GetMetadataInt32(sub.Plan.Metadata, "hosts")
 	if err != nil {
 		return err
 	}
 
 	var subID int32
-	size := sub.Metadata["size"]
+	size := sub.Plan.Metadata["size"]
 	switch size {
 	case "small":
 		subID = am.SubscriptionMonthlySmall
@@ -122,6 +122,35 @@ func (h *BillingHandlers) handlePaymentFailure(ctx context.Context, event stripe
 	return nil
 }
 
+func (h *BillingHandlers) handleSubscriptionUpdated(ctx context.Context, event stripe.Invoice) error {
+	return nil
+}
+
+func (h *BillingHandlers) getOrgByBillingSubID(ctx context.Context, subID string) (*am.Organization, error) {
+
+	if subID == "" {
+		return nil, errors.New("subscription id was empty")
+	}
+
+	filter := &am.OrgFilter{
+		Start:   0,
+		Limit:   2,
+		Filters: &am.FilterType{},
+	}
+
+	filter.Filters.AddString(am.FilterBillingSubscriptionID, subID)
+	orgs, err := h.orgClient.List(ctx, h.systemContext, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(orgs) != 1 {
+		return nil, fmt.Errorf("organization count != 1 got ", len(orgs))
+	}
+
+	return orgs[0], nil
+}
+
 func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -144,7 +173,6 @@ func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request)
 	}
 
 	log.Info().Msgf("incoming webhook event %#v", event)
-	log.Info().Msgf("incoming webhook event data %#v", event.Data)
 	// Unmarshal the event data into an appropriate struct depending on its Type
 	switch event.Type {
 	// This is the first event for a new customer we need to handle
@@ -164,6 +192,7 @@ func (h *BillingHandlers) HandleStripe(w http.ResponseWriter, req *http.Request)
 		}
 		// if customer changes their subscription level
 	case "customer.subscription.updated":
+		//var sub stripe.SubscriptionU
 		// if customer deletes their subscription
 	case "customer.subscription.deleted":
 		// payment succeeded for re-occuring payments

@@ -50,7 +50,7 @@
   version = "v1.12.0"
 
 [[projects]]
-  digest = "1:125ce01dc45d262fc3e8a6d6619efc9f793949f2d3ec2f6bf9e76d4e3d404c0f"
+  digest = "1:2063ce4b1896013c961aaf04556a3427b0676ae6065ceadbd9c9281d8490048c"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -93,8 +93,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "ba829de1f3457a55eddf7ed693f36fe9069e39c4"
-  version = "v1.21.6"
+  revision = "b024dccbed5bf4ecdf4718113f282c0ef972a776"
+  version = "v1.21.8"
 
 [[projects]]
   digest = "1:b14c2322f7004e8ccfa55067c9825c7745516d8875ec9ad2f829c8828b0068b1"
@@ -298,7 +298,7 @@
 
 [[projects]]
   branch = "billing"
-  digest = "1:7096d9cefd9fecbf3e0e1bac1cb9d9c2e4def09d55219d316922102886ff45f0"
+  digest = "1:7559e3a781b3f1fe7f3663da215955f86d7db14016fb54c6d6c5d03da294dddb"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -331,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "b721406c9f1b5280b02d77e41f57e6c7a646ab73"
+  revision = "934fe39e25b11c12b53ce417f3b59d5d199dda89"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -380,7 +380,7 @@
   version = "v1.14.3"
 
 [[projects]]
-  digest = "1:4f01a903043b5ad2d75e786ebbd59295c65f740e22ec7fadfa97e3413fdb104e"
+  digest = "1:b3d00fe65b772b66efb63dd3e83105099d2ce9faa1e85fe0753b21e0ff669f18"
   name = "github.com/stripe/stripe-go"
   packages = [
     ".",
@@ -388,6 +388,7 @@
     "accountlink",
     "applepaydomain",
     "balance",
+    "balancetransaction",
     "bankaccount",
     "bitcoinreceiver",
     "bitcointransaction",
@@ -420,6 +421,7 @@
     "issuing/dispute",
     "issuing/transaction",
     "loginlink",
+    "oauth",
     "order",
     "orderreturn",
     "paymentintent",
@@ -462,8 +464,8 @@
     "webhookendpoint",
   ]
   pruneopts = "UT"
-  revision = "2419d12bdcece7b9c5c69561ab44235325e2938c"
-  version = "v61.21.0"
+  revision = "6866041f85936e1566fbbfcdde79e3350b27a9bd"
+  version = "v61.25.0"
 
 [[projects]]
   digest = "1:210ba8019d2abe6648d08bfed8211c6354b554f20b75252cd0be4253f45cad0f"
@@ -562,14 +564,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f99b0e9035cf86cdc14cb2848308e831193d5e19ab9a23a8493cd925bdc3952b"
+  digest = "1:6f4db4018547b0c19aa51a66ea3a5eed800cc5e2de9df6490a37b14d06155f22"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "fc99dfbffb4e5ed5758a37e31dd861afe285406b"
+  revision = "1393eb0183657fb29200106b17a5042ec6e48dbe"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"

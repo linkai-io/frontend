@@ -121,4 +121,5 @@ func TestSuccess(t *testing.T) {
 		t.Fatalf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
+  orgClient.GetByCID(context.Background(), )
 }

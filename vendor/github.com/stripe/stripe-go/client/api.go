@@ -7,6 +7,7 @@ import (
 	"github.com/stripe/stripe-go/accountlink"
 	"github.com/stripe/stripe-go/applepaydomain"
 	"github.com/stripe/stripe-go/balance"
+	"github.com/stripe/stripe-go/balancetransaction"
 	"github.com/stripe/stripe-go/bankaccount"
 	"github.com/stripe/stripe-go/bitcoinreceiver"
 	"github.com/stripe/stripe-go/bitcointransaction"
@@ -37,6 +38,7 @@ import (
 	issuingdispute "github.com/stripe/stripe-go/issuing/dispute"
 	"github.com/stripe/stripe-go/issuing/transaction"
 	"github.com/stripe/stripe-go/loginlink"
+	"github.com/stripe/stripe-go/oauth"
 	"github.com/stripe/stripe-go/order"
 	"github.com/stripe/stripe-go/orderreturn"
 	"github.com/stripe/stripe-go/paymentintent"
@@ -86,8 +88,10 @@ type API struct {
 	AccountLinks *accountlink.Client
 	// ApplePayDomains is the client used to invoke /apple_pay/domains APIs.
 	ApplePayDomains *applepaydomain.Client
-	// Balance is the client used to invoke /balance and transaction-related APIs.
+	// Balance is the client used to invoke /balance APIs.
 	Balance *balance.Client
+	// BalanceTransaction is the client used to invoke /balance_transactions APIs.
+	BalanceTransaction *balancetransaction.Client
 	// BankAccounts is the client used to invoke bank account related APIs.
 	BankAccounts *bankaccount.Client
 	// BitcoinReceivers is the client used to invoke /bitcoin/receivers APIs.
@@ -148,6 +152,8 @@ type API struct {
 	IssuingTransactions *transaction.Client
 	// LoginLinks is the client used to invoke login link related APIs.
 	LoginLinks *loginlink.Client
+	// OAuth is the client used to invoke /oauth APIs.
+	OAuth *oauth.Client
 	// Orders is the client used to invoke /orders APIs.
 	Orders *order.Client
 	// OrderReturns is the client used to invoke /order_returns APIs.
@@ -234,6 +240,7 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	if backends == nil {
 		backends = &stripe.Backends{
 			API:     stripe.GetBackend(stripe.APIBackend),
+			Connect: stripe.GetBackend(stripe.ConnectBackend),
 			Uploads: stripe.GetBackend(stripe.UploadsBackend),
 		}
 	}
@@ -242,6 +249,7 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	a.ApplePayDomains = &applepaydomain.Client{B: backends.API, Key: key}
 	a.AccountLinks = &accountlink.Client{B: backends.API, Key: key}
 	a.Balance = &balance.Client{B: backends.API, Key: key}
+	a.BalanceTransaction = &balancetransaction.Client{B: backends.API, Key: key}
 	a.BankAccounts = &bankaccount.Client{B: backends.API, Key: key}
 	a.BitcoinReceivers = &bitcoinreceiver.Client{B: backends.API, Key: key}
 	a.BitcoinTransactions = &bitcointransaction.Client{B: backends.API, Key: key}
@@ -272,8 +280,9 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	a.IssuingDisputes = &issuingdispute.Client{B: backends.API, Key: key}
 	a.IssuingTransactions = &transaction.Client{B: backends.API, Key: key}
 	a.LoginLinks = &loginlink.Client{B: backends.API, Key: key}
-	a.Orders = &order.Client{B: backends.API, Key: key}
+	a.OAuth = &oauth.Client{B: backends.Connect, Key: key}
 	a.OrderReturns = &orderreturn.Client{B: backends.API, Key: key}
+	a.Orders = &order.Client{B: backends.API, Key: key}
 	a.PaymentIntents = &paymentintent.Client{B: backends.API, Key: key}
 	a.PaymentMethods = &paymentmethod.Client{B: backends.API, Key: key}
 	a.PaymentSource = &paymentsource.Client{B: backends.API, Key: key}
