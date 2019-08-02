@@ -58,6 +58,7 @@ func (h *OrgHandlers) GetByID(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	param := chi.URLParam(req, "id")
@@ -88,6 +89,7 @@ func (h *OrgHandlers) GetByCID(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	param := chi.URLParam(req, "cid")
@@ -114,6 +116,7 @@ func (h *OrgHandlers) List(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	q := req.URL.Query()

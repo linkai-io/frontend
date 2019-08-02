@@ -227,6 +227,11 @@ func (h *ScanGroupHandlers) CreateScanGroup(w http.ResponseWriter, req *http.Req
 	}
 	logger := middleware.UserContextLogger(userContext)
 
+	if middleware.AccountDisabled(userContext) {
+		middleware.ReturnError(w, "user account disabled", 401)
+		return
+	}
+
 	_, user, err := h.userClient.GetByCID(req.Context(), userContext, userContext.GetUserCID())
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to get user details")
@@ -389,6 +394,12 @@ func (h *ScanGroupHandlers) UpdateScanGroup(w http.ResponseWriter, req *http.Req
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+
+	if middleware.AccountDisabled(userContext) {
+		middleware.ReturnError(w, "user account disabled", 401)
+		return
+	}
+
 	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")
@@ -543,6 +554,12 @@ func (h *ScanGroupHandlers) UpdateScanGroupStatus(w http.ResponseWriter, req *ht
 		middleware.ReturnError(w, "missing user context", 401)
 		return
 	}
+
+	if middleware.AccountDisabled(userContext) {
+		middleware.ReturnError(w, "user account disabled", 401)
+		return
+	}
+
 	logger := middleware.UserContextLogger(userContext)
 
 	param := chi.URLParam(req, "name")

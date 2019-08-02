@@ -50,7 +50,7 @@ func main() {
 	userHandlers := user.New(userClient, tokener, authenticator, orgClient, &user.UserEnv{Env: env, Region: region})
 	userHandlers.ContextExtractor = fakeContext
 
-	webHandlers := webdata.New(webClient)
+	webHandlers := webdata.New(webClient, scanGroupClient)
 	webHandlers.ContextExtractor = fakeContext
 
 	scanGroupHandlers := scangroup.New(scanGroupClient, userClient, orgClient, &scangroup.ScanGroupEnv{Env: env, Region: region})
@@ -149,7 +149,7 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 103}, true
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 103, OrgStatusID: am.OrgStatusDisabledLocked}, true
 }
 
 func testUserClient() am.UserService {

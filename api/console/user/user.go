@@ -230,6 +230,7 @@ type userDetails struct {
 	LimitTLDReached   bool `json:"limit_tld_reached"`
 	LimitHostsReached bool `json:"limit_hosts_reached"`
 	PortScanEnabled   bool `json:"port_scan_enabled"`
+	OrgStatusID       int  `json:"org_status_id"`
 }
 
 func (h *UserHandlers) Get(w http.ResponseWriter, req *http.Request) {
@@ -255,7 +256,7 @@ func (h *UserHandlers) Get(w http.ResponseWriter, req *http.Request) {
 		middleware.ReturnError(w, "error retreiving user details", 500)
 	}
 
-	details := &userDetails{User: user, LimitHostsReached: org.LimitHostsReached, LimitTLDReached: org.LimitTLDReached, PortScanEnabled: org.PortScanEnabled}
+	details := &userDetails{User: user, LimitHostsReached: org.LimitHostsReached, LimitTLDReached: org.LimitTLDReached, OrgStatusID: org.StatusID, PortScanEnabled: org.PortScanEnabled}
 
 	data, _ := json.Marshal(details)
 	w.WriteHeader(200)
