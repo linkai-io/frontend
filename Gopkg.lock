@@ -298,7 +298,7 @@
 
 [[projects]]
   branch = "pause-orgs"
-  digest = "1:dbbcc0f88b8d5bb649fd0fa62e0b755350a6cd038f0dfb4860cf8fc5bd431377"
+  digest = "1:5381dfd1d20ffe5ebf55e1d3faaecec5dcf825faea982ae6953be08b72a75602"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -331,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "385f41023e7fc39b3e1dfe586d09b1981a2b1c33"
+  revision = "7caab326c79f39201ff66b7927b6891505fc82bc"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -476,14 +476,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f4db4018547b0c19aa51a66ea3a5eed800cc5e2de9df6490a37b14d06155f22"
+  digest = "1:16c3c95c0f98e5bff7c863065da66f1e747bced6f101281c041060830842ebc1"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "1393eb0183657fb29200106b17a5042ec6e48dbe"
+  revision = "cbf593c0f2f39034e9104bbf77e2ec7c48c98fc5"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
@@ -562,7 +562,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "c506a9f9061087022822e8da603a52fc387115a8"
+  revision = "fa694d86fc64c7654a660f8908de4e879866748d"
 
 [[projects]]
   digest = "1:947ff528f3399903d07eb33f09cd6e8d423a147798023dcecc1ec2066c15afbb"

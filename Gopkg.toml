@@ -44,5 +44,5 @@
 
 [[constraint]]
    name = "github.com/linkai-io/am"
-   branch = "master"
+   branch = "pause-orgs"
    source = "github.com/linkai-io/am"
