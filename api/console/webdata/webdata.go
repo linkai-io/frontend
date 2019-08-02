@@ -27,9 +27,10 @@ type WebHandlers struct {
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(webClient am.WebDataService) *WebHandlers {
+func New(webClient am.WebDataService, sgClient am.ScanGroupService) *WebHandlers {
 	return &WebHandlers{
 		webClient:        webClient,
+		scanGroupClient:  sgClient,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
 }
@@ -153,6 +154,17 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 		return
 	}
 
+	_, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	if err != nil {
+		middleware.ReturnError(w, "error getting scan group", 500)
+		return
+	}
+
+	fromTime := time.Now()
+	if group.Paused {
+		fromTime = time.Unix(0, group.LastPausedTime)
+	}
+
 	uniqueNodes := make(map[string]struct{}, 0)
 	uniqueLinks := make(map[string]struct{}, 0)
 	dependencies := &am.WebDomainDependency{
@@ -167,7 +179,7 @@ func (h *WebHandlers) GetDomainDependencies(w http.ResponseWriter, req *http.Req
 	firstRequest := true
 	for {
 		filters := &am.FilterType{}
-		filters.AddInt64(am.FilterWebAfterURLRequestTime, time.Now().Add(time.Hour*-(2*24)).UnixNano())
+		filters.AddInt64(am.FilterWebAfterURLRequestTime, fromTime.Add(time.Hour*-(2*24)).UnixNano())
 		filters.AddBool("is_domain_dependency", true)
 		filter := &am.WebResponseFilter{
 			OrgID:   userContext.GetOrgID(),
@@ -314,10 +326,21 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 	}
 	logger := middleware.UserContextLogger(userContext)
 
-	id, err := groupIDFromRequest(req)
+	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
+	}
+
+	_, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	if err != nil {
+		middleware.ReturnError(w, "error getting scan group", 500)
+		return
+	}
+
+	fromTime := time.Now()
+	if group.Paused {
+		fromTime = time.Unix(0, group.LastPausedTime)
 	}
 
 	allResponses := make([]*am.HTTPResponse, 0)
@@ -326,10 +349,10 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 	lastIndex = math.MaxInt64
 	for {
 		filters := &am.FilterType{}
-		filters.AddInt64(am.FilterWebAfterResponseTime, time.Now().Add(time.Hour*48).UnixNano())
+		filters.AddInt64(am.FilterWebAfterResponseTime, fromTime.Add(time.Hour*48).UnixNano())
 		filter := &am.WebResponseFilter{
 			OrgID:   userContext.GetOrgID(),
-			GroupID: id,
+			GroupID: groupID,
 			Start:   lastIndex,
 			Filters: filters,
 			Limit:   1000,
@@ -367,7 +390,7 @@ func (h *WebHandlers) ExportResponses(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=snapshots.%d.%d.json", id, time.Now().Unix()))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=snapshots.%d.%d.json", groupID, time.Now().Unix()))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
@@ -392,7 +415,18 @@ func (h *WebHandlers) GetSnapshots(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	filter, err := h.ParseSnapshotsFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID)
+	_, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	if err != nil {
+		middleware.ReturnError(w, "error getting scan group", 500)
+		return
+	}
+
+	fromTime := time.Now()
+	if group.Paused {
+		fromTime = time.Unix(0, group.LastPausedTime)
+	}
+
+	filter, err := h.ParseSnapshotsFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID, fromTime)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed parse url query parameters")
 		middleware.ReturnError(w, "invalid parameters supplied", 401)
@@ -451,14 +485,25 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 	}
 	logger := middleware.UserContextLogger(userContext)
 
-	id, err := groupIDFromRequest(req)
+	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed getting group id")
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
 	}
 
-	queryFilter, err := h.ParseSnapshotsFilterQuery(req.URL.Query(), userContext.GetOrgID(), id)
+	_, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	if err != nil {
+		middleware.ReturnError(w, "error getting scan group", 500)
+		return
+	}
+
+	fromTime := time.Now()
+	if group.Paused {
+		fromTime = time.Unix(0, group.LastPausedTime)
+	}
+
+	queryFilter, err := h.ParseSnapshotsFilterQuery(req.URL.Query(), userContext.GetOrgID(), groupID, fromTime)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed parse url query parameters")
 		middleware.ReturnError(w, "invalid parameters supplied", 401)
@@ -471,7 +516,7 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 	for {
 		filter := &am.WebSnapshotFilter{
 			OrgID:   userContext.GetOrgID(),
-			GroupID: id,
+			GroupID: groupID,
 			Start:   lastIndex,
 			Limit:   1000,
 			Filters: &am.FilterType{},
@@ -514,7 +559,7 @@ func (h *WebHandlers) ExportSnapshots(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=snapshots.%d.%d.json", id, time.Now().Unix()))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=snapshots.%d.%d.json", groupID, time.Now().Unix()))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
@@ -552,11 +597,22 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 	}
 	logger := middleware.UserContextLogger(userContext)
 	logger.Info().Msg("Getting TechData")
-	id, err := groupIDFromRequest(req)
+	groupID, err := groupIDFromRequest(req)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed getting group id")
 		middleware.ReturnError(w, "invalid scangroup id supplied", 401)
 		return
+	}
+
+	_, group, err := h.scanGroupClient.Get(req.Context(), userContext, groupID)
+	if err != nil {
+		middleware.ReturnError(w, "error getting scan group", 500)
+		return
+	}
+
+	fromTime := time.Now()
+	if group.Paused {
+		fromTime = time.Unix(0, group.LastPausedTime)
 	}
 
 	techData := &TechDataResponse{}
@@ -570,12 +626,12 @@ func (h *WebHandlers) GetTechData(w http.ResponseWriter, req *http.Request) {
 	for {
 		filter := &am.WebSnapshotFilter{
 			OrgID:   userContext.GetOrgID(),
-			GroupID: id,
+			GroupID: groupID,
 			Start:   lastIndex,
 			Limit:   1000,
 			Filters: &am.FilterType{},
 		}
-		filter.Filters.AddInt64(am.FilterWebAfterResponseTime, time.Now().Add(time.Hour*(-24*7)).UnixNano()) // only search past 7 days
+		filter.Filters.AddInt64(am.FilterWebAfterResponseTime, fromTime.Add(time.Hour*(-24*7)).UnixNano()) // only search past 7 days
 		oid, snapshots, err := h.webClient.GetSnapshots(req.Context(), userContext, filter)
 		if err != nil {
 			logger.Error().Err(err).Msg("error getting snapshots for tech data")
@@ -1006,7 +1062,7 @@ func (h *WebHandlers) ParseCertificatesFilterQuery(values url.Values, orgID, gro
 	return filter, nil
 }
 
-func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupID int) (*am.WebSnapshotFilter, error) {
+func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupID int, fromTime time.Time) (*am.WebSnapshotFilter, error) {
 	var err error
 	filter := &am.WebSnapshotFilter{
 		OrgID:   orgID,
@@ -1033,7 +1089,7 @@ func (h *WebHandlers) ParseSnapshotsFilterQuery(values url.Values, orgID, groupI
 	dependentHostAddress := values.Get(am.FilterWebDependentHostAddress)
 	if dependentHostAddress != "" {
 		filter.Filters.AddString(am.FilterWebDependentHostAddress, dependentHostAddress)
-		filter.Filters.AddInt64(am.FilterWebAfterURLRequestTime, time.Now().Add(time.Hour*(-24*7)).UnixNano())
+		filter.Filters.AddInt64(am.FilterWebAfterURLRequestTime, fromTime.Add(time.Hour*(-24*7)).UnixNano())
 	}
 
 	techType := values.Get(am.FilterWebTechType)

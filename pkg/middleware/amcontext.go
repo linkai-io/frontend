@@ -25,6 +25,7 @@ func stringField(key string, properties map[string]interface{}) string {
 	return str
 }
 
+// ExtractUserContext ...
 func ExtractUserContext(ctx context.Context) (am.UserContext, bool) {
 	userContext, ok := ctx.Value(userCtxKey).(am.UserContext)
 	return userContext, ok
@@ -34,6 +35,7 @@ func UserCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		var subID int
+		var orgStatusID int
 		userContext := &am.UserContextData{}
 
 		log.Info().Msg("retrieving user context")
@@ -85,6 +87,13 @@ func UserCtx(next http.Handler) http.Handler {
 			return
 		}
 		userContext.SubscriptionID = int32(subID)
+
+		orgStatus := stringField("OrgStatusID", requestContext.Authorizer)
+		if orgStatusID, err = strconv.Atoi(orgStatus); err != nil {
+			ReturnError(w, "invalid subscription id", 401)
+			return
+		}
+		userContext.OrgStatusID = orgStatusID
 
 		userContext.TraceID = requestContext.RequestID
 		userContext.IPAddress = requestContext.Identity.SourceIP

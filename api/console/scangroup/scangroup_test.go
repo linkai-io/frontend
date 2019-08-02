@@ -171,10 +171,10 @@ func TestNewGroupSubscriptionLevels(t *testing.T) {
 		return userContext.GetOrgID(), make([]*am.ScanGroup, 0), nil
 	}
 
-	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), testOrgClient(), &scangroup.ScanGroupEnv{"dev", "us-east-1"})
+	scanGroupHandlers := scangroup.New(scanGroupClient, testUserClient(), testOrgClient(), &scangroup.ScanGroupEnv{Env: "dev", Region: "us-east-1"})
 
 	scanGroupHandlers.ContextExtractor = func(ctx context.Context) (am.UserContext, bool) {
-		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101}, true
+		return &am.UserContextData{UserID: 1, OrgID: 1, SubscriptionID: 101, OrgStatusID: am.OrgStatusActive}, true
 	}
 
 	r := chi.NewRouter()

@@ -124,6 +124,7 @@ func generatePolicy(org *am.Organization, user *am.User, accessToken *token.Acce
 		"OrgID":          org.OrgID,
 		"OrgCID":         org.OrgCID,
 		"SubscriptionID": org.SubscriptionID,
+		"OrgStatusID":    org.StatusID,
 		"Group":          accessToken.Groups[0], // for now, only one group
 	}
 	return authResponse, nil

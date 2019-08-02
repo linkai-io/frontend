@@ -8,6 +8,7 @@ import (
 	"github.com/linkai-io/am/clients/webdata"
 	"github.com/linkai-io/am/pkg/lb/consul"
 	wd "github.com/linkai-io/frontend/api/console/webdata"
+	"github.com/linkai-io/frontend/pkg/initializers"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -17,6 +18,7 @@ import (
 )
 
 var webClient am.WebDataService
+var scanGroupClient am.ScanGroupService
 
 func init() {
 	zerolog.TimeFieldFormat = ""
@@ -27,13 +29,14 @@ func init() {
 	if err := webClient.Init(nil); err != nil {
 		log.Fatal().Err(err).Msg("error initializing webdata client")
 	}
+	scanGroupClient = initializers.ScanGroupClient()
 }
 
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.UserCtx)
 
-	webHandlers := wd.New(webClient)
+	webHandlers := wd.New(webClient, scanGroupClient)
 	r.Route("/webdata", func(r chi.Router) {
 		r.Get("/stats", webHandlers.OrgStats)
 		r.Get("/group/{id}/snapshots", webHandlers.GetSnapshots)
