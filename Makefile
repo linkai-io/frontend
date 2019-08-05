@@ -1,4 +1,4 @@
-APP_ENV = dev
+APP_ENV = prod
 CONSOLE_HANDLERS = auth address org scangroup user webdata
 
 test:
