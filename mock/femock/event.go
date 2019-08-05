@@ -3,6 +3,7 @@ package femock
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 	"sync"
 	"time"
 
@@ -39,16 +40,19 @@ func MockEventClient() am.EventService {
 		GroupID:        0,
 		TypeID:         am.EventNewWebsiteID,
 		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"https://example.com", "443", "http://www.example.com", "80"},
+		Data:           []string{"https://example.com", "443", "http://www.example.com/", "80"},
 		Read:           false,
 	}
+	expire := time.Now().Add(24 * time.Hour)
+	expireStr := strconv.FormatInt(expire.Unix(), 10)
+
 	events[3] = &am.Event{
 		NotificationID: 3,
 		OrgID:          0,
 		GroupID:        0,
 		TypeID:         am.EventCertExpiringID,
 		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"example.com", "443", "24 hours"},
+		Data:           []string{"example.com", "443", expireStr},
 		Read:           false,
 	}
 	events[4] = &am.Event{
@@ -57,7 +61,7 @@ func MockEventClient() am.EventService {
 		GroupID:        0,
 		TypeID:         am.EventNewWebTechID,
 		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"http://example.com", "80", "jQuery", "1.2.3", "https://new.example.com", "443", "jQuery", "1.2.4"},
+		Data:           []string{"http://example.com", "80", "jQuery", "1.2.3", "https://new.example.com/", "443", "jQuery", "1.2.4"},
 		Read:           false,
 	}
 	events[5] = &am.Event{
@@ -107,8 +111,8 @@ func MockEventClient() am.EventService {
 	}
 
 	m, _ = json.Marshal([]*am.EventNewWebsite{
-		&am.EventNewWebsite{LoadURL: "https://json.example.com", URL: "https://json.example.com", Port: 443},
-		&am.EventNewWebsite{LoadURL: "http://json.redirect.example.com", URL: "https://json.redirect.example.com:443", Port: 443},
+		&am.EventNewWebsite{LoadURL: "https://json.example.com", URL: "https://json.example.com/", Port: 443},
+		&am.EventNewWebsite{LoadURL: "http://json.redirect.example.com", URL: "https://json.redirect.example.com:443/", Port: 443},
 	})
 
 	events[9] = &am.Event{
@@ -135,8 +139,8 @@ func MockEventClient() am.EventService {
 	}
 
 	m, _ = json.Marshal([]*am.EventNewWebTech{
-		&am.EventNewWebTech{LoadURL: "https://json.example.com", URL: "https://json.example.com", Port: 443, TechName: "jQuery", Version: "1.2.3"},
-		&am.EventNewWebTech{LoadURL: "http://json.example.com", URL: "https://json.example.com", Port: 443, TechName: "jQuery", Version: "1.2.3"},
+		&am.EventNewWebTech{LoadURL: "https://json.example.com", URL: "https://json.example.com/", Port: 443, TechName: "jQuery", Version: "1.2.3"},
+		&am.EventNewWebTech{LoadURL: "http://json.example.com", URL: "https://json.example.com/", Port: 443, TechName: "jQuery", Version: "1.2.3"},
 	})
 	events[11] = &am.Event{
 		NotificationID: 11,

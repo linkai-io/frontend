@@ -298,7 +298,7 @@
 
 [[projects]]
   branch = "fix-redirect-events"
-  digest = "1:e9b87d861eb482f2ae33359d0b90cac35f72fe4b20cbb23c4065833a335c1739"
+  digest = "1:413a417f1c7b4d3045471cce5b2bb817697d875f6c8a71ae413eb86c172db9c3"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -331,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "cedfcedd2608382a9409b4b421e9e881c46ffbb4"
+  revision = "4b590643f90023d8ee3391126f3b2c7c2496b167"
   source = "github.com/linkai-io/am"
 
 [[projects]]
