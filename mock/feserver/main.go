@@ -4,21 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
-	"github.com/linkai-io/am/mock"
 	"github.com/linkai-io/frontend/api/console/address"
 	"github.com/linkai-io/frontend/api/console/event"
 	"github.com/linkai-io/frontend/api/console/org"
 	"github.com/linkai-io/frontend/api/console/scangroup"
 	"github.com/linkai-io/frontend/api/console/user"
 	"github.com/linkai-io/frontend/api/console/webdata"
+	"github.com/linkai-io/frontend/mock/femock"
 	"github.com/linkai-io/frontend/pkg/authz/awsauthz"
 	"github.com/linkai-io/frontend/pkg/middleware"
 	"github.com/linkai-io/frontend/pkg/token/awstoken"
@@ -31,12 +29,12 @@ func main() {
 	log.Logger = log.With().Str("service", "FakeServer").Logger()
 
 	r := chi.NewRouter()
-	orgClient := testOrgClient()
-	addrClient := testAddrClient()
-	userClient := testUserClient()
-	scanGroupClient := testScanGroupClient()
-	webClient := testWebClient()
-	eventClient := testEventClient()
+	orgClient := femock.MockOrgClient()
+	addrClient := femock.MockAddrClient()
+	userClient := femock.MockUserClient()
+	scanGroupClient := femock.MockScanGroupClient()
+	webClient := femock.MockWebClient()
+	eventClient := femock.MockEventClient()
 
 	tokener := awstoken.New(env, region)
 	authenticator := awsauthz.New(env, region, tokener)
@@ -63,7 +61,7 @@ func main() {
 	eventHandlers := event.New(eventClient)
 	eventHandlers.ContextExtractor = fakeContext
 
-	testAuthHandler := &testAuth{}
+	testAuthHandler := &femock.TestAuth{}
 	// auth
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/health", middleware.Health)
@@ -149,235 +147,5 @@ func main() {
 }
 
 func fakeContext(ctx context.Context) (am.UserContext, bool) {
-	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 103, OrgStatusID: am.OrgStatusDisabledLocked}, true
-}
-
-func testUserClient() am.UserService {
-	userClient := &mock.UserService{}
-	user := &am.User{
-		UserEmail:                  "test@test.com",
-		FirstName:                  "test",
-		LastName:                   "test",
-		StatusID:                   am.UserStatusActive,
-		CreationTime:               time.Now().UnixNano(),
-		Deleted:                    false,
-		AgreementAccepted:          false,
-		AgreementAcceptedTimestamp: 0,
-	}
-	userClient.GetFn = func(ctx context.Context, userContext am.UserContext, userEmail string) (int, *am.User, error) {
-		user.OrgID = userContext.GetOrgID()
-		user.UserCID = userContext.GetUserCID()
-		user.OrgCID = userContext.GetOrgCID()
-		user.UserID = userContext.GetUserID()
-		return userContext.GetOrgID(), user, nil
-	}
-
-	userClient.GetByCIDFn = userClient.GetFn
-
-	userClient.AcceptAgreementFn = func(ctx context.Context, userContext am.UserContext, accepted bool) (int, int, error) {
-		user.AgreementAccepted = accepted
-		user.AgreementAcceptedTimestamp = time.Now().UnixNano()
-		return userContext.GetOrgID(), userContext.GetUserID(), nil
-	}
-
-	return userClient
-}
-
-func testOrgClient() am.OrganizationService {
-	orgClient := &mock.OrganizationService{}
-
-	orgClient.GetFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
-		org = buildOrg(userContext, orgName, userContext.GetOrgID())
-		return userContext.GetOrgID(), org, nil
-	}
-	orgClient.GetByIDFn = func(ctx context.Context, userContext am.UserContext, orgID int) (oid int, org *am.Organization, err error) {
-		org = buildOrg(userContext, "test", userContext.GetOrgID())
-		return userContext.GetOrgID(), org, nil
-	}
-	orgClient.GetByCIDFn = func(ctx context.Context, userContext am.UserContext, orgName string) (oid int, org *am.Organization, err error) {
-		org = buildOrg(userContext, orgName, userContext.GetOrgID())
-		return userContext.GetOrgID(), org, nil
-	}
-	return orgClient
-}
-
-func testEventClient() am.EventService {
-	eventClient := &mock.EventService{}
-	eventLock := &sync.RWMutex{}
-
-	events := make(map[int64]*am.Event, 7)
-	events[0] = &am.Event{
-		NotificationID: 0,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventAXFR,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"ns1.example.com", "ns2.example.com"},
-		Read:           false,
-	}
-	events[1] = &am.Event{
-		NotificationID: 1,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventNewHost,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"www.example.com", "test.example.com"},
-		Read:           false,
-	}
-	events[2] = &am.Event{
-		NotificationID: 2,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventNewWebsite,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"https://example.com", "443", "http://www.example.com", "80"},
-		Read:           false,
-	}
-	events[3] = &am.Event{
-		NotificationID: 3,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventCertExpiring,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"example.com", "443", "24 hours"},
-		Read:           false,
-	}
-	events[4] = &am.Event{
-		NotificationID: 4,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventNewWebTech,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"http://example.com", "80", "jQuery", "1.2.3", "https://new.example.com", "443", "jQuery", "1.2.4"},
-		Read:           false,
-	}
-	events[5] = &am.Event{
-		NotificationID: 5,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventNewOpenPort,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"example.com", "1.1.1.1", "1.1.1.2", "8080", "example1.com", "1.1.1.1", "1.1.1.2", "8080,443"},
-		Read:           false,
-	}
-	events[6] = &am.Event{
-		NotificationID: 6,
-		OrgID:          0,
-		GroupID:        0,
-		TypeID:         am.EventClosedPort,
-		EventTimestamp: time.Now().UnixNano(),
-		Data:           []string{"example.com", "1.1.1.1", "1.1.1.1", "80", "example1.com", "1.1.1.1", "1.1.1.2", "9090"},
-		Read:           false,
-	}
-	eventSettings := &am.UserEventSettings{
-		WeeklyReportSendDay: 0,
-		ShouldWeeklyEmail:   false,
-		DailyReportSendHour: 0,
-		ShouldDailyEmail:    false,
-		UserTimezone:        "America/New_York",
-		Subscriptions: []*am.EventSubscriptions{
-			&am.EventSubscriptions{
-				TypeID:              am.EventAXFR,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-			&am.EventSubscriptions{
-				TypeID:              am.EventCertExpiring,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-			&am.EventSubscriptions{
-				TypeID:              am.EventNewHost,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-			&am.EventSubscriptions{
-				TypeID:              am.EventNewWebsite,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-			&am.EventSubscriptions{
-				TypeID:              am.EventNewOpenPort,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-			&am.EventSubscriptions{
-				TypeID:              am.EventClosedPort,
-				SubscribedTimestamp: time.Now().UnixNano(),
-				Subscribed:          true,
-			},
-		},
-	}
-
-	eventClient.GetFn = func(ctx context.Context, userContext am.UserContext, filter *am.EventFilter) ([]*am.Event, error) {
-		eventLock.Lock()
-		defer eventLock.Unlock()
-		cp := make([]*am.Event, 0)
-		var groupID int32
-		val, ok := filter.Filters.Int32(am.FilterEventGroupID)
-		if ok {
-			groupID = val
-		}
-		for _, v := range events {
-			v.OrgID = userContext.GetOrgID()
-			v.GroupID = int(groupID)
-			cp = append(cp, v)
-		}
-		return cp, nil
-	}
-
-	eventClient.MarkReadFn = func(ctx context.Context, userContext am.UserContext, notificationIDs []int64) error {
-		eventLock.Lock()
-		defer eventLock.Unlock()
-		for _, id := range notificationIDs {
-			if _, ok := events[id]; ok {
-				delete(events, id)
-			}
-		}
-		return nil
-	}
-
-	eventClient.GetSettingsFn = func(ctx context.Context, userContext am.UserContext) (*am.UserEventSettings, error) {
-		return eventSettings, nil
-	}
-
-	eventClient.UpdateSettingsFn = func(ctx context.Context, userContext am.UserContext, settings *am.UserEventSettings) error {
-		eventLock.Lock()
-		eventSettings = settings
-		eventLock.Unlock()
-		return nil
-	}
-
-	return eventClient
-}
-
-func buildOrg(userContext am.UserContext, orgName string, orgID int) *am.Organization {
-	return &am.Organization{
-		OrgID:                   userContext.GetOrgID(),
-		OrgCID:                  "test",
-		OrgName:                 orgName,
-		OwnerEmail:              "test@" + orgName + ".com",
-		UserPoolID:              "test",
-		UserPoolAppClientID:     "test",
-		UserPoolAppClientSecret: "test",
-		IdentityPoolID:          "test",
-		UserPoolJWK:             "test",
-		FirstName:               "test",
-		LastName:                "test",
-		Phone:                   "test",
-		Country:                 "test",
-		StatePrefecture:         "test",
-		Street:                  "test",
-		Address1:                "test",
-		Address2:                "test",
-		City:                    "test",
-		PostalCode:              "test",
-		CreationTime:            time.Now().UnixNano(),
-		StatusID:                am.OrgStatusActive,
-		Deleted:                 false,
-		SubscriptionID:          am.SubscriptionEnterprise,
-		LimitHosts:              10000,
-		LimitTLD:                3,
-		PortScanEnabled:         true,
-	}
+	return &am.UserContextData{OrgID: 1, UserID: 1, UserCID: "test@test.com", OrgCID: "somerandomvalue", SubscriptionID: 103, OrgStatusID: am.OrgStatusActive}, true
 }

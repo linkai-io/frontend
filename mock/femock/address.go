@@ -1,4 +1,4 @@
-package main
+package femock
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func testAddrClient() am.AddressService {
+func MockAddrClient() am.AddressService {
 	addrClient := &mock.AddressService{}
 	allAddresses := make(map[int64]*am.ScanGroupAddress)
 	addrLock := &sync.RWMutex{}

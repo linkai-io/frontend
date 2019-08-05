@@ -1,4 +1,4 @@
-package main
+package femock
 
 import (
 	"encoding/json"
@@ -15,15 +15,15 @@ type AuthEnv struct {
 	Region       string
 }
 
-type testAuth struct {
+type TestAuth struct {
 }
 
-func New() *testAuth {
-	return &testAuth{}
+func New() *TestAuth {
+	return &TestAuth{}
 }
 
 // Refresh user access tokens
-func (h *testAuth) Refresh(w http.ResponseWriter, req *http.Request) {
+func (h *TestAuth) Refresh(w http.ResponseWriter, req *http.Request) {
 
 	response := make(map[string]string, 5)
 
@@ -39,7 +39,7 @@ func (h *testAuth) Refresh(w http.ResponseWriter, req *http.Request) {
 }
 
 // Login to the application, returning access/refresh tokens
-func (h *testAuth) Login(w http.ResponseWriter, req *http.Request) {
+func (h *TestAuth) Login(w http.ResponseWriter, req *http.Request) {
 
 	response := make(map[string]string, 5)
 
@@ -55,7 +55,7 @@ func (h *testAuth) Login(w http.ResponseWriter, req *http.Request) {
 }
 
 // Forgot password flow sending email to user with verification code
-func (h *testAuth) Forgot(w http.ResponseWriter, req *http.Request) {
+func (h *TestAuth) Forgot(w http.ResponseWriter, req *http.Request) {
 	response := make(map[string]string, 5)
 
 	response["state"] = authz.AuthSuccess
@@ -71,7 +71,7 @@ func (h *testAuth) Forgot(w http.ResponseWriter, req *http.Request) {
 
 // ForgotConfirm to allow user who successfully retrieved verification code to set a
 // new password
-func (h *testAuth) ForgotConfirm(w http.ResponseWriter, req *http.Request) {
+func (h *TestAuth) ForgotConfirm(w http.ResponseWriter, req *http.Request) {
 	response := make(map[string]string, 5)
 
 	response["state"] = authz.AuthSuccess
@@ -86,7 +86,7 @@ func (h *testAuth) ForgotConfirm(w http.ResponseWriter, req *http.Request) {
 }
 
 // ChangePwd allows a user to change their password provided the current password works.
-func (h *testAuth) ChangePwd(w http.ResponseWriter, req *http.Request) {
+func (h *TestAuth) ChangePwd(w http.ResponseWriter, req *http.Request) {
 	response := make(map[string]string, 1)
 
 	response["status"] = "ok"

@@ -50,7 +50,7 @@
   version = "v1.12.0"
 
 [[projects]]
-  digest = "1:2063ce4b1896013c961aaf04556a3427b0676ae6065ceadbd9c9281d8490048c"
+  digest = "1:3f4669b10842addbb0630afd171f4b90d8ad18b5d074fcb7fae2be4e860f97d5"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -93,8 +93,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "b024dccbed5bf4ecdf4718113f282c0ef972a776"
-  version = "v1.21.8"
+  revision = "f3fe96892dc0e8e8e9862456e1455e62e4cb55d4"
+  version = "v1.21.9"
 
 [[projects]]
   digest = "1:b14c2322f7004e8ccfa55067c9825c7745516d8875ec9ad2f829c8828b0068b1"
@@ -297,8 +297,8 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "pause-orgs"
-  digest = "1:5381dfd1d20ffe5ebf55e1d3faaecec5dcf825faea982ae6953be08b72a75602"
+  branch = "fix-redirect-events"
+  digest = "1:413a417f1c7b4d3045471cce5b2bb817697d875f6c8a71ae413eb86c172db9c3"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -331,7 +331,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "7caab326c79f39201ff66b7927b6891505fc82bc"
+  revision = "4b590643f90023d8ee3391126f3b2c7c2496b167"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -476,14 +476,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:16c3c95c0f98e5bff7c863065da66f1e747bced6f101281c041060830842ebc1"
+  digest = "1:00d73f8175ba939718fdfc3d3ecab52270c6d801a1930fbca62100f9a4d8f4c1"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "cbf593c0f2f39034e9104bbf77e2ec7c48c98fc5"
+  revision = "51ab0e2deafac1f46c46ad59cf0921be2f180c3d"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
