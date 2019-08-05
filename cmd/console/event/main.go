@@ -38,6 +38,7 @@ func main() {
 		r.Patch("/group/{id}/events", eventHandlers.MarkRead)
 		r.Get("/settings", eventHandlers.GetSettings)
 		r.Patch("/settings", eventHandlers.UpdateSettings)
+		r.Post("/test_webhook", eventHandlers.SendTestWebhookEvent)
 	})
 
 	err := gateway.ListenAndServe(":3000", r)

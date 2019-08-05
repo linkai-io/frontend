@@ -136,6 +136,46 @@ func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(data))
 }
 
+type webhookEventTest struct {
+	TypeID  int32  `json:"type_id"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
+	Type    string `json:"type"`
+}
+
+func (h *EventHandlers) SendTestWebhookEvent(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+	logger.Info().Msg("Retrieving settings...")
+
+	settings, err := h.eventClient.GetSettings(req.Context(), userContext)
+	if err != nil {
+		// hack :|
+		if strings.Contains(err.Error(), "no rows in result set") {
+			handleEmptySettings(w)
+			return
+		}
+		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
+		middleware.ReturnError(w, "error retrieving user notification settings", 500)
+		return
+	}
+
+	if data, err = json.Marshal(settings); err != nil {
+		middleware.ReturnError(w, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
 func handleEmptySettings(w http.ResponseWriter) {
 	var data []byte
 	var err error
