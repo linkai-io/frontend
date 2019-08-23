@@ -103,9 +103,16 @@ func (h *EventHandlers) ParseGetFilterQuery(values url.Values, groupID int) (*am
 	return filter, nil
 }
 
+type settingsResponse struct {
+	UserSettings    *am.UserEventSettings      `json:"user_settings"`
+	WebhookSettings []*am.WebhookEventSettings `json:"webhook_settings,omitempty"`
+}
+
 func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
+
+	resp := &settingsResponse{}
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
@@ -113,13 +120,18 @@ func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 	}
 
 	logger := middleware.UserContextLogger(userContext)
-	logger.Info().Msg("Retrieving settings...")
+	logger.Info().Msg("Retrieving webhooks and settings...")
 
-	settings, err := h.eventClient.GetSettings(req.Context(), userContext)
+	resp.WebhookSettings, err = h.eventClient.GetWebhooks(req.Context(), userContext)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to retrieve org webhook settings")
+	}
+
+	resp.UserSettings, err = h.eventClient.GetSettings(req.Context(), userContext)
 	if err != nil {
 		// hack :|
 		if strings.Contains(err.Error(), "no rows in result set") {
-			handleEmptySettings(w)
+			handleEmptySettings(w, resp)
 			return
 		}
 		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
@@ -127,7 +139,7 @@ func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if data, err = json.Marshal(settings); err != nil {
+	if data, err = json.Marshal(resp); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
@@ -155,19 +167,7 @@ func (h *EventHandlers) SendTestWebhookEvent(w http.ResponseWriter, req *http.Re
 	logger := middleware.UserContextLogger(userContext)
 	logger.Info().Msg("Retrieving settings...")
 
-	settings, err := h.eventClient.GetSettings(req.Context(), userContext)
-	if err != nil {
-		// hack :|
-		if strings.Contains(err.Error(), "no rows in result set") {
-			handleEmptySettings(w)
-			return
-		}
-		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
-		middleware.ReturnError(w, "error retrieving user notification settings", 500)
-		return
-	}
-
-	if data, err = json.Marshal(settings); err != nil {
+	if data, err = json.Marshal(nil); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
@@ -176,12 +176,12 @@ func (h *EventHandlers) SendTestWebhookEvent(w http.ResponseWriter, req *http.Re
 	fmt.Fprint(w, string(data))
 }
 
-func handleEmptySettings(w http.ResponseWriter) {
+func handleEmptySettings(w http.ResponseWriter, resp *settingsResponse) {
 	var data []byte
 	var err error
 
-	settings := &am.UserEventSettings{}
-	if data, err = json.Marshal(settings); err != nil {
+	resp.UserSettings = &am.UserEventSettings{}
+	if data, err = json.Marshal(resp); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
