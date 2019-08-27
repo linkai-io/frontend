@@ -259,5 +259,36 @@ func MockEventClient() am.EventService {
 		return nil
 	}
 
+	eventClient.GetWebhookEventsFn = func(ctx context.Context, userContext am.UserContext) ([]*am.WebhookEvent, error) {
+		return make([]*am.WebhookEvent, 0), nil
+	}
+
+	hooks := make(map[string]*am.WebhookEventSettings, 0)
+	newID := int32(1)
+	eventClient.UpdateWebhooksFn = func(ctx context.Context, userContext am.UserContext, hook *am.WebhookEventSettings) error {
+		eventLock.Lock()
+		defer eventLock.Unlock()
+
+		if hook.Deleted == true {
+			delete(hooks, hook.Name)
+			return nil
+		}
+		hook.WebhookID = newID
+		newID++
+		hooks[hook.Name] = hook
+		return nil
+	}
+
+	eventClient.GetWebhooksFn = func(ctx context.Context, userContext am.UserContext) ([]*am.WebhookEventSettings, error) {
+		eventLock.Lock()
+		defer eventLock.Unlock()
+		returned := make([]*am.WebhookEventSettings, len(hooks))
+		i := 0
+		for _, v := range hooks {
+			returned[i] = v
+			i++
+		}
+		return returned, nil
+	}
 	return eventClient
 }

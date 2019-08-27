@@ -59,7 +59,7 @@
   version = "v1.13.0"
 
 [[projects]]
-  digest = "1:f882e77101a9a8dcfba8d3a7a3a84230938062bd444169ef7903efa74aab1705"
+  digest = "1:74015e32da02fe1d3b44a99cb1df31bac4bbadd37921c5699576198966be3d86"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -104,8 +104,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "e9206af388a03608a4d614a3bc031a3418071f33"
-  version = "v1.23.7"
+  revision = "2eb9a651f22769d792f974e8a8efe16afea3370f"
+  version = "v1.23.9"
 
 [[projects]]
   digest = "1:9c4aedf4bedbf1eb0fcb15ff3065aebdcd77f8229c72bec2358811ce378926e8"
@@ -236,12 +236,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:8b20ed6a6df0628913a69e4c1709537b2e26c7be4aca856bf52b431cf1ce6d90"
+  digest = "1:888eed29c1705c99a75bec25251aed7e2ae23c7670b986c8166b31dfbf205872"
   name = "github.com/hashicorp/consul"
   packages = ["api"]
   pruneopts = "UT"
-  revision = "a42ded477cf4e5ac1a850b42ec5d25672cd2545d"
-  version = "v1.5.3"
+  revision = "944cc71026c007e7de9467ec3f38f0ad14464fcc"
+  version = "v1.6.0"
 
 [[projects]]
   digest = "1:af105c7c5dc0b4ae41991f122cae860b9600f7d226072c2a83127048c991660c"
@@ -327,7 +327,7 @@
 
 [[projects]]
   branch = "webhooks"
-  digest = "1:447901beb3c25b1327be5481a89cdccb2ea5769d60ae7fe4c962405392cad792"
+  digest = "1:98ddc5e00f4e3a3a03c29417b6e0687b850919e752651f8f560502dac63a05b5"
   name = "github.com/linkai-io/am"
   packages = [
     "am",
@@ -361,7 +361,7 @@
     "protocservices/webdata",
   ]
   pruneopts = "UT"
-  revision = "f4253947082a7cb9a56725d73ceb5c8475cf8c9e"
+  revision = "6017e2e490355e8eb732d8c1bd0afde6008f3861"
   source = "github.com/linkai-io/am"
 
 [[projects]]
@@ -528,14 +528,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d52ccbb025caf0a2166e0204ed934567b8d0dfdd23a09d947f1f040708888a0a"
+  digest = "1:c5b5d55096b762e29d0b887ce73932d06ddcf9def4285f1abd09f801176878ec"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "fde4db37ae7ad8191b03d30d27f258b5291ae4e3"
+  revision = "c7b8b68b14567162c6602a7c5659ee0f26417c18"
 
 [[projects]]
   digest = "1:5f1559c4cee44069f81517430ebba19589869f3d4d4648213a4d5ddd199b11d8"
@@ -569,7 +569,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a3ddac6b49cc9c8ba5453c5d9e56ef5557d204ddb925336292746948f2d4e830"
+  digest = "1:2436631a01759271fb28e6c7a24eeff7385090f5496123af05ed1b8a6ac67418"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -591,7 +591,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "b1e2c8edcefde75c7687c448a1ae9f07944fd462"
+  revision = "71894ab67ee38e5f4b1d98f5edc384c5c872c94f"
 
 [[projects]]
   digest = "1:c1c08a8eeff6383aaa5f684243adeb294062ca9b1b03afd028c3cf2951d26d77"

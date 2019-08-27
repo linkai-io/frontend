@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/am/am"
+	"github.com/linkai-io/am/pkg/webhooks"
 	"github.com/linkai-io/frontend/api/console/address"
 	"github.com/linkai-io/frontend/api/console/event"
 	"github.com/linkai-io/frontend/api/console/org"
@@ -58,7 +59,12 @@ func main() {
 		fmt.Fprintf(w, "%#v not found", req.URL)
 	}))
 
-	eventHandlers := event.New(eventClient)
+	hooks := webhooks.New(env, region)
+	if err := hooks.Init(); err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize webhooks")
+	}
+
+	eventHandlers := event.New(eventClient, hooks)
 	eventHandlers.ContextExtractor = fakeContext
 
 	testAuthHandler := &femock.TestAuth{}
@@ -135,8 +141,11 @@ func main() {
 	r.Route("/event", func(r chi.Router) {
 		r.Get("/group/{id}/events", eventHandlers.Get)
 		r.Patch("/group/{id}/events", eventHandlers.MarkRead)
+		r.Post("/group/{id}/webhooks", eventHandlers.UpdateWebhooks)
 		r.Get("/settings", eventHandlers.GetSettings)
 		r.Patch("/settings", eventHandlers.UpdateSettings)
+		r.Post("/webhook_test", eventHandlers.SendTestWebhookEvent)
+		r.Get("/webhook_events", eventHandlers.GetLastWebhookEvents)
 	})
 
 	log.Info().Msg("listening on :3000")
