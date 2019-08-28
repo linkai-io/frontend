@@ -1,4 +1,4 @@
-APP_ENV = prod
+APP_ENV = dev
 CONSOLE_HANDLERS = auth address org scangroup user webdata
 
 test:
@@ -95,6 +95,14 @@ buildevent:
 
 deployevent: buildevent upload 
 	aws lambda update-function-code --s3-bucket linkai-infra --s3-key frontend/lambdas/console/event_handler.zip --function-name ${APP_ENV}-console-handler-eventservice
+
+# Webhook Event Sender
+buildwebhooks:
+	GOOS=linux go build -o dist/webhooks/main ./cmd/webhooks/ && zip -j dist/webhooks/webhook_sender.zip dist/webhooks/main && rm dist/webhooks/main
+
+deploywebhooks: buildwebhooks
+	aws s3 sync dist/webhooks/ s3://linkai-infra/${APP_ENV}/lambdas/
+	aws lambda update-function-code --s3-bucket linkai-infra --s3-key ${APP_ENV}/lambdas/webhook_sender.zip --function-name ${APP_ENV}-function-event-webhooks
 
 # ALL
 deployall: deployauth deployauthorizer deploystaticauthorizer deployadmin deployorg deployscangroup deployaddress deploywebdata deployuser deployevent
