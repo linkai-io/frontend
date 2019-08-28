@@ -164,6 +164,18 @@ func (h *EventHandlers) UpdateWebhooks(w http.ResponseWriter, req *http.Request)
 		return
 	}
 	webhook.OrgID = int32(userContext.GetOrgID())
+	webhook.Type = "slack"
+	webhook.Version = "v1"
+	u, err := url.Parse(webhook.URL)
+	if err != nil || u.Scheme != "https" {
+		middleware.ReturnError(w, "webhook URL is invalid, must begin with https://", 400)
+		return
+	}
+
+	if webhook.Events == nil || len(webhook.Events) == 0 {
+		middleware.ReturnError(w, "webhook events must include at least one event", 400)
+		return
+	}
 
 	if err := h.eventClient.UpdateWebhooks(req.Context(), userContext, webhook); err != nil {
 		logger.Error().Err(err).Msg("failed updating webhook")
@@ -255,6 +267,7 @@ func (h *EventHandlers) SendTestWebhookEvent(w http.ResponseWriter, req *http.Re
 	}
 	webhook.OrgID = int32(userContext.GetOrgID())
 	webhook.ScanGroupName = "TEST WEBHOOK"
+	webhook.Type = "slack"
 
 	m, _ := json.Marshal([]*am.EventNewHost{&am.EventNewHost{Host: "this.is.a.webhook.test.com"}})
 
