@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/linkai-io/am/pkg/webhooks"
+
 	"github.com/go-chi/chi"
 	"github.com/linkai-io/frontend/pkg/middleware"
 
@@ -19,12 +21,14 @@ import (
 
 type EventHandlers struct {
 	eventClient      am.EventService
+	hooks            webhooks.Webhooker
 	ContextExtractor middleware.UserContextExtractor
 }
 
-func New(eventClient am.EventService) *EventHandlers {
+func New(eventClient am.EventService, hooks webhooks.Webhooker) *EventHandlers {
 	return &EventHandlers{
 		eventClient:      eventClient,
+		hooks:            hooks,
 		ContextExtractor: middleware.ExtractUserContext,
 	}
 }
@@ -41,6 +45,7 @@ func (h *EventHandlers) Get(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	logger := middleware.UserContextLogger(userContext)
@@ -103,31 +108,25 @@ func (h *EventHandlers) ParseGetFilterQuery(values url.Values, groupID int) (*am
 	return filter, nil
 }
 
-func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
+func (h *EventHandlers) GetLastWebhookEvents(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
-	}
-
-	logger := middleware.UserContextLogger(userContext)
-	logger.Info().Msg("Retrieving settings...")
-
-	settings, err := h.eventClient.GetSettings(req.Context(), userContext)
-	if err != nil {
-		// hack :|
-		if strings.Contains(err.Error(), "no rows in result set") {
-			handleEmptySettings(w)
-			return
-		}
-		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
-		middleware.ReturnError(w, "error retrieving user notification settings", 500)
 		return
 	}
 
-	if data, err = json.Marshal(settings); err != nil {
+	logger := middleware.UserContextLogger(userContext)
+	logger.Info().Msg("Retrieving webhooks events...")
+
+	events, err := h.eventClient.GetWebhookEvents(req.Context(), userContext)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to retrieve webhook events")
+	}
+
+	if data, err = json.Marshal(events); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
@@ -136,12 +135,170 @@ func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(data))
 }
 
-func handleEmptySettings(w http.ResponseWriter) {
+func (h *EventHandlers) UpdateWebhooks(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var body []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+
+	body, err = ioutil.ReadAll(req.Body)
+	logger.Info().Msgf("Updating webhook %s", string(body))
+
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
+		middleware.ReturnError(w, "error reading webhook details", 400)
+		return
+	}
+	defer req.Body.Close()
+
+	webhook := &am.WebhookEventSettings{}
+	if err := json.Unmarshal(body, webhook); err != nil {
+		logger.Error().Err(err).Msg("failed to unmarshal webhook")
+		middleware.ReturnError(w, "error reading notification ids", 400)
+		return
+	}
+	webhook.OrgID = int32(userContext.GetOrgID())
+	webhook.Type = "slack"
+	webhook.Version = "v1"
+	u, err := url.Parse(webhook.URL)
+	if err != nil || u.Scheme != "https" {
+		middleware.ReturnError(w, "webhook URL is invalid, must begin with https://", 400)
+		return
+	}
+
+	if webhook.Events == nil || len(webhook.Events) == 0 {
+		middleware.ReturnError(w, "webhook events must include at least one event", 400)
+		return
+	}
+
+	if err := h.eventClient.UpdateWebhooks(req.Context(), userContext, webhook); err != nil {
+		logger.Error().Err(err).Msg("failed updating webhook")
+		middleware.ReturnError(w, "error updating webhook", 400)
+		return
+	}
+
+	middleware.ReturnSuccess(w, "OK", 200)
+}
+
+type settingsResponse struct {
+	UserSettings    *am.UserEventSettings      `json:"user_settings"`
+	WebhookSettings []*am.WebhookEventSettings `json:"webhook_settings,omitempty"`
+}
+
+func (h *EventHandlers) GetSettings(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
+	resp := &settingsResponse{}
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+	logger.Info().Msg("Retrieving webhooks and settings...")
+
+	resp.WebhookSettings, err = h.eventClient.GetWebhooks(req.Context(), userContext)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to retrieve org webhook settings")
+	}
+
+	resp.UserSettings, err = h.eventClient.GetSettings(req.Context(), userContext)
+	if err != nil {
+		// hack :|
+		if strings.Contains(err.Error(), "no rows in result set") {
+			handleEmptySettings(w, resp)
+			return
+		}
+		logger.Error().Err(err).Msgf("failed to user notification settings %#v", err)
+		middleware.ReturnError(w, "error retrieving user notification settings", 500)
+		return
+	}
+
+	if data, err = json.Marshal(resp); err != nil {
+		middleware.ReturnError(w, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprint(w, string(data))
+}
+
+type webhookEventTest struct {
+	TypeID  int32  `json:"type_id"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
+	Type    string `json:"type"`
+}
+
+func (h *EventHandlers) SendTestWebhookEvent(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var body []byte
+
+	userContext, ok := h.ContextExtractor(req.Context())
+	if !ok {
+		middleware.ReturnError(w, "missing user context", 401)
+		return
+	}
+
+	logger := middleware.UserContextLogger(userContext)
+	logger.Info().Msg("Sending test webhook...")
+
+	body, err = ioutil.ReadAll(req.Body)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to read body")
+		middleware.ReturnError(w, "error reading webhook details", 400)
+		return
+	}
+	defer req.Body.Close()
+
+	webhook := &am.WebhookEventSettings{}
+	if err := json.Unmarshal(body, webhook); err != nil {
+		logger.Error().Err(err).Msg("failed to unmarshal webhook")
+		middleware.ReturnError(w, "error reading webhook data", 400)
+		return
+	}
+	webhook.OrgID = int32(userContext.GetOrgID())
+	webhook.ScanGroupName = "TEST WEBHOOK"
+	webhook.Type = "slack"
+
+	m, _ := json.Marshal([]*am.EventNewHost{&am.EventNewHost{Host: "this.is.a.webhook.test.com"}})
+
+	testEvents := make([]*am.Event, 1)
+	testEvents[0] = &am.Event{
+		NotificationID: 0,
+		OrgID:          userContext.GetOrgID(),
+		GroupID:        int(webhook.GroupID),
+		TypeID:         am.EventNewHostID,
+		EventTimestamp: time.Now().UnixNano(),
+		JSONData:       string(m),
+	}
+
+	_, err = h.hooks.Send(req.Context(), &webhooks.Data{
+		Settings: webhook,
+		Event:    testEvents,
+	})
+
+	if err != nil {
+		middleware.ReturnError(w, "failed to send webhook: "+err.Error(), 400)
+		return
+	}
+	middleware.ReturnSuccess(w, "OK", 200)
+}
+
+func handleEmptySettings(w http.ResponseWriter, resp *settingsResponse) {
 	var data []byte
 	var err error
 
-	settings := &am.UserEventSettings{}
-	if data, err = json.Marshal(settings); err != nil {
+	resp.UserSettings = &am.UserEventSettings{}
+	if data, err = json.Marshal(resp); err != nil {
 		middleware.ReturnError(w, err.Error(), 500)
 		return
 	}
@@ -161,6 +318,7 @@ func (h *EventHandlers) MarkRead(w http.ResponseWriter, req *http.Request) {
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	logger := middleware.UserContextLogger(userContext)
@@ -204,6 +362,7 @@ func (h *EventHandlers) UpdateSettings(w http.ResponseWriter, req *http.Request)
 	userContext, ok := h.ContextExtractor(req.Context())
 	if !ok {
 		middleware.ReturnError(w, "missing user context", 401)
+		return
 	}
 
 	logger := middleware.UserContextLogger(userContext)
